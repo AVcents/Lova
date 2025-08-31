@@ -1,52 +1,50 @@
 // lib/features/chat_lova/models/lova_message.dart
 
+import 'package:uuid/uuid.dart';
+
 class LovaMessage {
-  final String role; // "user" ou "assistant"
+  final String id;  // Ajout de l'ID pour les annotations
   final String content;
+  final bool isFromUser;
   final DateTime timestamp;
-  final bool isPartial; // Indique si le message est en cours de génération
 
-  const LovaMessage({
-    required this.role,
+  LovaMessage({
+    String? id,
     required this.content,
-    required this.timestamp,
-    this.isPartial = false, // Par défaut, le message est complet
-  });
+    required this.isFromUser,
+    DateTime? timestamp,
+  }) : id = id ?? const Uuid().v4(),
+        timestamp = timestamp ?? DateTime.now();
 
-  bool get isFromUser => role == 'user';
-
-  bool get isUser => isFromUser;
-
-  factory LovaMessage.fromJson(Map<String, dynamic> json) {
+  LovaMessage copyWith({
+    String? id,
+    String? content,
+    bool? isFromUser,
+    DateTime? timestamp,
+  }) {
     return LovaMessage(
-      role: json['role'],
-      content: json['content'],
-      timestamp: DateTime.tryParse(json['timestamp'] ?? '') ?? DateTime.now(),
-      isPartial: json['isPartial'] ?? false,
+      id: id ?? this.id,
+      content: content ?? this.content,
+      isFromUser: isFromUser ?? this.isFromUser,
+      timestamp: timestamp ?? this.timestamp,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'role': role,
+      'id': id,
       'content': content,
+      'isFromUser': isFromUser,
       'timestamp': timestamp.toIso8601String(),
-      'isPartial': isPartial,
     };
   }
 
-  // Méthode utile pour créer une copie avec des modifications
-  LovaMessage copyWith({
-    String? role,
-    String? content,
-    DateTime? timestamp,
-    bool? isPartial,
-  }) {
+  factory LovaMessage.fromMap(Map<String, dynamic> map) {
     return LovaMessage(
-      role: role ?? this.role,
-      content: content ?? this.content,
-      timestamp: timestamp ?? this.timestamp,
-      isPartial: isPartial ?? this.isPartial,
+      id: map['id'] as String,
+      content: map['content'] as String,
+      isFromUser: map['isFromUser'] as bool,
+      timestamp: DateTime.parse(map['timestamp'] as String),
     );
   }
 }

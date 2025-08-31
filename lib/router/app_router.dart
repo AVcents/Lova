@@ -1,8 +1,14 @@
+// lib/shared/navigation/app_router.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/auth/controller/auth_controller.dart';
 import 'package:lova/features/relation/relation_dashboard_page.dart';
+import '../../features/library_us/library_us_page.dart';
+import '../../shared/models/message_annotation.dart';
 
-// 🔹 Pages à créer plus tard (écrans vides pour l'instant)
+// 📹 Pages à créer plus tard (écrans vides pour l'instant)
 import '../features/onboarding/onboarding_page.dart';
 import '../features/auth/pages/sign_in_page.dart';
 import '../features/auth/pages/sign_up_page.dart';
@@ -26,6 +32,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/sign-in',
+        name: 'sign-in',
         builder: (context, state) => const SignInPage(),
       ),
       GoRoute(
@@ -49,7 +56,40 @@ class AppRouter {
           ),
           GoRoute(
             path: '/chat-couple',
-            builder: (context, state) => const ChatCouplePage(),
+            builder: (context, state) {
+              // Récupérer le messageId depuis les query params
+              final messageIdStr = state.uri.queryParameters['messageId'];
+              final messageId = messageIdStr != null ? int.tryParse(messageIdStr) : null;
+              return ChatCouplePage(initialMessageId: messageId);
+            },
+          ),
+          GoRoute(
+            path: '/library-us',
+            builder: (context, state) {
+              // Récupérer les paramètres depuis l'URL ou extra
+              final filterName = state.uri.queryParameters['filter'];
+              AnnotationTag? filter;
+              if (filterName != null) {
+                try {
+                  filter = AnnotationTag.values.firstWhere(
+                        (tag) => tag.name == filterName,
+                  );
+                } catch (_) {
+                  // Si le filtre n'est pas valide, on l'ignore
+                }
+              }
+
+              // Récupérer les données passées via extra
+              final extra = state.extra as Map<String, dynamic>?;
+              final coupleId = extra?['coupleId'] ?? 'couple_001';
+              final scrollToMessage = extra?['scrollToMessage'] as Function(int)?;
+
+              return LibraryUsPage(
+                initialFilter: filter,
+                coupleId: coupleId,
+                scrollToMessage: scrollToMessage,
+              );
+            },
           ),
           GoRoute(
             path: '/settings',
@@ -70,5 +110,21 @@ class AppRouter {
         ],
       ),
     ],
+    redirect: (context, state) {
+      final ref = ProviderScope.containerOf(context);
+      final user = ref.read(currentUserProvider).value;
+
+      final isGoingToAuth = state.fullPath == '/sign-in' || state.fullPath == '/sign-up';
+
+      if (user != null && isGoingToAuth) {
+        return '/dashboard';
+      }
+
+      if (user == null && state.fullPath == '/dashboard') {
+        return '/sign-in';
+      }
+
+      return null;
+    },
   );
 }

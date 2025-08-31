@@ -19,7 +19,7 @@ class AppScaffold extends StatelessWidget {
     final content = safeArea ? SafeArea(child: child) : child;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: appBar,
       body: content,
       bottomNavigationBar: bottomNavigationBar,

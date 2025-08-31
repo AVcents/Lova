@@ -1,7 +1,6 @@
 // lib/features/chat_lova/providers/lova_chat_providers.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lova/features/chat_lova/providers/lova_chat_providers.dart';
 import 'package:lova/features/chat_lova/models/lova_message.dart';
 import 'package:lova/features/chat_lova/data/real_lova_repository.dart';
 import 'package:lova/features/chat_lova/providers/lova_repository_provider.dart';
@@ -21,8 +20,9 @@ class LovaMessagesNotifier extends StateNotifier<List<LovaMessage>> {
 
   void sendMessage(String content) {
     final userMessage = LovaMessage(
-      role: 'user',
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
       content: content,
+      isFromUser: true,
       timestamp: DateTime.now(),
     );
 

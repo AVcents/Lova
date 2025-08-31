@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../metrics/gauge_provider.dart';
-import 'widgets/gauge_widget.dart';
-import 'widgets/indicator_chip.dart';
-import 'widgets/next_action_card.dart';
+import 'me_dashboard_view.dart';
+import 'us_dashboard_view.dart';
+import 'widgets/action_bar.dart';
+import '../../shared/providers/dashboard_mode_provider.dart';
 import 'package:go_router/go_router.dart';
 
-class RelationDashboardPage extends StatefulWidget {
+class RelationDashboardPage extends ConsumerStatefulWidget {
   const RelationDashboardPage({super.key});
 
   @override
-  State<RelationDashboardPage> createState() => _RelationDashboardPageState();
+  ConsumerState<RelationDashboardPage> createState() => _RelationDashboardPageState();
 }
 
-class _RelationDashboardPageState extends State<RelationDashboardPage>
+class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
     with TickerProviderStateMixin {
   bool isBreakupPressed = false;
   double breakupProgress = 0.0;
@@ -68,12 +70,13 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Logique pour mettre fin à la relation
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Relation terminée')),
                 );
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
               child: const Text('Confirmer'),
             ),
           ],
@@ -92,21 +95,43 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
 
   @override
   Widget build(BuildContext context) {
+    final dashboardMode = ref.watch(dashboardModeProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A), // Fond noir comme l'image
+      backgroundColor: colorScheme.background,
       body: SafeArea(
         child: Column(
           children: [
-            // Header avec profil, filtres et notifications
-            _buildHeader(),
+            // Header avec profil, switch ME/US et notifications
+            _buildHeader(dashboardMode),
 
-            // Corps principal avec les cartes relationnelles
+            // Corps principal avec AnimatedSwitcher
             Expanded(
-              child: _buildMainContent(),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween<double>(
+                        begin: 0.98,
+                        end: 1.0,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: dashboardMode == DashboardMode.me
+                    ? const MeDashboardView(key: ValueKey('me'))
+                    : const UsDashboardView(key: ValueKey('us')),
+              ),
             ),
 
             // Boutons d'action (croix, cœur, message)
-            _buildActionButtons(),
+            RelationActionBar(mode: dashboardMode),
 
             const SizedBox(height: 20),
           ],
@@ -115,24 +140,30 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(DashboardMode currentMode) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
         children: [
           // Bouton profil
           GestureDetector(
-            onTap: () => context.go('/profile'),
+            onTap: () => context.go('/settings'),
             child: Container(
               width: 44,
               height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                border: Border.all(
+                  color: colorScheme.onBackground.withOpacity(0.3),
+                  width: 2,
+                ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person,
-                color: Colors.white,
+                color: colorScheme.onBackground,
                 size: 24,
               ),
             ),
@@ -140,13 +171,30 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
 
           const Spacer(),
 
-          // Filtres centraux
-          Row(
-            children: [
-              _buildFilterButton('TODAY', isActive: true),
-              const SizedBox(width: 12),
-              _buildFilterButton('FOR YOU', isActive: false),
-            ],
+          // Switch ME/US
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: colorScheme.onBackground.withOpacity(0.25),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildModeButton(
+                  'ME',
+                  DashboardMode.me,
+                  currentMode == DashboardMode.me,
+                ),
+                _buildModeButton(
+                  'US',
+                  DashboardMode.us,
+                  currentMode == DashboardMode.us,
+                ),
+              ],
+            ),
           ),
 
           const Spacer(),
@@ -154,7 +202,6 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
           // Bouton notifications
           GestureDetector(
             onTap: () {
-              // Navigation vers notifications
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Notifications')),
               );
@@ -164,11 +211,14 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
               height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                border: Border.all(
+                  color: colorScheme.onBackground.withOpacity(0.3),
+                  width: 2,
+                ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.notifications_outlined,
-                color: Colors.white,
+                color: colorScheme.onBackground,
                 size: 24,
               ),
             ),
@@ -178,207 +228,38 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
     );
   }
 
-  Widget _buildFilterButton(String text, {required bool isActive}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFE8B4CB) : Colors.transparent,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: isActive ? const Color(0xFFE8B4CB) : Colors.white.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isActive ? Colors.black : Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
+  Widget _buildModeButton(String text, DashboardMode mode, bool isActive) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-  Widget _buildMainContent() {
-    return Consumer(
-      builder: (context, ref, _) {
-        final gauge = ref.watch(gaugeProvider);
-
-        return Center(
-          child: Container(
-            width: 320,
-            height: 480,
-            child: Stack(
-              children: [
-                // Cartes empilées avec effet de profondeur
-                Positioned(
-                  top: 0,
-                  child: Container(
-                    width: 320,
-                    height: 460,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF8B7355), Color(0xFF6B5B47)],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  child: Container(
-                    width: 320,
-                    height: 460,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF9D6B4F), Color(0xFF8B5A43)],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                ),
-                // Carte principale
-                Positioned(
-                  top: 16,
-                  child: Container(
-                    width: 320,
-                    height: 460,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFB85450), Color(0xFFA94744)],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          // Indicateur de progression en haut
-                          Row(
-                            children: List.generate(3, (index) {
-                              return Expanded(
-                                child: Container(
-                                  height: 3,
-                                  margin: EdgeInsets.only(
-                                    right: index < 2 ? 8 : 0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: index == 0
-                                        ? Colors.white
-                                        : Colors.white.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-
-                          const SizedBox(height: 40),
-
-                          // Contenu principal - Relation info
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                // Jauge relationnelle
-                                Container(
-                                  width: 120,
-                                  height: 120,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 120,
-                                        height: 120,
-                                        child: CircularProgressIndicator(
-                                          value: gauge / 100,
-                                          strokeWidth: 8,
-                                          backgroundColor: Colors.white.withOpacity(0.3),
-                                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                                        ),
-                                      ),
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.favorite,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${gauge.toInt()}%',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(height: 24),
-
-                                // Nom de la relation
-                                const Text(
-                                  'Ma Relation',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                // Informations additionnelles
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.location_on,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Ensemble depuis 2 ans',
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.9),
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 40),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+    return GestureDetector(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        await ref.read(dashboardModeProvider.notifier).setMode(mode);
       },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? colorScheme.secondary : Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          text,
+          style: textTheme.bodyMedium?.copyWith(
+            color: isActive
+                ? colorScheme.onSecondary
+                : colorScheme.onBackground,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildActionButtons() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 60),
       child: Row(
@@ -399,9 +280,11 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
               height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black,
+                color: colorScheme.surface,
                 border: Border.all(
-                  color: isBreakupPressed ? Colors.red : Colors.white.withOpacity(0.3),
+                  color: isBreakupPressed
+                      ? colorScheme.error
+                      : colorScheme.onSurface.withOpacity(0.3),
                   width: 2,
                 ),
               ),
@@ -416,12 +299,14 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
                         value: breakupProgress,
                         strokeWidth: 3,
                         backgroundColor: Colors.transparent,
-                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+                        valueColor: AlwaysStoppedAnimation<Color>(colorScheme.error),
                       ),
                     ),
                   Icon(
                     Icons.close,
-                    color: isBreakupPressed ? Colors.red : Colors.white,
+                    color: isBreakupPressed
+                        ? colorScheme.error
+                        : colorScheme.onSurface,
                     size: 28,
                   ),
                 ],
@@ -435,20 +320,18 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
             height: 70,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF6B9D), Color(0xFFFF8E9B)],
-              ),
+              color: colorScheme.primary,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF6B9D).withOpacity(0.4),
+                  color: colorScheme.primary.withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.favorite,
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               size: 32,
             ),
           ),
@@ -461,12 +344,15 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
               height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black,
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                color: colorScheme.surface,
+                border: Border.all(
+                  color: colorScheme.onSurface.withOpacity(0.3),
+                  width: 2,
+                ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline,
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 size: 24,
               ),
             ),
@@ -477,7 +363,7 @@ class _RelationDashboardPageState extends State<RelationDashboardPage>
   }
 }
 
-// Gardez votre classe SuggestionCard originale pour la compatibilité
+// Classe SuggestionCard conservée pour la compatibilité
 class SuggestionCard extends StatelessWidget {
   final String title;
   final String description;
@@ -492,12 +378,29 @@ class SuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Card(
       elevation: 3,
+      color: colorScheme.surface,
       child: ListTile(
-        title: Text(title),
-        subtitle: Text(description),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        title: Text(
+          title,
+          style: textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          description,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: colorScheme.onSurface.withOpacity(0.5),
+        ),
         onTap: onTap,
       ),
     );

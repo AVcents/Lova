@@ -12,8 +12,9 @@ class RealLovaRepository implements LovaRepository {
     // Validation des entrées
     if (userInput.trim().isEmpty) {
       yield LovaMessage(
-        role: 'assistant',
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
         content: 'Je n\'ai pas reçu votre message. Pouvez-vous reformuler votre question ?',
+        isFromUser: false,
         timestamp: DateTime.now(),
       );
       return;
@@ -53,15 +54,16 @@ class RealLovaRepository implements LovaRepository {
       if (hasReceivedContent) {
         final finalContent = _cleanContent(buffer.toString());
         yield LovaMessage(
-          role: 'assistant',
+          id: DateTime.now().add(const Duration(milliseconds: 1)).microsecondsSinceEpoch.toString(),
           content: finalContent,
+          isFromUser: false,
           timestamp: DateTime.now(),
-          isPartial: false,
         );
       } else {
         yield LovaMessage(
-          role: 'assistant',
+          id: DateTime.now().add(const Duration(milliseconds: 2)).microsecondsSinceEpoch.toString(),
           content: 'Je rencontre des difficultés à répondre. Pouvez-vous réessayer ?',
+          isFromUser: false,
           timestamp: DateTime.now(),
         );
       }
@@ -75,8 +77,9 @@ class RealLovaRepository implements LovaRepository {
       );
 
       yield LovaMessage(
-        role: 'assistant',
+        id: DateTime.now().add(const Duration(milliseconds: 3)).microsecondsSinceEpoch.toString(),
         content: 'Je rencontre une difficulté technique. Pouvez-vous réessayer dans quelques instants ?',
+        isFromUser: false,
         timestamp: DateTime.now(),
       );
     }
@@ -133,7 +136,7 @@ Tu es là pour accompagner avec authenticité, pas pour donner des leçons. 🤗
 
     for (final message in recentHistory) {
       messages.add({
-        "role": message.isUser ? "user" : "assistant",
+        "role": message.isFromUser ? "user" : "assistant",
         "content": message.content.trim(),
       });
     }

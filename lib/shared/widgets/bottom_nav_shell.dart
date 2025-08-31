@@ -11,14 +11,13 @@ class BottomNavShell extends StatelessWidget {
     final currentIndex = _getIndex(currentLocation);
 
     return Scaffold(
-      backgroundColor: Colors.black, // ✅ Scaffold reste noir
-      body: child,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,      body: child,
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(16),
         height: 60,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A), // ✅ CHANGEMENT: anthracite au lieu de noir
-          borderRadius: BorderRadius.circular(15),
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
@@ -32,7 +31,7 @@ class BottomNavShell extends StatelessWidget {
           children: [
             _buildNavItem(
               icon: Icons.home_filled,
-              label: 'Discover',
+              label: 'Dashboard',
               index: 0,
               currentIndex: currentIndex,
               onTap: () => context.go('/dashboard'),
@@ -58,13 +57,6 @@ class BottomNavShell extends StatelessWidget {
               currentIndex: currentIndex,
               onTap: () => context.go('/chat-couple'),
             ),
-            _buildNavItem(
-              icon: Icons.person,
-              label: 'Profil',
-              index: 4,
-              currentIndex: currentIndex,
-              onTap: () => context.go('/profile'),
-            ),
           ],
         ),
       ),
@@ -80,39 +72,45 @@ class BottomNavShell extends StatelessWidget {
   }) {
     final isSelected = index == currentIndex;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 16 : 12,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isSelected ? Colors.white : Colors.grey[600],
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? 16 : 12,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).iconTheme.color,
               ),
+              if (isSelected) ...[
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

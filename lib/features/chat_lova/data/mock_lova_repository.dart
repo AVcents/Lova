@@ -8,16 +8,18 @@ class MockLovaRepository implements LovaRepository {
   @override
   Stream<LovaMessage> getResponse(String userMessage, List<LovaMessage> history) async* {
     yield LovaMessage(
-      role: 'assistant',
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
       content: 'Je réfléchis à ta demande...',
+      isFromUser: false,
       timestamp: DateTime.now(),
     );
 
     await Future.delayed(const Duration(seconds: 1));
 
     yield LovaMessage(
-      role: 'assistant',
+      id: DateTime.now().add(const Duration(milliseconds: 1)).microsecondsSinceEpoch.toString(),
       content: _generateResponse(userMessage),
+      isFromUser: false,
       timestamp: DateTime.now(),
     );
   }

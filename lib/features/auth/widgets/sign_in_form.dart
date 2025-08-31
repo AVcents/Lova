@@ -16,6 +16,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
     return Form(
       key: _formKey,
       child: Column(
@@ -43,24 +44,26 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             },
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                try {
-                  await ref.read(authControllerProvider).signIn(_email, _password);
-                  if (context.mounted) {
-                    context.go('/dashboard');
+          authState.isLoading
+            ? const CircularProgressIndicator()
+            : ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    try {
+                      await ref.read(authControllerProvider.notifier).signIn(_email, _password);
+                      if (context.mounted) {
+                        context.go('/dashboard');
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString())),
+                      );
+                    }
                   }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
-                }
-              }
-            },
-            child: const Text("Se connecter"),
-          ),
+                },
+                child: const Text("Se connecter"),
+              ),
         ],
       ),
     );
