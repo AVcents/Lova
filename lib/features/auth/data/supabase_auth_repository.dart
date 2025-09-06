@@ -1,5 +1,3 @@
-
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/auth_repository.dart';
 
@@ -9,20 +7,27 @@ class SupabaseAuthRepository implements AuthRepository {
   SupabaseAuthRepository(this._client);
 
   @override
-  Future<void> signUp(String email, String password) async {
-    final response = await _client.auth.signUp(email: email, password: password);
+  Future<AuthResponse> signUp(String email, String password, {String? emailRedirectTo}) async {
+    final response = await _client.auth.signUp(
+      email: email,
+      password: password,
+      emailRedirectTo: emailRedirectTo,
+    );
 
-    if (response.user == null) {
-      throw Exception('Inscription échouée : ${response.session?.toJson()}');
-    }
+    // Ne pas lever d'erreur si la session est null (confirmation email requise)
+    // Retourner la réponse pour que le contrôleur puisse décider
+    return response;
   }
 
   @override
   Future<void> signIn(String email, String password) async {
-    final response = await _client.auth.signInWithPassword(email: email, password: password);
+    final response = await _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
 
     if (response.user == null) {
-      throw Exception('Connexion échouée : ${response.session?.toJson()}');
+      throw Exception('Connexion échouée : email ou mot de passe incorrect');
     }
   }
 
@@ -34,5 +39,20 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Stream<User?> authStateChanges() {
     return _client.auth.onAuthStateChange.map((event) => event.session?.user);
+  }
+
+  Future<void> resendConfirmationEmail(String email, {String? emailRedirectTo}) async {
+    await _client.auth.resend(
+      type: OtpType.signup,
+      email: email,
+      emailRedirectTo: emailRedirectTo,
+    );
+  }
+
+  Future<void> resetPassword(String email, {String? emailRedirectTo}) async {
+    await _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: emailRedirectTo,
+    );
   }
 }

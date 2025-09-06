@@ -54,6 +54,8 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   build_runner: ^2.4.12
   drift_dev: ^2.18.0
+  flutter_launcher_icons: ^0.13.1
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -69,6 +71,7 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/images/lova_logo.png
 
   fonts:
     - family: Astrid
@@ -105,3 +108,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icons/app_icon.png
+  # Optionnel Android (icône adaptive, Android 8+)
+  # adaptive_icon_background: "#FF3D86"   # ou une image
+  # adaptive_icon_foreground: assets/icons/app_icon_foreground.png
+  # adaptive_icon_monochrome: assets/icons/app_icon_mono.png

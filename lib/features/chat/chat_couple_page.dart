@@ -7,6 +7,12 @@ import 'package:lova/features/chat/controllers/chat_couple_controller.dart';
 import 'package:lova/features/chat/database/drift_database.dart';
 import 'package:lova/features/chat/widgets/input_bar_couple.dart';
 import 'package:lova/features/chat/widgets/message_bubble_couple.dart';
+import 'package:lova/features/chat/analysis/conversation_analyzer.dart';
+import 'package:lova/features/chat/ui/intervention_banner.dart';
+import 'package:lova/features/chat/ui/mediation_sos_sheet.dart';
+import 'package:lova/features/chat/ui/breath_sheet.dart';
+import 'package:lova/features/chat/providers/intervention_metrics_provider.dart';
+import 'package:lova/features/chat_lova/ui/composer_assist_sheet.dart';
 
 class ChatCouplePage extends ConsumerStatefulWidget {
   final int? initialMessageId;
@@ -22,14 +28,15 @@ class ChatCouplePage extends ConsumerStatefulWidget {
 
 class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
   String currentUserId = 'userA';
-  String coupleId = 'couple_001'; // Pour le sprint 1
+  String coupleId = 'couple_001';
   final ScrollController _scrollController = ScrollController();
   final Map<int, GlobalKey> _messageKeys = {};
+  final GlobalKey<InputBarCoupleState> _inputBarKey = GlobalKey();
+  bool _ranInitialAnalysis = false;
 
   @override
   void initState() {
     super.initState();
-    // Si on a un messageId initial, on scroll vers lui après le build
     if (widget.initialMessageId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         scrollToMessage(widget.initialMessageId!);
@@ -49,7 +56,6 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
     });
   }
 
-  /// Fait défiler jusqu'à un message spécifique
   void scrollToMessage(int messageId) {
     final key = _messageKeys[messageId];
     if (key != null && key.currentContext != null) {
@@ -57,27 +63,118 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
         key.currentContext!,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
-        alignment: 0.5, // Centre le message dans la vue
+        alignment: 0.5,
       );
 
-      // Effet visuel pour indiquer le message ciblé
       Future.delayed(const Duration(milliseconds: 350), () {
         if (mounted) {
-          setState(() {
-            // Force un rebuild pour animer le message
-          });
+          setState(() {});
         }
       });
     }
   }
 
+  void _handleRephrase(List<Message> messages) async {
+    ref.read(interventionMetricsProvider).logRephrase();
+
+    // Build a simple textual history for the composer (last 12 messages)
+    final history = messages
+        .take(12)
+        .map((m) => m.content)
+        .toList()
+        .reversed
+        .toList();
+
+    // Short initial context from the last two messages
+    final initialContext = messages.take(2).map((m) => m.content).join(' · ');
+
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => ComposerAssistSheet(
+        history: history,
+        initialContext: initialContext,
+      ),
+    );
+
+    if (result != null && mounted) {
+      _inputBarKey.currentState?.insertText(result);
+    }
+  }
+
+  void _handlePause() async {
+    ref.read(interventionMetricsProvider).logPause();
+    ref.read(conversationAnalyzerProvider.notifier).setSnooze(
+      const Duration(minutes: 5),
+    );
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const BreathSheet(),
+    );
+  }
+
+  void _handleSos() async {
+    ref.read(interventionMetricsProvider).logSos();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => MediationSosSheet(
+        onInsertToChat: (text) {
+          if (mounted) {
+            _inputBarKey.currentState?.insertText(text);
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(chatCoupleControllerProvider);
+
+    // Listen to message updates -> analyze
+    ref.listen<List<Message>>(chatCoupleControllerProvider, (previous, next) {
+      ref.read(conversationAnalyzerProvider.notifier).analyzeMessages(next);
+    });
+
+    // Log when banner becomes visible
+    ref.listen(conversationAnalyzerProvider, (previous, next) {
+      if ((previous == null || previous.status != next.status) &&
+          next.status != InterventionStatus.calm) {
+        ref.read(interventionMetricsProvider).logBannerShown(next.status.toString());
+      }
+    });
+
+    // Run initial analysis once after first build
+    if (!_ranInitialAnalysis) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(conversationAnalyzerProvider.notifier).analyzeMessages(messages);
+        }
+      });
+      _ranInitialAnalysis = true;
+    }
+
+    final interventionState = ref.watch(conversationAnalyzerProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final metrics = ref.read(interventionMetricsProvider);
 
-    // Créer les clés pour chaque message
     for (final message in messages) {
       _messageKeys.putIfAbsent(message.id, () => GlobalKey());
     }
@@ -109,7 +206,6 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
             icon: const Icon(Icons.bookmark_outline),
             tooltip: 'Bibliothèque',
             onPressed: () {
-              // Naviguer vers la bibliothèque avec callback
               context.push(
                 '/library-us',
                 extra: {
@@ -147,6 +243,18 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
         ),
         child: Column(
           children: [
+            if (interventionState.status != InterventionStatus.calm)
+              InterventionBanner(
+                reason: interventionState.reason ?? '',
+                isTension: interventionState.status == InterventionStatus.tension,
+                onDismiss: () {
+                  metrics.logDismiss(interventionState.status.toString());
+                  ref.read(conversationAnalyzerProvider.notifier).dismissBanner();
+                },
+                onRephrase: () => _handleRephrase(messages),
+                onPause: _handlePause,
+                onSos: _handleSos,
+              ),
             Expanded(
               child: Scrollbar(
                 controller: _scrollController,
@@ -175,11 +283,8 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
                         currentUserId: currentUserId,
                         coupleId: coupleId,
                         onTap: isTargeted ? () {
-                          // Retirer le highlight après tap
                           if (mounted) {
-                            setState(() {
-                              // Force rebuild sans highlight
-                            });
+                            setState(() {});
                           }
                         } : null,
                       ),
@@ -188,7 +293,6 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
                 ),
               ),
             ),
-            // Input bar on a surfaced container with a subtle top border
             Container(
               decoration: BoxDecoration(
                 color: colorScheme.surface,
@@ -199,6 +303,7 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
               child: SafeArea(
                 top: false,
                 child: InputBarCouple(
+                  key: _inputBarKey,
                   onSend: (content) {
                     final receiverId = currentUserId == 'userA' ? 'userB' : 'userA';
                     ref.read(chatCoupleControllerProvider.notifier).sendMessage(

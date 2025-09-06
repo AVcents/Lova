@@ -14,6 +14,7 @@ class InputBarLova extends ConsumerStatefulWidget {
 
 class _InputBarLovaState extends ConsumerState<InputBarLova> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   bool get _canSend => _controller.text.trim().isNotEmpty;
 
@@ -34,11 +35,14 @@ class _InputBarLovaState extends ConsumerState<InputBarLova> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -48,35 +52,35 @@ class _InputBarLovaState extends ConsumerState<InputBarLova> {
             Expanded(
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
                 minLines: 1,
-                maxLines: 5, // grandit verticalement
+                maxLines: 5,
                 decoration: InputDecoration(
                   hintText: "Écris quelque chose…",
                   hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: colorScheme.onSurface.withOpacity(0.6),
                   ),
-                  // Transparent pour garder le même background que l'écran de chat
                   filled: false,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.4),
                   ),
                 ),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: colorScheme.onSurface,
                 ),
-                onSubmitted: (_) {}, // on reste en multiline
+                onSubmitted: (_) {},
               ),
             ),
             const SizedBox(width: 8),
@@ -95,17 +99,20 @@ class _InputBarLovaState extends ConsumerState<InputBarLova> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: colorScheme.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
+                            color: colorScheme.primary.withOpacity(0.35),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: Icon(Icons.send_rounded, color: Theme.of(context).colorScheme.onPrimary),
+                      child: Icon(
+                        Icons.send_rounded,
+                        color: colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),

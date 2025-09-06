@@ -1,4 +1,4 @@
-// lib/shared/navigation/app_router.dart
+// lib/router/app_router.dart
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,9 +9,9 @@ import '../../features/library_us/library_us_page.dart';
 import '../../shared/models/message_annotation.dart';
 
 // 📹 Pages à créer plus tard (écrans vides pour l'instant)
-import '../features/onboarding/onboarding_page.dart';
 import '../features/auth/pages/sign_in_page.dart';
 import '../features/auth/pages/sign_up_page.dart';
+import '../features/auth/pages/verify_email_page.dart';
 import '../features/dashboard/pages/dashboard_page.dart';
 import '../features/mediation/mediation_flow.dart';
 import '../features/chat/chat_lova_page.dart';
@@ -27,8 +27,8 @@ class AppRouter {
     initialLocation: '/sign-in',
     routes: [
       GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingPage(),
+        path: '/dashboard',
+        builder: (context, state) => const RelationDashboardPage(),
       ),
       GoRoute(
         path: '/sign-in',
@@ -38,6 +38,22 @@ class AppRouter {
       GoRoute(
         path: '/sign-up',
         builder: (context, state) => const SignUpPage(),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        name: 'verify-email',
+        builder: (context, state) {
+          // Récupérer l'email et les éventuelles erreurs depuis les query params
+          final email = state.uri.queryParameters['email'] ?? '';
+          final errorCode = state.uri.queryParameters['error_code'];
+          final errorDescription = state.uri.queryParameters['error_description'];
+
+          return VerifyEmailPage(
+            email: email,
+            errorCode: errorCode,
+            errorDescription: errorDescription,
+          );
+        },
       ),
       GoRoute(
         path: '/mediation',
@@ -114,13 +130,25 @@ class AppRouter {
       final ref = ProviderScope.containerOf(context);
       final user = ref.read(currentUserProvider).value;
 
-      final isGoingToAuth = state.fullPath == '/sign-in' || state.fullPath == '/sign-up';
+      final isGoingToAuth = state.fullPath == '/sign-in' ||
+          state.fullPath == '/sign-up' ||
+          state.fullPath?.startsWith('/verify-email') == true;
 
+      // Si l'utilisateur est connecté et essaie d'aller vers les pages auth
       if (user != null && isGoingToAuth) {
+        // Sauf s'il est sur verify-email avec un lien déjà confirmé
+        if (state.fullPath?.startsWith('/verify-email') == true) {
+          final errorCode = state.uri.queryParameters['error_code'];
+          if (errorCode == 'otp_disabled' || errorCode == 'email_already_confirmed') {
+            // Rediriger vers sign-in avec un message
+            return '/sign-in';
+          }
+        }
         return '/dashboard';
       }
 
-      if (user == null && state.fullPath == '/dashboard') {
+      // Si l'utilisateur n'est pas connecté et essaie d'accéder au dashboard
+      if (user == null && !isGoingToAuth) {
         return '/sign-in';
       }
 

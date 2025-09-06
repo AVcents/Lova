@@ -1,15 +1,10 @@
-class AuthRepository {
-  Future<void> signIn({required String email, required String password}) async {
-    await Future.delayed(const Duration(seconds: 1)); // Simule une requête
-    if (email != 'test@test.com' || password != '123456') {
-      throw Exception('Email ou mot de passe incorrect');
-    }
-  }
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-  Future<void> signUp({required String email, required String password}) async {
-    await Future.delayed(const Duration(seconds: 1)); // Simule une requête
-    if (email == 'existe@test.com') {
-      throw Exception('Cet email est déjà utilisé');
-    }
-  }
+abstract class AuthRepository {
+  Future<AuthResponse> signUp(String email, String password, {String? emailRedirectTo});
+  Future<void> signIn(String email, String password);
+  Future<void> signOut();
+  Stream<User?> authStateChanges();
+  Future<void> resendConfirmationEmail(String email, {String? emailRedirectTo});
+  Future<void> resetPassword(String email, {String? emailRedirectTo});
 }
