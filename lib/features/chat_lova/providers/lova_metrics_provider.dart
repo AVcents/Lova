@@ -1,7 +1,8 @@
 // lib/features/chat_lova/providers/lova_metrics_provider.dart
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LovaMetrics {
   final int openedCount;
@@ -85,6 +86,7 @@ class LovaMetricsNotifier extends StateNotifier<LovaMetrics> {
   }
 }
 
-final lovaMetricsProvider = StateNotifierProvider<LovaMetricsNotifier, LovaMetrics>((ref) {
-  return LovaMetricsNotifier();
-});
+final lovaMetricsProvider =
+    StateNotifierProvider<LovaMetricsNotifier, LovaMetrics>((ref) {
+      return LovaMetricsNotifier();
+    });

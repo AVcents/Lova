@@ -26,14 +26,8 @@ class WelcomePage extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: isDark
-                          ? [
-                        const Color(0xFF1A1A1A),
-                        const Color(0xFF0D0F12),
-                      ]
-                          : [
-                        const Color(0xFFF7F2F5),
-                        const Color(0xFFFFE0EC),
-                      ],
+                          ? [const Color(0xFF1A1A1A), const Color(0xFF0D0F12)]
+                          : [const Color(0xFFF7F2F5), const Color(0xFFFFE0EC)],
                     ),
                   ),
                 );
@@ -105,7 +99,7 @@ class WelcomePage extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
+                                const Text(
                                   'Get Started',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -134,9 +128,7 @@ class WelcomePage extends StatelessWidget {
                     height: 64,
                     color: colorScheme.primary,
                     child: CustomPaint(
-                      painter: ConnectionPainter(
-                        color: colorScheme.primary,
-                      ),
+                      painter: ConnectionPainter(color: colorScheme.primary),
                     ),
                   ),
 
@@ -162,7 +154,7 @@ class WelcomePage extends StatelessWidget {
                         // Go to sign-in
                         onTap: () => context.go('/sign-in'),
                         customBorder: const CircleBorder(),
-                        child: Center(
+                        child: const Center(
                           child: Icon(
                             Icons.person_outline_rounded,
                             color: Colors.white,
@@ -300,12 +292,16 @@ class ConnectionPainter extends CustomPainter {
     path.moveTo(0, size.height / 2 - 32);
     path.lineTo(0, size.height / 2 + 32);
     path.quadraticBezierTo(
-      size.width / 2, size.height / 2 + 32,
-      size.width, size.height / 2,
+      size.width / 2,
+      size.height / 2 + 32,
+      size.width,
+      size.height / 2,
     );
     path.quadraticBezierTo(
-      size.width / 2, size.height / 2 - 32,
-      0, size.height / 2 - 32,
+      size.width / 2,
+      size.height / 2 - 32,
+      0,
+      size.height / 2 - 32,
     );
     path.close();
 

@@ -3,7 +3,7 @@
 import 'package:uuid/uuid.dart';
 
 class LovaMessage {
-  final String id;  // Ajout de l'ID pour les annotations
+  final String id; // Ajout de l'ID pour les annotations
   final String content;
   final bool isFromUser;
   final DateTime timestamp;
@@ -14,7 +14,7 @@ class LovaMessage {
     required this.isFromUser,
     DateTime? timestamp,
   }) : id = id ?? const Uuid().v4(),
-        timestamp = timestamp ?? DateTime.now();
+       timestamp = timestamp ?? DateTime.now();
 
   LovaMessage copyWith({
     String? id,

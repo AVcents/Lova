@@ -3,18 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../shared/models/message_annotation.dart';
-import '../../../shared/providers/annotations_provider.dart';
-import '../../../shared/providers/tanks_provider.dart';
-import '../../../shared/ui/semantic_colors.dart';
+
+import 'package:lova/shared/models/message_annotation.dart';
+import 'package:lova/shared/providers/annotations_provider.dart';
+import 'package:lova/shared/providers/tanks_provider.dart';
+import 'package:lova/shared/ui/semantic_colors.dart';
 
 /// Affiche la bottom sheet pour tagger un message
 Future<void> showTagActionSheet(
-    BuildContext context, {
-      required String coupleId,
-      required int messageId,
-      required String currentUserId,
-    }) async {
+  BuildContext context, {
+  required String coupleId,
+  required int messageId,
+  required String currentUserId,
+}) async {
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -42,10 +43,12 @@ class _TagActionSheetContent extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_TagActionSheetContent> createState() => _TagActionSheetContentState();
+  ConsumerState<_TagActionSheetContent> createState() =>
+      _TagActionSheetContentState();
 }
 
-class _TagActionSheetContentState extends ConsumerState<_TagActionSheetContent> {
+class _TagActionSheetContentState
+    extends ConsumerState<_TagActionSheetContent> {
   bool _isProcessing = false;
 
   Future<void> _handleTagSelection(AnnotationTag tag) async {
@@ -67,15 +70,20 @@ class _TagActionSheetContentState extends ConsumerState<_TagActionSheetContent> 
       );
 
       // Ajouter l'annotation via le notifier
-      await ref.read(annotationsNotifierProvider.notifier).addAnnotation(annotation);
+      await ref
+          .read(annotationsNotifierProvider.notifier)
+          .addAnnotation(annotation);
 
       // Si c'est un tag utile, incrémenter le Love Tank
       if (tag.isUseful) {
         try {
           // Créer une action custom pour le tagging
-          await ref.read(loveTankProvider.notifier).incrementBy(
-            LoveTankAction.applyAdvice, // On utilise une action existante (+3 points)
-          );
+          await ref
+              .read(loveTankProvider.notifier)
+              .incrementBy(
+                LoveTankAction
+                    .applyAdvice, // On utilise une action existante (+3 points)
+              );
         } catch (e) {
           // Si le quota est atteint ou autre erreur, on continue silencieusement
           print('Impossible d\'incrémenter le Love Tank: $e');
@@ -98,11 +106,7 @@ class _TagActionSheetContentState extends ConsumerState<_TagActionSheetContent> 
                 ),
                 if (tag.isUseful) ...[
                   const SizedBox(width: 8),
-                  Icon(
-                    Icons.favorite,
-                    size: 16,
-                    color: colorScheme.onPrimary,
-                  ),
+                  Icon(Icons.favorite, size: 16, color: colorScheme.onPrimary),
                   const SizedBox(width: 4),
                   Text(
                     '+3',

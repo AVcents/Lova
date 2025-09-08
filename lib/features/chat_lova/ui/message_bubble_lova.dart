@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lova/features/chat_lova/models/lova_message.dart';
-import '../../../shared/models/message_annotation.dart';
-import '../../../shared/providers/annotations_provider.dart';
-import '../../../shared/ui/semantic_colors.dart';
-import '../../chat/widgets/tag_action_sheet.dart';
+
+import 'package:lova/shared/models/message_annotation.dart';
+import 'package:lova/shared/providers/annotations_provider.dart';
+import 'package:lova/features/chat/widgets/tag_action_sheet.dart';
 
 class MessageBubbleLova extends ConsumerWidget {
   final LovaMessage message;
@@ -31,7 +31,9 @@ class MessageBubbleLova extends ConsumerWidget {
     // Récupérer les annotations pour ce message
     // Pour LOVA, on utilise un hash du message.id comme int pour la compatibilité
     final messageIdAsInt = message.id.hashCode;
-    final annotationsAsync = ref.watch(annotationsByMessageProvider(messageIdAsInt));
+    final annotationsAsync = ref.watch(
+      annotationsByMessageProvider(messageIdAsInt),
+    );
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -43,7 +45,9 @@ class MessageBubbleLova extends ConsumerWidget {
           right: isUser ? 0 : 40,
         ),
         child: Column(
-          crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             // Nom/Label avec avatar pour LOVA
             if (!isUser) ...[
@@ -69,10 +73,7 @@ class MessageBubbleLova extends ConsumerWidget {
                       ],
                     ),
                     child: const Center(
-                      child: Text(
-                        '💜',
-                        style: TextStyle(fontSize: 12),
-                      ),
+                      child: Text('💜', style: TextStyle(fontSize: 12)),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -100,17 +101,20 @@ class MessageBubbleLova extends ConsumerWidget {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 constraints: const BoxConstraints(maxWidth: 280),
                 decoration: BoxDecoration(
                   color: isUser ? colorScheme.primary : null,
                   gradient: isUser
                       ? null
                       : LinearGradient(
-                    colors: [colorScheme.secondary, colorScheme.primary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                          colors: [colorScheme.secondary, colorScheme.primary],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(18),
                     topRight: const Radius.circular(18),
@@ -125,7 +129,9 @@ class MessageBubbleLova extends ConsumerWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (isUser ? colorScheme.primary : colorScheme.secondary).withOpacity(0.20),
+                      color:
+                          (isUser ? colorScheme.primary : colorScheme.secondary)
+                              .withOpacity(0.20),
                       blurRadius: isUser ? 8 : 12,
                       offset: const Offset(0, 4),
                     ),
@@ -153,10 +159,7 @@ class MessageBubbleLova extends ConsumerWidget {
                   transitionBuilder: (child, animation) {
                     return FadeTransition(
                       opacity: animation,
-                      child: ScaleTransition(
-                        scale: animation,
-                        child: child,
-                      ),
+                      child: ScaleTransition(scale: animation, child: child),
                     );
                   },
                   child: Container(
@@ -166,7 +169,9 @@ class MessageBubbleLova extends ConsumerWidget {
                     child: Wrap(
                       spacing: 4,
                       runSpacing: 4,
-                      alignment: isUser ? WrapAlignment.end : WrapAlignment.start,
+                      alignment: isUser
+                          ? WrapAlignment.end
+                          : WrapAlignment.start,
                       children: _buildTagChips(context, ref, annotations),
                     ),
                   ),
@@ -197,7 +202,11 @@ class MessageBubbleLova extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildTagChips(BuildContext context, WidgetRef ref, List<MessageAnnotation> annotations) {
+  List<Widget> _buildTagChips(
+    BuildContext context,
+    WidgetRef ref,
+    List<MessageAnnotation> annotations,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -224,7 +233,7 @@ class MessageBubbleLova extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
+                color: colorScheme.surfaceContainerHighest,
                 border: Border.all(
                   color: colorScheme.outline.withOpacity(0.15),
                   width: 1,
@@ -253,7 +262,7 @@ class MessageBubbleLova extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant,
+              color: colorScheme.surfaceContainerHighest,
               border: Border.all(
                 color: colorScheme.outline.withOpacity(0.15),
                 width: 1,
@@ -263,10 +272,7 @@ class MessageBubbleLova extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  entry.key.emoji,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                Text(entry.key.emoji, style: const TextStyle(fontSize: 12)),
                 if (entry.value > 1) ...[
                   const SizedBox(width: 4),
                   Text(
@@ -291,7 +297,11 @@ class MessageBubbleLova extends ConsumerWidget {
   String _formatTime(DateTime timestamp) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final messageDate = DateTime(timestamp.year, timestamp.month, timestamp.day);
+    final messageDate = DateTime(
+      timestamp.year,
+      timestamp.month,
+      timestamp.day,
+    );
 
     if (messageDate == today) {
       // Aujourd'hui - juste l'heure

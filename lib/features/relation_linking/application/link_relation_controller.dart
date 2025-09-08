@@ -1,17 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../domain/relation_linking_state.dart';
-import '../infrastructure/linking_repository.dart';
 
-final linkRelationControllerProvider = StateNotifierProvider<LinkRelationController, RelationLinkingState>(
+import 'package:lova/features/relation_linking/domain/relation_linking_state.dart';
+import 'package:lova/features/relation_linking/infrastructure/linking_repository.dart';
+
+final linkRelationControllerProvider =
+    StateNotifierProvider<LinkRelationController, RelationLinkingState>(
       (ref) => LinkRelationController(ref, LinkingRepository()),
-);
+    );
 
 class LinkRelationController extends StateNotifier<RelationLinkingState> {
   final Ref ref;
   final LinkingRepository repository;
 
   LinkRelationController(this.ref, this.repository)
-      : super(RelationLinkingState.idle());
+    : super(RelationLinkingState.idle());
 
   /// Génère un code pour l'utilisateur actuel
   String generateCode(String userId) {

@@ -1,20 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:async';
-import '../../../shared/providers/dashboard_mode_provider.dart';
-import '../../../shared/providers/tanks_provider.dart';
-import '../../../shared/ui/semantic_colors.dart';
-import 'love_tank_gauge.dart';
-import 'me_tank_gauge.dart';
+
+import 'package:lova/shared/providers/dashboard_mode_provider.dart';
+import 'package:lova/shared/providers/tanks_provider.dart';
+import 'package:lova/shared/ui/semantic_colors.dart';
+import 'package:lova/features/relation/widgets/love_tank_gauge.dart';
+import 'package:lova/features/relation/widgets/me_tank_gauge.dart';
 
 class RelationActionBar extends ConsumerStatefulWidget {
   final DashboardMode mode;
 
-  const RelationActionBar({
-    super.key,
-    required this.mode,
-  });
+  const RelationActionBar({super.key, required this.mode});
 
   @override
   ConsumerState<RelationActionBar> createState() => _RelationActionBarState();
@@ -86,12 +85,8 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final colorScheme = Theme
-            .of(context)
-            .colorScheme;
-        final textTheme = Theme
-            .of(context)
-            .textTheme;
+        final colorScheme = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
 
         return AlertDialog(
           title: Text(
@@ -121,9 +116,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
                 );
                 _resetBreakup();
               },
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
               child: const Text('Confirmer'),
             ),
           ],
@@ -153,10 +146,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
           return FadeTransition(
             opacity: animation,
             child: ScaleTransition(
-              scale: Tween<double>(
-                begin: 0.98,
-                end: 1.0,
-              ).animate(animation),
+              scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
               child: child,
             ),
           );
@@ -219,9 +209,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
   }
 
   Widget _buildBreakupButton() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTapDown: (_) {
@@ -243,7 +231,8 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
             border: Border.all(
               color: _isBreakupPressed
                   ? colorScheme.error.withOpacity(
-                  0.5 + (_breakupProgress * 0.5))
+                      0.5 + (_breakupProgress * 0.5),
+                    )
                   : colorScheme.onSurface.withOpacity(0.3),
               width: 2,
             ),
@@ -283,9 +272,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
   }
 
   Widget _buildMomentButton() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: () => _showMomentSheet(),
@@ -313,9 +300,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
   }
 
   Widget _buildCheckinButton() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: () {
@@ -335,20 +320,14 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
               width: 2,
             ),
           ),
-          child: Icon(
-            Icons.mood,
-            color: colorScheme.primary,
-            size: 28,
-          ),
+          child: Icon(Icons.mood, color: colorScheme.primary, size: 28),
         ),
       ),
     );
   }
 
   Widget _buildJournalButton() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: () {
@@ -379,9 +358,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
   }
 
   void _showMomentSheet() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       backgroundColor: colorScheme.surface,
@@ -389,8 +366,12 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
-        Widget tile(IconData icon, String title, String subtitle,
-            VoidCallback onTap) {
+        Widget tile(
+          IconData icon,
+          String title,
+          String subtitle,
+          VoidCallback onTap,
+        ) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Material(
@@ -401,31 +382,35 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
                 onTap: onTap,
                 child: ListTile(
                   leading: Icon(icon, color: colorScheme.primary),
-                  title: Text(title, style: Theme
-                      .of(context)
-                      .textTheme
-                      .bodyLarge
-                      ?.copyWith(color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600)),
-                  subtitle: Text(subtitle, style: Theme
-                      .of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7))),
+                  title: Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text('+8', style: Theme
-                        .of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: colorScheme.primary,
-                        fontWeight: FontWeight.bold)),
+                    child: Text(
+                      '+8',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -435,13 +420,16 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
 
         Future<void> planAndClose(String label) async {
           HapticFeedback.lightImpact();
-          await ref.read(loveTankProvider.notifier).incrementBy(
-              LoveTankAction.planMoment);
+          await ref
+              .read(loveTankProvider.notifier)
+              .incrementBy(LoveTankAction.planMoment);
           if (mounted) {
             Navigator.pop(ctx);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Moment planifié ($label) +8'),
-                  backgroundColor: SemanticColors.success(context)),
+              SnackBar(
+                content: Text('Moment planifié ($label) +8'),
+                backgroundColor: SemanticColors.success(context),
+              ),
             );
           }
         }
@@ -455,23 +443,37 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(2)),
+                  color: colorScheme.onSurface.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(height: 16),
-              Text('Planifier un moment', style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(
-                  fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+              Text(
+                'Planifier un moment',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 12),
-              tile(Icons.schedule, '30 minutes', 'Aujourd’hui', () =>
-                  planAndClose('30 min aujourd’hui')),
-              tile(Icons.alarm, '60 minutes', 'Demain', () =>
-                  planAndClose('60 min demain')),
-              tile(Icons.weekend_outlined, '120 minutes', 'Ce week-end', () =>
-                  planAndClose('120 min ce week-end')),
+              tile(
+                Icons.schedule,
+                '30 minutes',
+                'Aujourd’hui',
+                () => planAndClose('30 min aujourd’hui'),
+              ),
+              tile(
+                Icons.alarm,
+                '60 minutes',
+                'Demain',
+                () => planAndClose('60 min demain'),
+              ),
+              tile(
+                Icons.weekend_outlined,
+                '120 minutes',
+                'Ce week-end',
+                () => planAndClose('120 min ce week-end'),
+              ),
               const SizedBox(height: 8),
             ],
           ),
@@ -481,38 +483,44 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
   }
 
   void _showCheckinDialog() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (ctx) {
-        Widget emoji(String char) =>
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () async {
-                HapticFeedback.lightImpact();
-                await ref.read(meTankProvider.notifier).incrementBy(
-                    MeTankAction.moodCheckin);
-                if (mounted) {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: const Text('Check-in enregistré +3'),
-                        backgroundColor: SemanticColors.success(context)),
-                  );
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(char, style: const TextStyle(fontSize: 28)),
-              ),
-            );
+        Widget emoji(String char) => InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            await ref
+                .read(meTankProvider.notifier)
+                .incrementBy(MeTankAction.moodCheckin);
+            if (mounted) {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Check-in enregistré +3'),
+                  backgroundColor: SemanticColors.success(context),
+                ),
+              );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(char, style: const TextStyle(fontSize: 28)),
+          ),
+        );
 
         return AlertDialog(
           title: const Text('Ton humeur du moment'),
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ['😞', '😐', '🙂', '😊', '🤩'].map((e) => emoji(e)).toList(),
+            children: [
+              '😞',
+              '😐',
+              '🙂',
+              '😊',
+              '🤩',
+            ].map((e) => emoji(e)).toList(),
           ),
           actions: [
             TextButton(
@@ -526,9 +534,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
   }
 
   void _showJournalSheet() {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final controller1 = TextEditingController();
     final controller2 = TextEditingController();
     final controller3 = TextEditingController();
@@ -546,10 +552,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
             left: 20,
             right: 20,
             top: 20,
-            bottom: 20 + MediaQuery
-                .of(ctx)
-                .viewInsets
-                .bottom,
+            bottom: 20 + MediaQuery.of(ctx).viewInsets.bottom,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -558,40 +561,53 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(2)),
+                  color: colorScheme.onSurface.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(height: 16),
-              Text('Journal rapide', style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(
-                  fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+              Text(
+                'Journal rapide',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 12),
-              TextField(controller: controller1,
-                  decoration: const InputDecoration(
-                      labelText: 'Ce que j’ai bien fait')),
+              TextField(
+                controller: controller1,
+                decoration: const InputDecoration(
+                  labelText: 'Ce que j’ai bien fait',
+                ),
+              ),
               const SizedBox(height: 8),
-              TextField(controller: controller2,
-                  decoration: const InputDecoration(
-                      labelText: 'Un besoin aujourd’hui')),
+              TextField(
+                controller: controller2,
+                decoration: const InputDecoration(
+                  labelText: 'Un besoin aujourd’hui',
+                ),
+              ),
               const SizedBox(height: 8),
-              TextField(controller: controller3,
-                  decoration: const InputDecoration(labelText: 'Un merci')),
+              TextField(
+                controller: controller3,
+                decoration: const InputDecoration(labelText: 'Un merci'),
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
                     HapticFeedback.lightImpact();
-                    await ref.read(meTankProvider.notifier).incrementBy(
-                        MeTankAction.journalGratitude);
+                    await ref
+                        .read(meTankProvider.notifier)
+                        .incrementBy(MeTankAction.journalGratitude);
                     if (mounted) {
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: const Text('Journal enregistré +4'),
-                            backgroundColor: SemanticColors.success(context)),
+                        SnackBar(
+                          content: const Text('Journal enregistré +4'),
+                          backgroundColor: SemanticColors.success(context),
+                        ),
                       );
                     }
                   },

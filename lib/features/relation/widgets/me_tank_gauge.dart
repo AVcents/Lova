@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math' as math;
-import '../../../shared/ui/semantic_colors.dart';
-import '../../../shared/providers/tanks_provider.dart';
+
+import 'package:lova/shared/providers/tanks_provider.dart';
+import 'package:lova/shared/ui/semantic_colors.dart';
 
 enum MeTier { low, mid, high }
 
@@ -11,11 +13,7 @@ class MeTankGauge extends ConsumerStatefulWidget {
   final int value;
   final VoidCallback onTap;
 
-  const MeTankGauge({
-    super.key,
-    required this.value,
-    required this.onTap,
-  });
+  const MeTankGauge({super.key, required this.value, required this.onTap});
 
   MeTier get tier {
     if (value <= 24) return MeTier.low;
@@ -53,21 +51,18 @@ class _MeTankGaugeState extends ConsumerState<MeTankGauge>
       vsync: this,
     );
 
-    _fillAnimation = Tween<double>(
-      begin: widget.value / 100,
-      end: widget.value / 100,
-    ).animate(CurvedAnimation(
-      parent: _fillController,
-      curve: Curves.easeOutBack,
-    ));
+    _fillAnimation =
+        Tween<double>(
+          begin: widget.value / 100,
+          end: widget.value / 100,
+        ).animate(
+          CurvedAnimation(parent: _fillController, curve: Curves.easeOutBack),
+        );
 
     _glowAnimation = Tween<double>(
       begin: 0,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _glowController, curve: Curves.easeOut));
   }
 
   @override
@@ -76,13 +71,13 @@ class _MeTankGaugeState extends ConsumerState<MeTankGauge>
 
     if (oldWidget.value != widget.value) {
       // Animation de remplissage
-      _fillAnimation = Tween<double>(
-        begin: _previousValue / 100,
-        end: widget.value / 100,
-      ).animate(CurvedAnimation(
-        parent: _fillController,
-        curve: Curves.easeOutBack,
-      ));
+      _fillAnimation =
+          Tween<double>(
+            begin: _previousValue / 100,
+            end: widget.value / 100,
+          ).animate(
+            CurvedAnimation(parent: _fillController, curve: Curves.easeOutBack),
+          );
 
       _fillController.forward(from: 0);
 
@@ -152,7 +147,9 @@ class _MeTankGaugeState extends ConsumerState<MeTankGauge>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: tierColor.withOpacity(0.3 * (1 - _glowAnimation.value)),
+                      color: tierColor.withOpacity(
+                        0.3 * (1 - _glowAnimation.value),
+                      ),
                       width: 2,
                     ),
                   ),
@@ -181,7 +178,9 @@ class _MeTankGaugeState extends ConsumerState<MeTankGauge>
               children: [
                 Icon(
                   Icons.person,
-                  color: widget.value > 50 ? tierColor : colorScheme.onSurface.withOpacity(0.5),
+                  color: widget.value > 50
+                      ? tierColor
+                      : colorScheme.onSurface.withOpacity(0.5),
                   size: 20,
                 ),
                 const SizedBox(height: 2),
@@ -245,8 +244,7 @@ class _MeTankPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MeTankPainter oldDelegate) {
-    return oldDelegate.fillLevel != fillLevel ||
-        oldDelegate.color != color;
+    return oldDelegate.fillLevel != fillLevel || oldDelegate.color != color;
   }
 }
 
@@ -258,7 +256,7 @@ void showMeTankRitualsSheet(BuildContext context, WidgetRef ref) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) => _MeTankRitualsSheet(),
+    builder: (context) => const _MeTankRitualsSheet(),
   );
 }
 
@@ -271,19 +269,19 @@ class _MeTankRitualsSheet extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final rituals = [
-      _RitualAction(
+      const _RitualAction(
         icon: Icons.mood,
         title: 'Check-in humeur',
         points: '+3',
         action: MeTankAction.moodCheckin,
       ),
-      _RitualAction(
+      const _RitualAction(
         icon: Icons.air,
         title: 'Respiration 1 min',
         points: '+3',
         action: MeTankAction.breath1min,
       ),
-      _RitualAction(
+      const _RitualAction(
         icon: Icons.edit_note,
         title: 'Journal de gratitude',
         points: '+4',
@@ -313,11 +311,7 @@ class _MeTankRitualsSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...rituals.map((ritual) => _buildRitualTile(
-            context,
-            ref,
-            ritual,
-          )),
+          ...rituals.map((ritual) => _buildRitualTile(context, ref, ritual)),
           const SizedBox(height: 20),
         ],
       ),
@@ -325,10 +319,10 @@ class _MeTankRitualsSheet extends ConsumerWidget {
   }
 
   Widget _buildRitualTile(
-      BuildContext context,
-      WidgetRef ref,
-      _RitualAction ritual,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    _RitualAction ritual,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -346,10 +340,14 @@ class _MeTankRitualsSheet extends ConsumerWidget {
             if (ritual.action == MeTankAction.journalGratitude) {
               final result = await _showJournalDialog(context);
               if (result == true) {
-                await ref.read(meTankProvider.notifier).incrementBy(ritual.action);
+                await ref
+                    .read(meTankProvider.notifier)
+                    .incrementBy(ritual.action);
               }
             } else {
-              await ref.read(meTankProvider.notifier).incrementBy(ritual.action);
+              await ref
+                  .read(meTankProvider.notifier)
+                  .incrementBy(ritual.action);
             }
 
             if (context.mounted) {
@@ -420,27 +418,27 @@ class _MeTankRitualsSheet extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Journal de gratitude'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Ce que j\'ai bien fait',
                 hintText: 'Une réussite de la journée...',
               ),
               maxLines: 2,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Un besoin',
                 hintText: 'Ce dont j\'ai besoin...',
               ),
               maxLines: 2,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Un merci',
                 hintText: 'Je suis reconnaissant pour...',
               ),

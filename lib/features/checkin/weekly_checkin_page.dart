@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lova/core/providers/database_provider.dart';
 
 class WeeklyCheckinPage extends ConsumerStatefulWidget {
@@ -37,7 +37,9 @@ class _WeeklyCheckinPageState extends ConsumerState<WeeklyCheckinPage> {
     final checkins = await db.getAllCheckins();
 
     for (final checkin in checkins) {
-      print("📝 Check-in => ID: ${checkin.id}, Mood: ${checkin.mood}, Date: ${checkin.timestamp}");
+      print(
+        "📝 Check-in => ID: ${checkin.id}, Mood: ${checkin.mood}, Date: ${checkin.timestamp}",
+      );
     }
   }
 
@@ -77,7 +79,9 @@ class _WeeklyCheckinPageState extends ConsumerState<WeeklyCheckinPage> {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: selected ? Colors.teal.withOpacity(0.2) : Colors.transparent,
+                      color: selected
+                          ? Colors.teal.withOpacity(0.2)
+                          : Colors.transparent,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: selected ? Colors.teal : Colors.grey,

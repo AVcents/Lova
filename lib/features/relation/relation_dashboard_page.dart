@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../metrics/gauge_provider.dart';
-import 'me_dashboard_view.dart';
-import 'us_dashboard_view.dart';
-import 'widgets/action_bar.dart';
-import '../../shared/providers/dashboard_mode_provider.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:lova/shared/providers/dashboard_mode_provider.dart';
+import 'package:lova/features/relation/me_dashboard_view.dart';
+import 'package:lova/features/relation/us_dashboard_view.dart';
+import 'package:lova/features/relation/widgets/action_bar.dart';
 
 class RelationDashboardPage extends ConsumerStatefulWidget {
   const RelationDashboardPage({super.key});
 
   @override
-  ConsumerState<RelationDashboardPage> createState() => _RelationDashboardPageState();
+  ConsumerState<RelationDashboardPage> createState() =>
+      _RelationDashboardPageState();
 }
 
 class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
@@ -58,7 +59,9 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Fin de relation'),
-          content: const Text('Êtes-vous sûr de vouloir mettre fin à cette relation ?'),
+          content: const Text(
+            'Êtes-vous sûr de vouloir mettre fin à cette relation ?',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -99,7 +102,7 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -157,13 +160,13 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: colorScheme.onBackground.withOpacity(0.3),
+                  color: colorScheme.onSurface.withOpacity(0.3),
                   width: 2,
                 ),
               ),
               child: Icon(
                 Icons.person,
-                color: colorScheme.onBackground,
+                color: colorScheme.onSurface,
                 size: 24,
               ),
             ),
@@ -176,7 +179,7 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: colorScheme.onBackground.withOpacity(0.25),
+                color: colorScheme.onSurface.withOpacity(0.25),
                 width: 1,
               ),
             ),
@@ -202,9 +205,9 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
           // Bouton notifications
           GestureDetector(
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Notifications')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Notifications')));
             },
             child: Container(
               width: 44,
@@ -212,13 +215,13 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: colorScheme.onBackground.withOpacity(0.3),
+                  color: colorScheme.onSurface.withOpacity(0.3),
                   width: 2,
                 ),
               ),
               child: Icon(
                 Icons.notifications_outlined,
-                color: colorScheme.onBackground,
+                color: colorScheme.onSurface,
                 size: 24,
               ),
             ),
@@ -249,7 +252,7 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
           style: textTheme.bodyMedium?.copyWith(
             color: isActive
                 ? colorScheme.onSecondary
-                : colorScheme.onBackground,
+                : colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -299,7 +302,9 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
                         value: breakupProgress,
                         strokeWidth: 3,
                         backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(colorScheme.error),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorScheme.error,
+                        ),
                       ),
                     ),
                   Icon(
@@ -329,11 +334,7 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
                 ),
               ],
             ),
-            child: Icon(
-              Icons.favorite,
-              color: colorScheme.onPrimary,
-              size: 32,
-            ),
+            child: Icon(Icons.favorite, color: colorScheme.onPrimary, size: 32),
           ),
 
           // Bouton message
@@ -387,9 +388,7 @@ class SuggestionCard extends StatelessWidget {
       child: ListTile(
         title: Text(
           title,
-          style: textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurface,
-          ),
+          style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
         ),
         subtitle: Text(
           description,

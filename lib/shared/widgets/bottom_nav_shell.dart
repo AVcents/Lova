@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 class BottomNavShell extends StatelessWidget {
   final Widget child;
+
   const BottomNavShell({super.key, required this.child});
 
   @override
@@ -11,7 +12,8 @@ class BottomNavShell extends StatelessWidget {
     final currentIndex = _getIndex(currentLocation);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,      body: child,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      body: child,
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(16),
         height: 60,

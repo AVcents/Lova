@@ -6,10 +6,7 @@ import 'package:flutter/services.dart';
 class MediationSosSheet extends StatefulWidget {
   final Function(String)? onInsertToChat;
 
-  const MediationSosSheet({
-    super.key,
-    this.onInsertToChat,
-  });
+  const MediationSosSheet({super.key, this.onInsertToChat});
 
   @override
   State<MediationSosSheet> createState() => _MediationSosSheetState();
@@ -22,7 +19,8 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
   final List<_MediationStep> _steps = [
     _MediationStep(
       title: 'Nommer le ressenti',
-      description: 'Prenez un moment pour identifier ce que vous ressentez maintenant',
+      description:
+          'Prenez un moment pour identifier ce que vous ressentez maintenant',
       icon: Icons.favorite_outline,
       prompts: [
         'Je ressens de la frustration',
@@ -33,7 +31,8 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
     ),
     _MediationStep(
       title: 'Écouter et valider',
-      description: 'Reconnaissez les émotions de votre partenaire sans jugement',
+      description:
+          'Reconnaissez les émotions de votre partenaire sans jugement',
       icon: Icons.hearing,
       prompts: [
         'J\'entends que tu es...',
@@ -184,7 +183,7 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
                         child: Material(
                           color: isSelected
                               ? colorScheme.primary.withOpacity(0.1)
-                              : colorScheme.surfaceVariant,
+                              : colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                           child: InkWell(
                             onTap: () {
@@ -231,7 +230,7 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -241,9 +240,7 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
             decoration: BoxDecoration(
               color: colorScheme.surface,
               border: Border(
-                top: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.12),
-                ),
+                top: BorderSide(color: colorScheme.outline.withOpacity(0.12)),
               ),
             ),
             child: SafeArea(
@@ -259,7 +256,7 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
                             _currentStep--;
                           });
                         },
-                        child: Text('Retour'),
+                        child: const Text('Retour'),
                       ),
                     ),
                   if (_currentStep > 0) const SizedBox(width: 12),
@@ -268,9 +265,9 @@ class _MediationSosSheetState extends State<MediationSosSheet> {
                     child: ElevatedButton(
                       onPressed: _responses[_currentStep].isNotEmpty
                           ? () {
-                        HapticFeedback.mediumImpact();
-                        _nextStep();
-                      }
+                              HapticFeedback.mediumImpact();
+                              _nextStep();
+                            }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colorScheme.primary,

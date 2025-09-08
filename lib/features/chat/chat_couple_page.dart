@@ -3,24 +3,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lova/features/chat/analysis/conversation_analyzer.dart';
 import 'package:lova/features/chat/controllers/chat_couple_controller.dart';
 import 'package:lova/features/chat/database/drift_database.dart';
-import 'package:lova/features/chat/widgets/input_bar_couple.dart';
-import 'package:lova/features/chat/widgets/message_bubble_couple.dart';
-import 'package:lova/features/chat/analysis/conversation_analyzer.dart';
+import 'package:lova/features/chat/providers/intervention_metrics_provider.dart';
+import 'package:lova/features/chat/ui/breath_sheet.dart';
 import 'package:lova/features/chat/ui/intervention_banner.dart';
 import 'package:lova/features/chat/ui/mediation_sos_sheet.dart';
-import 'package:lova/features/chat/ui/breath_sheet.dart';
-import 'package:lova/features/chat/providers/intervention_metrics_provider.dart';
+import 'package:lova/features/chat/widgets/input_bar_couple.dart';
+import 'package:lova/features/chat/widgets/message_bubble_couple.dart';
 import 'package:lova/features/chat_lova/ui/composer_assist_sheet.dart';
 
 class ChatCouplePage extends ConsumerStatefulWidget {
   final int? initialMessageId;
 
-  const ChatCouplePage({
-    super.key,
-    this.initialMessageId,
-  });
+  const ChatCouplePage({super.key, this.initialMessageId});
 
   @override
   ConsumerState<ChatCouplePage> createState() => _ChatCouplePageState();
@@ -95,10 +92,8 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => ComposerAssistSheet(
-        history: history,
-        initialContext: initialContext,
-      ),
+      builder: (context) =>
+          ComposerAssistSheet(history: history, initialContext: initialContext),
     );
 
     if (result != null && mounted) {
@@ -108,9 +103,9 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
 
   void _handlePause() async {
     ref.read(interventionMetricsProvider).logPause();
-    ref.read(conversationAnalyzerProvider.notifier).setSnooze(
-      const Duration(minutes: 5),
-    );
+    ref
+        .read(conversationAnalyzerProvider.notifier)
+        .setSnooze(const Duration(minutes: 5));
 
     await showModalBottomSheet(
       context: context,
@@ -156,7 +151,9 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
     ref.listen(conversationAnalyzerProvider, (previous, next) {
       if ((previous == null || previous.status != next.status) &&
           next.status != InterventionStatus.calm) {
-        ref.read(interventionMetricsProvider).logBannerShown(next.status.toString());
+        ref
+            .read(interventionMetricsProvider)
+            .logBannerShown(next.status.toString());
       }
     });
 
@@ -164,7 +161,9 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
     if (!_ranInitialAnalysis) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ref.read(conversationAnalyzerProvider.notifier).analyzeMessages(messages);
+          ref
+              .read(conversationAnalyzerProvider.notifier)
+              .analyzeMessages(messages);
         }
       });
       _ranInitialAnalysis = true;
@@ -234,10 +233,7 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primary.withOpacity(0.04),
-              Colors.transparent,
-            ],
+            colors: [colorScheme.primary.withOpacity(0.04), Colors.transparent],
             stops: const [0.0, 0.6],
           ),
         ),
@@ -246,10 +242,13 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
             if (interventionState.status != InterventionStatus.calm)
               InterventionBanner(
                 reason: interventionState.reason ?? '',
-                isTension: interventionState.status == InterventionStatus.tension,
+                isTension:
+                    interventionState.status == InterventionStatus.tension,
                 onDismiss: () {
                   metrics.logDismiss(interventionState.status.toString());
-                  ref.read(conversationAnalyzerProvider.notifier).dismissBanner();
+                  ref
+                      .read(conversationAnalyzerProvider.notifier)
+                      .dismissBanner();
                 },
                 onRephrase: () => _handleRephrase(messages),
                 onPause: _handlePause,
@@ -260,10 +259,14 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
                 controller: _scrollController,
                 child: ListView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
                   reverse: true,
                   physics: const BouncingScrollPhysics(),
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[messages.length - 1 - index];
@@ -272,21 +275,25 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
                     return AnimatedContainer(
                       key: _messageKeys[message.id],
                       duration: const Duration(milliseconds: 300),
-                      decoration: isTargeted ? BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: colorScheme.primary.withOpacity(0.1),
-                      ) : null,
+                      decoration: isTargeted
+                          ? BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: colorScheme.primary.withOpacity(0.1),
+                            )
+                          : null,
                       padding: isTargeted ? const EdgeInsets.all(4) : null,
                       margin: const EdgeInsets.symmetric(vertical: 2),
                       child: MessageBubbleCouple(
                         message: message,
                         currentUserId: currentUserId,
                         coupleId: coupleId,
-                        onTap: isTargeted ? () {
-                          if (mounted) {
-                            setState(() {});
-                          }
-                        } : null,
+                        onTap: isTargeted
+                            ? () {
+                                if (mounted) {
+                                  setState(() {});
+                                }
+                              }
+                            : null,
                       ),
                     );
                   },
@@ -305,12 +312,16 @@ class _ChatCouplePageState extends ConsumerState<ChatCouplePage> {
                 child: InputBarCouple(
                   key: _inputBarKey,
                   onSend: (content) {
-                    final receiverId = currentUserId == 'userA' ? 'userB' : 'userA';
-                    ref.read(chatCoupleControllerProvider.notifier).sendMessage(
-                      senderId: currentUserId,
-                      receiverId: receiverId,
-                      content: content,
-                    );
+                    final receiverId = currentUserId == 'userA'
+                        ? 'userB'
+                        : 'userA';
+                    ref
+                        .read(chatCoupleControllerProvider.notifier)
+                        .sendMessage(
+                          senderId: currentUserId,
+                          receiverId: receiverId,
+                          content: content,
+                        );
                   },
                 ),
               ),

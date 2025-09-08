@@ -15,17 +15,21 @@ class DeepLinkHandler {
     if (errorCode != null) {
       switch (errorCode) {
         case 'otp_expired':
-        // Lien expiré - rediriger vers verify-email avec l'erreur
+          // Lien expiré - rediriger vers verify-email avec l'erreur
           final email = Supabase.instance.client.auth.currentUser?.email ?? '';
-          context.go('/verify-email?email=$email&error_code=$errorCode&error_description=${Uri.encodeComponent(errorDescription ?? "Lien expiré")}');
+          context.go(
+            '/verify-email?email=$email&error_code=$errorCode&error_description=${Uri.encodeComponent(errorDescription ?? "Lien expiré")}',
+          );
           break;
 
         case 'otp_disabled':
         case 'email_already_confirmed':
-        // Email déjà confirmé
+          // Email déjà confirmé
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Email déjà confirmé. Connecte-toi pour continuer.'),
+              content: Text(
+                'Email déjà confirmé. Connecte-toi pour continuer.',
+              ),
               backgroundColor: Colors.blue,
             ),
           );
@@ -34,7 +38,7 @@ class DeepLinkHandler {
 
         case 'invalid_request':
         case 'invalid_token':
-        // Token invalide
+          // Token invalide
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Lien invalide. ${errorDescription ?? ""}'),
@@ -45,7 +49,7 @@ class DeepLinkHandler {
           break;
 
         default:
-        // Erreur inconnue
+          // Erreur inconnue
           print("❌ Erreur deep link non gérée : $errorCode");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -57,7 +61,7 @@ class DeepLinkHandler {
       }
     } else {
       // Pas d'erreur - la confirmation a réussi
-      // L'AuthController gérera la redirection via onAuthStateChange
+      // La redirection post-confirmation est gérée par AuthStateNotifier (via onAuthStateChange)
       print("✅ Deep link sans erreur - confirmation réussie");
     }
   }

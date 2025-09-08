@@ -1,5 +1,5 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class MediationFlowPage extends StatefulWidget {
   const MediationFlowPage({super.key});
@@ -53,8 +53,14 @@ class _MediationFlowPageState extends State<MediationFlowPage> {
             ),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: _currentStep < _steps.length - 1 ? _nextStep : _restartFlow,
-              child: Text(_currentStep < _steps.length - 1 ? 'Étape suivante' : 'Recommencer'),
+              onPressed: _currentStep < _steps.length - 1
+                  ? _nextStep
+                  : _restartFlow,
+              child: Text(
+                _currentStep < _steps.length - 1
+                    ? 'Étape suivante'
+                    : 'Recommencer',
+              ),
             ),
           ],
         ),

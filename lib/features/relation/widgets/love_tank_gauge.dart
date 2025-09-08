@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math' as math;
-import '../../../shared/ui/semantic_colors.dart';
-import '../../../shared/providers/tanks_provider.dart';
+
+import 'package:lova/shared/providers/tanks_provider.dart';
+import 'package:lova/shared/ui/semantic_colors.dart';
 
 enum LoveTier { low, mid, high }
 
@@ -11,11 +13,7 @@ class LoveTankGauge extends ConsumerStatefulWidget {
   final int value;
   final VoidCallback onTap;
 
-  const LoveTankGauge({
-    super.key,
-    required this.value,
-    required this.onTap,
-  });
+  const LoveTankGauge({super.key, required this.value, required this.onTap});
 
   LoveTier get tier {
     if (value <= 24) return LoveTier.low;
@@ -53,21 +51,18 @@ class _LoveTankGaugeState extends ConsumerState<LoveTankGauge>
       vsync: this,
     );
 
-    _fillAnimation = Tween<double>(
-      begin: widget.value / 100,
-      end: widget.value / 100,
-    ).animate(CurvedAnimation(
-      parent: _fillController,
-      curve: Curves.easeOutBack,
-    ));
+    _fillAnimation =
+        Tween<double>(
+          begin: widget.value / 100,
+          end: widget.value / 100,
+        ).animate(
+          CurvedAnimation(parent: _fillController, curve: Curves.easeOutBack),
+        );
 
     _glowAnimation = Tween<double>(
       begin: 0,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _glowController, curve: Curves.easeOut));
   }
 
   @override
@@ -76,13 +71,13 @@ class _LoveTankGaugeState extends ConsumerState<LoveTankGauge>
 
     if (oldWidget.value != widget.value) {
       // Animation de remplissage
-      _fillAnimation = Tween<double>(
-        begin: _previousValue / 100,
-        end: widget.value / 100,
-      ).animate(CurvedAnimation(
-        parent: _fillController,
-        curve: Curves.easeOutBack,
-      ));
+      _fillAnimation =
+          Tween<double>(
+            begin: _previousValue / 100,
+            end: widget.value / 100,
+          ).animate(
+            CurvedAnimation(parent: _fillController, curve: Curves.easeOutBack),
+          );
 
       _fillController.forward(from: 0);
 
@@ -152,7 +147,9 @@ class _LoveTankGaugeState extends ConsumerState<LoveTankGauge>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: tierColor.withOpacity(0.3 * (1 - _glowAnimation.value)),
+                      color: tierColor.withOpacity(
+                        0.3 * (1 - _glowAnimation.value),
+                      ),
                       width: 2,
                     ),
                   ),
@@ -181,7 +178,9 @@ class _LoveTankGaugeState extends ConsumerState<LoveTankGauge>
               children: [
                 Icon(
                   Icons.favorite,
-                  color: widget.value > 50 ? tierColor : colorScheme.onSurface.withOpacity(0.5),
+                  color: widget.value > 50
+                      ? tierColor
+                      : colorScheme.onSurface.withOpacity(0.5),
                   size: 20,
                 ),
                 const SizedBox(height: 2),
@@ -245,8 +244,7 @@ class _LoveTankPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LoveTankPainter oldDelegate) {
-    return oldDelegate.fillLevel != fillLevel ||
-        oldDelegate.color != color;
+    return oldDelegate.fillLevel != fillLevel || oldDelegate.color != color;
   }
 }
 
@@ -258,7 +256,7 @@ void showLoveTankBoosterSheet(BuildContext context, WidgetRef ref) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) => _LoveTankBoosterSheet(),
+    builder: (context) => const _LoveTankBoosterSheet(),
   );
 }
 
@@ -271,19 +269,19 @@ class _LoveTankBoosterSheet extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final actions = [
-      _BoosterAction(
+      const _BoosterAction(
         icon: Icons.calendar_today,
         title: 'Planifier un moment',
         points: '+8',
         action: LoveTankAction.planMoment,
       ),
-      _BoosterAction(
+      const _BoosterAction(
         icon: Icons.favorite_outline,
         title: 'Envoyer une attention',
         points: '+5',
         action: LoveTankAction.sendAttention,
       ),
-      _BoosterAction(
+      const _BoosterAction(
         icon: Icons.lightbulb_outline,
         title: 'Appliquer le conseil',
         points: '+3',
@@ -313,11 +311,7 @@ class _LoveTankBoosterSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...actions.map((action) => _buildActionTile(
-            context,
-            ref,
-            action,
-          )),
+          ...actions.map((action) => _buildActionTile(context, ref, action)),
           const SizedBox(height: 20),
         ],
       ),
@@ -325,10 +319,10 @@ class _LoveTankBoosterSheet extends ConsumerWidget {
   }
 
   Widget _buildActionTile(
-      BuildContext context,
-      WidgetRef ref,
-      _BoosterAction action,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    _BoosterAction action,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -341,7 +335,9 @@ class _LoveTankBoosterSheet extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           onTap: () async {
             HapticFeedback.lightImpact();
-            await ref.read(loveTankProvider.notifier).incrementBy(action.action);
+            await ref
+                .read(loveTankProvider.notifier)
+                .incrementBy(action.action);
 
             if (context.mounted) {
               Navigator.pop(context);

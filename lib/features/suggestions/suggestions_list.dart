@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'suggestion_repository.dart';
+
+import 'package:lova/features/suggestions/suggestion_repository.dart';
 
 class Suggestion {
   final String type;
   final String title;
   final String description;
 
-  Suggestion({required this.type, required this.title, required this.description});
+  Suggestion({
+    required this.type,
+    required this.title,
+    required this.description,
+  });
 }
 
 class SuggestionsList extends StatefulWidget {
@@ -58,7 +63,9 @@ class _SuggestionsListState extends State<SuggestionsList> {
               padding: const EdgeInsets.all(16),
               itemCount: _suggestions!.length,
               itemBuilder: (context, index) {
-                if (_ignoredIndices.contains(index)) return const SizedBox.shrink();
+                if (_ignoredIndices.contains(index)) {
+                  return const SizedBox.shrink();
+                }
 
                 final suggestion = _suggestions![index];
                 final isAccepted = _acceptedIndices.contains(index);

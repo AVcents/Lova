@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Niveau de force du mot de passe
-enum PasswordStrength {
-  weak,
-  medium,
-  strong,
-  veryStrong,
-}
+enum PasswordStrength { weak, medium, strong, veryStrong }
 
 /// Politique de mot de passe configurable
 class PasswordPolicy {
@@ -37,13 +32,12 @@ class PasswordPolicy {
 }
 
 class PasswordValidator {
-  static const _specialPattern =
-      r'[!@#\$%\^&\*()\[\]{}:;,.<>?/\\|\-+=_~`]';
+  static const _specialPattern = r'[!@#\$%\^&\*()\[\]{}:;,.<>?/\\|\-+=_~`]';
 
   static PasswordValidationResult validate(
-      String password, {
-        PasswordPolicy policy = const PasswordPolicy(),
-      }) {
+    String password, {
+    PasswordPolicy policy = const PasswordPolicy(),
+  }) {
     final hasMinLength = password.length >= policy.minLength;
     final hasUpperCase = RegExp(r'[A-Z]').hasMatch(password);
     final hasLowerCase = RegExp(r'[a-z]').hasMatch(password);
@@ -56,16 +50,21 @@ class PasswordValidator {
     if (hasDigit) categoriesMet++;
     if (hasSpecialChar) categoriesMet++;
 
-    final explicitOk = (!policy.requireUpper || hasUpperCase) &&
+    final explicitOk =
+        (!policy.requireUpper || hasUpperCase) &&
         (!policy.requireLower || hasLowerCase) &&
         (!policy.requireDigit || hasDigit) &&
         (!policy.requireSpecial || hasSpecialChar);
 
     final meetsCategories = categoriesMet >= policy.minCategories;
 
-    final lengthScore = (password.length / (policy.minLength + 8)).clamp(0, 1).toDouble();
+    final lengthScore = (password.length / (policy.minLength + 8))
+        .clamp(0, 1)
+        .toDouble();
     final varietyScore = (categoriesMet / 4).clamp(0, 1).toDouble();
-    final score01 = (0.5 * lengthScore + 0.5 * varietyScore).clamp(0, 1).toDouble();
+    final score01 = (0.5 * lengthScore + 0.5 * varietyScore)
+        .clamp(0, 1)
+        .toDouble();
 
     final strength = _strengthFromScore(score01);
 
@@ -92,7 +91,10 @@ class PasswordValidator {
     return PasswordStrength.veryStrong;
   }
 
-  static Color getStrengthColor(PasswordStrength strength, BuildContext context) {
+  static Color getStrengthColor(
+    PasswordStrength strength,
+    BuildContext context,
+  ) {
     switch (strength) {
       case PasswordStrength.weak:
         return Colors.red;
@@ -207,6 +209,7 @@ class PasswordStrengthMeter extends StatelessWidget {
 
 class _Checklist extends StatelessWidget {
   final PasswordValidationResult res;
+
   const _Checklist({required this.res});
 
   @override
@@ -215,8 +218,11 @@ class _Checklist extends StatelessWidget {
 
     Widget item(bool ok, String text) => Row(
       children: [
-        Icon(ok ? Icons.check_circle : Icons.cancel,
-            size: 16, color: ok ? Colors.green : theme.colorScheme.error),
+        Icon(
+          ok ? Icons.check_circle : Icons.cancel,
+          size: 16,
+          color: ok ? Colors.green : theme.colorScheme.error,
+        ),
         const SizedBox(width: 8),
         Flexible(
           child: Text(

@@ -7,6 +7,7 @@ class ComposerAssistSheet extends StatefulWidget {
   final int initialTone;
   final int initialLength;
   final int initialEmpathy;
+
   /// Contexte optionnel (clé/valeur) – non utilisé ici mais conservé pour intégration.
   final List<Map<String, String>>? context;
 
@@ -70,7 +71,8 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
 
     // Empathie
     if (_empathy == 2) {
-      response += 'Je sais que c\'est difficile pour toi et j\'aimerais qu\'on trouve une solution ensemble. ';
+      response +=
+          'Je sais que c\'est difficile pour toi et j\'aimerais qu\'on trouve une solution ensemble. ';
     } else if (_empathy == 1) {
       response += 'On peut en discuter calmement. ';
     } else {
@@ -83,7 +85,8 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
     } else if (_length == 1) {
       response += 'Qu\'est-ce qui te ferait sentir mieux?';
     } else {
-      response += 'Dis-moi ce dont tu as besoin pour qu\'on avance. J\'ai vraiment envie qu\'on se comprenne mieux.';
+      response +=
+          'Dis-moi ce dont tu as besoin pour qu\'on avance. J\'ai vraiment envie qu\'on se comprenne mieux.';
     }
 
     setState(() {
@@ -211,7 +214,7 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
                       minLines: 3,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: colorScheme.surfaceVariant,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -245,9 +248,7 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
             decoration: BoxDecoration(
               color: colorScheme.surface,
               border: Border(
-                top: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.12),
-                ),
+                top: BorderSide(color: colorScheme.outline.withOpacity(0.12)),
               ),
             ),
             child: SafeArea(
@@ -269,10 +270,11 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
                     child: ElevatedButton(
                       onPressed: _inputController.text.trim().isNotEmpty
                           ? () {
-                        HapticFeedback.mediumImpact();
-                        Navigator.of(context)
-                            .pop(_inputController.text.trim());
-                      }
+                              HapticFeedback.mediumImpact();
+                              Navigator.of(
+                                context,
+                              ).pop(_inputController.text.trim());
+                            }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colorScheme.primary,
@@ -343,7 +345,7 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? colorScheme.primary
-                          : colorScheme.surfaceVariant,
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: isSelected
@@ -359,8 +361,9 @@ class _ComposerAssistSheetState extends State<ComposerAssistSheet> {
                           color: isSelected
                               ? colorScheme.onPrimary
                               : colorScheme.onSurface,
-                          fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                       ),
                     ),

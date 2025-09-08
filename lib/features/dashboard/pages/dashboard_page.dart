@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../shared/widgets/app_scaffold.dart';
-import '../../metrics/gauge_provider.dart';
+
+import 'package:lova/shared/widgets/app_scaffold.dart';
+import 'package:lova/features/metrics/gauge_provider.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});

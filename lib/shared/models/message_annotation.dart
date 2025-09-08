@@ -30,7 +30,7 @@ enum AnnotationTag {
   /// Conversion depuis string pour la sérialisation
   static AnnotationTag fromString(String value) {
     return AnnotationTag.values.firstWhere(
-          (tag) => tag.name == value,
+      (tag) => tag.name == value,
       orElse: () => AnnotationTag.favorite,
     );
   }
@@ -39,7 +39,7 @@ enum AnnotationTag {
 /// Modèle d'annotation pour un message
 class MessageAnnotation {
   final String id;
-  final int messageId;  // Changé en int pour correspondre à Drift
+  final int messageId; // Changé en int pour correspondre à Drift
   final String coupleId;
   final String authorUserId;
   final AnnotationTag tag;
@@ -54,8 +54,8 @@ class MessageAnnotation {
     required this.tag,
     this.note,
     DateTime? createdAt,
-  })  : id = id ?? const Uuid().v4(),
-        createdAt = createdAt ?? DateTime.now();
+  }) : id = id ?? const Uuid().v4(),
+       createdAt = createdAt ?? DateTime.now();
 
   /// Conversion en Map pour la sérialisation
   Map<String, dynamic> toMap() {

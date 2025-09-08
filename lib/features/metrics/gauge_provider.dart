@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'compute_gauge.dart';
-import 'metrics.dart';
-import '../chat/models/message_model.dart';
+
+import 'package:lova/features/chat/models/message_model.dart';
+import 'package:lova/features/metrics/compute_gauge.dart';
+import 'package:lova/features/metrics/metrics.dart';
 
 final gaugeProvider = Provider<int>((ref) {
   // TODO: remplacer par une vraie source de messages
@@ -46,20 +47,38 @@ ConversationMetrics computeMetrics(List<MessageModel> messages) {
 
   return ConversationMetrics(
     totalMessages: messages.length,
-    averageResponseTimeSeconds:
-    responseCount == 0 ? 0 : totalResponseTime / responseCount,
+    averageResponseTimeSeconds: responseCount == 0
+        ? 0
+        : totalResponseTime / responseCount,
     positiveWordCount: totalPositive,
     negativeWordCount: totalNegative,
   );
 }
 
 int _countPositiveWords(String text) {
-  const positiveWords = ['merci', 'bien', 'cool', 'génial', 'super', 'ok', 'top', 'bravo'];
+  const positiveWords = [
+    'merci',
+    'bien',
+    'cool',
+    'génial',
+    'super',
+    'ok',
+    'top',
+    'bravo',
+  ];
   return positiveWords.where((w) => text.contains(w)).length;
 }
 
 int _countNegativeWords(String text) {
-  const negativeWords = ['fatigué', 'marre', 'nul', 'déteste', 'problème', 'fâché', 'non'];
+  const negativeWords = [
+    'fatigué',
+    'marre',
+    'nul',
+    'déteste',
+    'problème',
+    'fâché',
+    'non',
+  ];
   return negativeWords.where((w) => text.contains(w)).length;
 }
 

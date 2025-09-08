@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../metrics/gauge_provider.dart';
+
+import 'package:lova/features/metrics/gauge_provider.dart';
 
 class UsDashboardView extends ConsumerWidget {
   const UsDashboardView({super.key});
@@ -55,13 +56,13 @@ class UsDashboardView extends ConsumerWidget {
                         end: Alignment.bottomRight,
                         colors: isDark
                             ? [
-                          const Color(0xFFA12539).withOpacity(0.1),
-                          const Color(0xFFFF5A6E).withOpacity(0.1),
-                        ]
+                                const Color(0xFFA12539).withOpacity(0.1),
+                                const Color(0xFFFF5A6E).withOpacity(0.1),
+                              ]
                             : [
-                          const Color(0xFFFFA38F).withOpacity(0.08),
-                          const Color(0xFFFF6FA5).withOpacity(0.08),
-                        ],
+                                const Color(0xFFFFA38F).withOpacity(0.08),
+                                const Color(0xFFFF6FA5).withOpacity(0.08),
+                              ],
                       ),
                     ),
                   ),
@@ -79,7 +80,7 @@ class UsDashboardView extends ConsumerWidget {
                       ),
                       const SizedBox(height: 24),
                       // Jauge circulaire
-                      Container(
+                      SizedBox(
                         width: 140,
                         height: 140,
                         child: Stack(
@@ -91,7 +92,8 @@ class UsDashboardView extends ConsumerWidget {
                               child: CircularProgressIndicator(
                                 value: gauge / 100,
                                 strokeWidth: 10,
-                                backgroundColor: colorScheme.onSurface.withOpacity(0.1),
+                                backgroundColor: colorScheme.onSurface
+                                    .withOpacity(0.1),
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   _getGaugeColor(gauge, colorScheme),
                                 ),
@@ -116,7 +118,9 @@ class UsDashboardView extends ConsumerWidget {
                                 Text(
                                   _getGaugeLabel(gauge),
                                   style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurface.withOpacity(0.7),
+                                    color: colorScheme.onSurface.withOpacity(
+                                      0.7,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -138,11 +142,7 @@ class UsDashboardView extends ConsumerWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              trendIcon,
-                              color: trendColor,
-                              size: 20,
-                            ),
+                            Icon(trendIcon, color: trendColor, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               trend > 0
@@ -245,11 +245,7 @@ class UsDashboardView extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.event,
-                      color: colorScheme.primary,
-                      size: 24,
-                    ),
+                    Icon(Icons.event, color: colorScheme.primary, size: 24),
                     const SizedBox(width: 12),
                     Text(
                       'Moments à venir',
@@ -336,11 +332,11 @@ class UsDashboardView extends ConsumerWidget {
   }
 
   Widget _buildQuickAction(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -361,11 +357,7 @@ class UsDashboardView extends ConsumerWidget {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: colorScheme.primary,
-              size: 28,
-            ),
+            Icon(icon, color: colorScheme.primary, size: 28),
             const SizedBox(height: 8),
             Text(
               label,

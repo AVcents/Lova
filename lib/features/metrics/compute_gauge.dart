@@ -1,6 +1,6 @@
 // lib/features/metrics/compute_gauge.dart
 
-import 'metrics.dart';
+import 'package:lova/features/metrics/metrics.dart';
 
 int computeGaugeScore(ConversationMetrics metrics) {
   // Score sentiment : 0 → 0, 1 → 100
@@ -15,9 +15,8 @@ int computeGaugeScore(ConversationMetrics metrics) {
   final messageScore = (metrics.totalMessages * 10).clamp(0, 100);
 
   // Pondération (0.4 sentiment, 0.3 temps réponse, 0.3 messages)
-  final gaugeScore = (sentimentScore * 0.4) +
-      (responseScore * 0.3) +
-      (messageScore * 0.3);
+  final gaugeScore =
+      (sentimentScore * 0.4) + (responseScore * 0.3) + (messageScore * 0.3);
 
   return gaugeScore.round().clamp(0, 100);
 }

@@ -1,9 +1,11 @@
 // lib/shared/repositories/annotations_repository_memory.dart
 
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/message_annotation.dart';
-import 'annotations_repository.dart';
+
+import 'package:lova/shared/models/message_annotation.dart';
+import 'package:lova/shared/repositories/annotations_repository.dart';
 
 /// Implémentation en mémoire du repository des annotations
 /// avec persistance locale via SharedPreferences
@@ -29,7 +31,9 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
       try {
         final List<dynamic> jsonList = json.decode(jsonString);
         _annotations = jsonList
-            .map((json) => MessageAnnotation.fromMap(json as Map<String, dynamic>))
+            .map(
+              (json) => MessageAnnotation.fromMap(json as Map<String, dynamic>),
+            )
             .toList();
       } catch (e) {
         print('Erreur lors du chargement des annotations: $e');
@@ -47,10 +51,10 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
 
   @override
   Future<List<MessageAnnotation>> listByCouple(
-      String coupleId, {
-        AnnotationTag? filter,
-        String? query,
-      }) async {
+    String coupleId, {
+    AnnotationTag? filter,
+    String? query,
+  }) async {
     var results = _annotations.where((ann) => ann.coupleId == coupleId);
 
     // Filtre par tag si spécifié
@@ -76,10 +80,9 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
 
   @override
   Future<List<MessageAnnotation>> listByMessage(int messageId) async {
-    final results = _annotations
-        .where((ann) => ann.messageId == messageId)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final results =
+        _annotations.where((ann) => ann.messageId == messageId).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return results;
   }
@@ -115,11 +118,17 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
   }
 
   @override
-  Future<bool> hasUserTag(int messageId, String userId, AnnotationTag tag) async {
-    return _annotations.any((ann) =>
-    ann.messageId == messageId &&
-        ann.authorUserId == userId &&
-        ann.tag == tag);
+  Future<bool> hasUserTag(
+    int messageId,
+    String userId,
+    AnnotationTag tag,
+  ) async {
+    return _annotations.any(
+      (ann) =>
+          ann.messageId == messageId &&
+          ann.authorUserId == userId &&
+          ann.tag == tag,
+    );
   }
 
   @override

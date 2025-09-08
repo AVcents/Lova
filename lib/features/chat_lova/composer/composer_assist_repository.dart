@@ -1,8 +1,10 @@
 // lib/features/chat_lova/composer/composer_assist_repository.dart
 
 import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'composer_assist_provider.dart';
+
+import 'package:lova/features/chat_lova/composer/composer_assist_provider.dart';
 
 abstract class ComposerAssistRepository {
   Future<List<String>> generate({
@@ -28,27 +30,50 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
     final baseMessages = _getBaseMessages(params, contextClues);
 
     for (int i = 0; i < 3; i++) {
-      final variation = _buildVariation(params, baseMessages, contextClues, contextText, i);
+      final variation = _buildVariation(
+        params,
+        baseMessages,
+        contextClues,
+        contextText,
+        i,
+      );
       variations.add(variation);
     }
 
     return variations;
   }
 
-  Map<String, dynamic> _analyzeContext(List<String> history, String contextText) {
-    final allText = (history.join(' ') + ' ' + contextText).toLowerCase();
+  Map<String, dynamic> _analyzeContext(
+    List<String> history,
+    String contextText,
+  ) {
+    final allText = ('${history.join(' ')} $contextText').toLowerCase();
 
-    final needsComfort = allText.contains(RegExp(r'\b(triste|difficile|dur|problème|inquiet|stress|anxieux|désolé|excuse|pardon)\b'));
-    final isPositive = allText.contains(RegExp(r'\b(heureux|content|bien|super|génial|parfait|amour|merci)\b'));
+    final needsComfort = allText.contains(
+      RegExp(
+        r'\b(triste|difficile|dur|problème|inquiet|stress|anxieux|désolé|excuse|pardon)\b',
+      ),
+    );
+    final isPositive = allText.contains(
+      RegExp(r'\b(heureux|content|bien|super|génial|parfait|amour|merci)\b'),
+    );
     final hasQuestion = allText.contains('?');
-    final isApology = allText.contains(RegExp(r'\b(excuse|pardon|désolé|regret|faute)\b'));
-    final isProposal = allText.contains(RegExp(r'\b(propose|veux|aimerais|on pourrait|si on)\b'));
+    final isApology = allText.contains(
+      RegExp(r'\b(excuse|pardon|désolé|regret|faute)\b'),
+    );
+    final isProposal = allText.contains(
+      RegExp(r'\b(propose|veux|aimerais|on pourrait|si on)\b'),
+    );
 
     String mood = 'neutral';
-    if (isApology) mood = 'apologetic';
-    else if (needsComfort) mood = 'supportive';
-    else if (isPositive) mood = 'positive';
-    else if (hasQuestion) mood = 'questioning';
+    if (isApology) {
+      mood = 'apologetic';
+    } else if (needsComfort)
+      mood = 'supportive';
+    else if (isPositive)
+      mood = 'positive';
+    else if (hasQuestion)
+      mood = 'questioning';
 
     final keywords = <String>[];
     if (allText.contains('couple')) keywords.add('couple');
@@ -68,11 +93,15 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
     };
   }
 
-  List<String> _getBaseMessages(ComposerAssistParams params, Map<String, dynamic> context) {
+  List<String> _getBaseMessages(
+    ComposerAssistParams params,
+    Map<String, dynamic> context,
+  ) {
     final mood = context['mood'];
 
     final toneMessages = {
-      0: { // Chaleureux
+      0: {
+        // Chaleureux
         'neutral': [
           "J'aimerais te parler de quelque chose qui me tient à cœur",
           "Je ressens le besoin de partager avec toi",
@@ -89,7 +118,8 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
           "Il y a quelque chose qui me remplit de joie et j'ai envie de t'en parler",
         ],
       },
-      1: { // Neutre
+      1: {
+        // Neutre
         'neutral': [
           "Je voudrais aborder un sujet avec toi",
           "Il y a quelque chose dont nous devrions parler",
@@ -106,7 +136,8 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
           "Il y a un sujet qui me tient à cœur",
         ],
       },
-      2: { // Assertif
+      2: {
+        // Assertif
         'neutral': [
           "Nous devons parler de quelque chose d'important",
           "Il est temps qu'on aborde ce sujet",
@@ -125,12 +156,19 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
       },
     };
 
-    final moodMessages = toneMessages[params.tone]?[mood] ?? toneMessages[params.tone]?['neutral'];
+    final moodMessages =
+        toneMessages[params.tone]?[mood] ??
+        toneMessages[params.tone]?['neutral'];
     return moodMessages ?? toneMessages[0]!['neutral']!;
   }
 
-  String _buildVariation(ComposerAssistParams params, List<String> baseMessages,
-      Map<String, dynamic> context, String contextText, int variationIndex) {
+  String _buildVariation(
+    ComposerAssistParams params,
+    List<String> baseMessages,
+    Map<String, dynamic> context,
+    String contextText,
+    int variationIndex,
+  ) {
     final base = baseMessages[_random.nextInt(baseMessages.length)];
     String message = base;
 
@@ -164,26 +202,38 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
     return message;
   }
 
-  String _integrateContext(String message, String contextText, ComposerAssistParams params) {
+  String _integrateContext(
+    String message,
+    String contextText,
+    ComposerAssistParams params,
+  ) {
     // Analyser le contexte pour l'intégrer naturellement
     final lowerContext = contextText.toLowerCase();
 
     if (lowerContext.contains(RegExp(r'\b(excuse|pardon|désolé)\b'))) {
-      if (params.tone == 0) { // Chaleureux
+      if (params.tone == 0) {
+        // Chaleureux
         return "Mon amour, je sais que j'ai fait une erreur et $message pour qu'on puisse en parler.";
-      } else if (params.tone == 2) { // Assertif
+      } else if (params.tone == 2) {
+        // Assertif
         return "Je reconnais mes torts et $message pour qu'on règle ça.";
-      } else { // Neutre
+      } else {
+        // Neutre
         return "Je pense avoir fait une erreur et $message à ce sujet.";
       }
     }
 
-    if (lowerContext.contains(RegExp(r'\b(propose|sortir|moment|activité)\b'))) {
-      if (params.tone == 0) { // Chaleureux
+    if (lowerContext.contains(
+      RegExp(r'\b(propose|sortir|moment|activité)\b'),
+    )) {
+      if (params.tone == 0) {
+        // Chaleureux
         return "$message J'ai une idée qui pourrait nous faire plaisir à tous les deux.";
-      } else if (params.tone == 2) { // Assertif
+      } else if (params.tone == 2) {
+        // Assertif
         return "$message J'ai une proposition concrète à te faire.";
-      } else { // Neutre
+      } else {
+        // Neutre
         return "$message J'aimerais te proposer quelque chose.";
       }
     }
@@ -204,38 +254,54 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
     return prefix + message.toLowerCase();
   }
 
-  String _expandMessage(String message, ComposerAssistParams params,
-      Map<String, dynamic> context, bool isLong) {
+  String _expandMessage(
+    String message,
+    ComposerAssistParams params,
+    Map<String, dynamic> context,
+    bool isLong,
+  ) {
     final additions = <String>[];
 
     // Ajouts selon le contexte
     if (context['hasQuestion'] == true) {
-      additions.add(isLong
-          ? "car j'ai l'impression qu'il y a des choses importantes à éclaircir entre nous"
-          : "car j'ai quelques questions");
+      additions.add(
+        isLong
+            ? "car j'ai l'impression qu'il y a des choses importantes à éclaircir entre nous"
+            : "car j'ai quelques questions",
+      );
     }
 
     if (context['isApology'] == true) {
-      additions.add(isLong
-          ? "Je sais que j'ai pu te blesser et j'aimerais qu'on trouve ensemble comment réparer les choses"
-          : "surtout après ce qui s'est passé");
+      additions.add(
+        isLong
+            ? "Je sais que j'ai pu te blesser et j'aimerais qu'on trouve ensemble comment réparer les choses"
+            : "surtout après ce qui s'est passé",
+      );
     }
 
     if (context['isProposal'] == true) {
-      additions.add(isLong
-          ? "J'ai réfléchi à quelque chose qui pourrait nous rapprocher et nous faire du bien"
-          : "car j'ai une idée à te soumettre");
+      additions.add(
+        isLong
+            ? "J'ai réfléchi à quelque chose qui pourrait nous rapprocher et nous faire du bien"
+            : "car j'ai une idée à te soumettre",
+      );
     }
 
     // Ajouts selon le ton
-    if (params.tone == 0) { // Chaleureux
-      additions.add(isLong
-          ? "Notre relation me tient vraiment à cœur et je pense que la communication est essentielle pour nous"
-          : "car notre complicité est précieuse");
-    } else if (params.tone == 2) { // Assertif
-      additions.add(isLong
-          ? "Il me semble important qu'on soit sur la même longueur d'onde pour avancer sereinement"
-          : "pour qu'on soit clairs tous les deux");
+    if (params.tone == 0) {
+      // Chaleureux
+      additions.add(
+        isLong
+            ? "Notre relation me tient vraiment à cœur et je pense que la communication est essentielle pour nous"
+            : "car notre complicité est précieuse",
+      );
+    } else if (params.tone == 2) {
+      // Assertif
+      additions.add(
+        isLong
+            ? "Il me semble important qu'on soit sur la même longueur d'onde pour avancer sereinement"
+            : "pour qu'on soit clairs tous les deux",
+      );
     }
 
     if (additions.isNotEmpty) {
@@ -246,12 +312,17 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
     return message;
   }
 
-  String _addVariationTouch(String message, int index, ComposerAssistParams params, Map<String, dynamic> context) {
+  String _addVariationTouch(
+    String message,
+    int index,
+    ComposerAssistParams params,
+    Map<String, dynamic> context,
+  ) {
     switch (index) {
       case 0:
         return message; // Version de base
       case 1:
-      // Ajouter une question
+        // Ajouter une question
         if (context['isApology'] == true) {
           return "$message Tu serais d'accord pour qu'on en discute ?";
         } else if (params.tone == 0) {
@@ -260,7 +331,7 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
           return "$message Es-tu disponible pour en discuter ?";
         }
       case 2:
-      // Ajouter une proposition de moment
+        // Ajouter une proposition de moment
         if (context['isApology'] == true) {
           return "$message Je suis libre ce soir si tu veux.";
         } else {
@@ -272,6 +343,8 @@ class MockComposerAssistRepository implements ComposerAssistRepository {
   }
 }
 
-final composerAssistRepositoryProvider = Provider<ComposerAssistRepository>((ref) {
+final composerAssistRepositoryProvider = Provider<ComposerAssistRepository>((
+  ref,
+) {
   return MockComposerAssistRepository();
 });

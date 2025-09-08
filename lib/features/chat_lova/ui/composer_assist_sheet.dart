@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lova/features/chat_lova/composer/composer_assist_provider.dart';
-import '../providers/lova_metrics_provider.dart';
+
+import 'package:lova/features/chat_lova/providers/lova_metrics_provider.dart';
 
 class ComposerAssistSheet extends ConsumerStatefulWidget {
   final List<String> history;
@@ -17,7 +18,8 @@ class ComposerAssistSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ComposerAssistSheet> createState() => _ComposerAssistSheetState();
+  ConsumerState<ComposerAssistSheet> createState() =>
+      _ComposerAssistSheetState();
 }
 
 class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
@@ -33,9 +35,10 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
     _fadeController.forward();
 
     if (widget.initialContext != null) {
@@ -173,12 +176,13 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
             minLines: 2,
             maxLines: 4,
             decoration: InputDecoration(
-              hintText: "Ex : je veux m'excuser pour hier et proposer un moment",
+              hintText:
+                  "Ex : je veux m'excuser pour hier et proposer un moment",
               hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.6),
               ),
               filled: true,
-              fillColor: colorScheme.surfaceVariant,
+              fillColor: colorScheme.surfaceContainerHighest,
               contentPadding: const EdgeInsets.all(12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -192,15 +196,12 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: colorScheme.primary,
-                  width: 1.4,
-                ),
+                borderSide: BorderSide(color: colorScheme.primary, width: 1.4),
               ),
             ),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
           ),
         ],
       ),
@@ -217,7 +218,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
             'Ton',
             state.params.tone,
             ['Chaleureux', 'Neutre', 'Assertif'],
-                (value) => ref.read(composerAssistProvider.notifier).updateParams(tone: value),
+            (value) => ref
+                .read(composerAssistProvider.notifier)
+                .updateParams(tone: value),
           ),
           const SizedBox(height: 20),
           _buildSlider(
@@ -225,7 +228,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
             'Longueur',
             state.params.length,
             ['Court', 'Moyen', 'Long'],
-                (value) => ref.read(composerAssistProvider.notifier).updateParams(length: value),
+            (value) => ref
+                .read(composerAssistProvider.notifier)
+                .updateParams(length: value),
           ),
           const SizedBox(height: 20),
           _buildSlider(
@@ -233,7 +238,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
             'Empathie',
             state.params.empathy,
             ['Faible', 'Moyenne', 'Forte'],
-                (value) => ref.read(composerAssistProvider.notifier).updateParams(empathy: value),
+            (value) => ref
+                .read(composerAssistProvider.notifier)
+                .updateParams(empathy: value),
           ),
         ],
       ),
@@ -241,12 +248,12 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
   }
 
   Widget _buildSlider(
-      BuildContext context,
-      String title,
-      int value,
-      List<String> labels,
-      Function(int) onChanged,
-      ) {
+    BuildContext context,
+    String title,
+    int value,
+    List<String> labels,
+    Function(int) onChanged,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -263,11 +270,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.2),
-            ),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
           ),
           child: Column(
             children: [
@@ -282,7 +287,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
                       color: index == value
                           ? colorScheme.primary
                           : colorScheme.onSurface.withOpacity(0.6),
-                      fontWeight: index == value ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: index == value
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                   );
                 }).toList(),
@@ -291,8 +298,12 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 4,
-                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 8,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 16,
+                  ),
                 ),
                 child: Slider(
                   value: value.toDouble(),
@@ -332,17 +343,19 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
           ),
           child: state.isLoading
               ? SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
-            ),
-          )
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.onPrimary,
+                    ),
+                  ),
+                )
               : const Text(
-            'Générer',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
+                  'Générer',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
         ),
       ),
     );
@@ -374,14 +387,24 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
           ),
           const SizedBox(height: 12),
           ...state.variations.asMap().entries.map(
-                (entry) => _buildVariationCard(context, entry.value, entry.key, state.params),
+            (entry) => _buildVariationCard(
+              context,
+              entry.value,
+              entry.key,
+              state.params,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildVariationCard(BuildContext context, String variation, int index, ComposerAssistParams params) {
+  Widget _buildVariationCard(
+    BuildContext context,
+    String variation,
+    int index,
+    ComposerAssistParams params,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final hasContext = _contextController.text.trim().isNotEmpty;
 
@@ -397,11 +420,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant,
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.outline.withOpacity(0.15),
-              ),
+              border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +439,10 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -434,17 +458,21 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
                     if (hasContext) ...[
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: colorScheme.secondary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           'Contexte utilisé',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.secondary,
-                            fontSize: 10,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: colorScheme.secondary,
+                                fontSize: 10,
+                              ),
                         ),
                       ),
                     ],
@@ -468,10 +496,9 @@ class _ComposerAssistSheetState extends ConsumerState<ComposerAssistSheet>
 
   void _onGenerate() async {
     final contextText = _contextController.text.trim();
-    await ref.read(composerAssistProvider.notifier).generateVariations(
-      widget.history,
-      contextText,
-    );
+    await ref
+        .read(composerAssistProvider.notifier)
+        .generateVariations(widget.history, contextText);
     ref.read(lovaMetricsProvider.notifier).logGenerated(3);
 
     final state = ref.read(composerAssistProvider);

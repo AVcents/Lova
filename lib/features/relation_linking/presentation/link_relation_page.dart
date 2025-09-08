@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../application/link_relation_controller.dart';
-import '../domain/relation_linking_state.dart';
+
+import 'package:lova/features/relation_linking/application/link_relation_controller.dart';
+import 'package:lova/features/relation_linking/domain/relation_linking_state.dart';
 
 class LinkRelationPage extends ConsumerStatefulWidget {
   const LinkRelationPage({super.key});
@@ -25,7 +26,9 @@ class _LinkRelationPageState extends ConsumerState<LinkRelationPage> {
     // TODO: remplacer par l’ID réel de l’utilisateur connecté
     const currentUserId = "user_b";
 
-    ref.read(linkRelationControllerProvider.notifier).linkWithCode(code, currentUserId);
+    ref
+        .read(linkRelationControllerProvider.notifier)
+        .linkWithCode(code, currentUserId);
   }
 
   @override
@@ -68,7 +71,8 @@ class _LinkRelationPageState extends ConsumerState<LinkRelationPage> {
                     : const Text("Lier"),
               ),
               const SizedBox(height: 16),
-              if (state.status == RelationLinkingStatus.error && state.message != null)
+              if (state.status == RelationLinkingStatus.error &&
+                  state.message != null)
                 Text(
                   state.message!,
                   style: const TextStyle(color: Colors.red),

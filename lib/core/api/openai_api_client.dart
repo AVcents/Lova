@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 class OpenAIApiClient {
   final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';

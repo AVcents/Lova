@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class NextActionCard extends StatelessWidget {
@@ -35,10 +33,7 @@ class NextActionCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(fontSize: 14),
-                  ),
+                  Text(description, style: const TextStyle(fontSize: 14)),
                 ],
               ),
             ),

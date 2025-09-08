@@ -1,14 +1,15 @@
 // lib/main.dart
 
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'shared/services/tanks_persistence.dart';
-import 'shared/providers/tanks_provider.dart';
-import 'shared/repositories/annotations_repository_memory.dart';
-import 'shared/providers/annotations_provider.dart';
-import 'app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:lova/app.dart';
+import 'package:lova/shared/providers/annotations_provider.dart';
+import 'package:lova/shared/providers/tanks_provider.dart';
+import 'package:lova/shared/repositories/annotations_repository_memory.dart';
+import 'package:lova/shared/services/tanks_persistence.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,7 @@ void main() async {
     await Supabase.initialize(
       url: dotenv.env['SUPABASE_URL']!,
       anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-      debug: false,  // Désactive les logs debug
+      debug: false, // Désactive les logs debug
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
         autoRefreshToken: true,
@@ -30,7 +31,6 @@ void main() async {
 
     // Configurer le listener global pour les deep links et auth state
     _setupAuthListener();
-
   } catch (e) {
     print("❌ Erreur Supabase: $e");
     // Continue quand même pour voir si l'app fonctionne
@@ -63,7 +63,7 @@ void _setupAuthListener() {
     switch (event) {
       case AuthChangeEvent.signedIn:
         print("✅ Utilisateur connecté : ${session?.user.email}");
-        // La création du profil est gérée dans AuthController
+        // La création du profil est désormais gérée dans AuthStateNotifier
         break;
       case AuthChangeEvent.signedOut:
         print("👋 Utilisateur déconnecté");

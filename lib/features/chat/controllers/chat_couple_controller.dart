@@ -35,11 +35,11 @@ final databaseProvider = Provider<AppDatabase>((ref) => AppDatabase());
 
 // 🔹 Provider du repository
 final chatCoupleRepositoryProvider = Provider<ChatCoupleRepository>(
-      (ref) => ChatCoupleRepository(ref.watch(databaseProvider)),
+  (ref) => ChatCoupleRepository(ref.watch(databaseProvider)),
 );
 
 // 🔹 Provider du controller
 final chatCoupleControllerProvider =
-StateNotifierProvider<ChatCoupleController, List<Message>>(
+    StateNotifierProvider<ChatCoupleController, List<Message>>(
       (ref) => ChatCoupleController(ref.watch(chatCoupleRepositoryProvider)),
-);
+    );

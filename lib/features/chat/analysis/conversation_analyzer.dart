@@ -35,17 +35,27 @@ class InterventionState {
 
 class ConversationAnalyzer extends StateNotifier<InterventionState> {
   ConversationAnalyzer(this._ref)
-      : super(const InterventionState(status: InterventionStatus.calm));
+    : super(const InterventionState(status: InterventionStatus.calm));
 
   final Ref _ref;
 
   // Seuils (faciles à ajuster en debug)
-  static final Duration _bannerThrottle = _kAnalyzerDebug ? const Duration(seconds: 45) : const Duration(minutes: 10);
-  static final Duration _silenceDuration = _kAnalyzerDebug ? const Duration(minutes: 60) : const Duration(hours: 12);
-  static final Duration _pingPongMaxInterval = _kAnalyzerDebug ? const Duration(seconds: 90) : const Duration(seconds: 60);
-  static final int _minExchangesForTension = _kAnalyzerDebug ? 2 : 3; // nb de va-et-vient courts
-  static final int _negativeScoreThreshold = _kAnalyzerDebug ? 1 : 2; // nb total de mots négatifs
-  static final int _recentWindowMinutes = _kAnalyzerDebug ? 20 : 30;
+  static const Duration _bannerThrottle = _kAnalyzerDebug
+      ? Duration(seconds: 45)
+      : Duration(minutes: 10);
+  static const Duration _silenceDuration = _kAnalyzerDebug
+      ? Duration(minutes: 60)
+      : Duration(hours: 12);
+  static const Duration _pingPongMaxInterval = _kAnalyzerDebug
+      ? Duration(seconds: 90)
+      : Duration(seconds: 60);
+  static const int _minExchangesForTension = _kAnalyzerDebug
+      ? 2
+      : 3; // nb de va-et-vient courts
+  static const int _negativeScoreThreshold = _kAnalyzerDebug
+      ? 1
+      : 2; // nb total de mots négatifs
+  static const int _recentWindowMinutes = _kAnalyzerDebug ? 20 : 30;
 
   DateTime? _snoozeUntil;
   DateTime? _lastBannerShown;
@@ -59,13 +69,18 @@ class ConversationAnalyzer extends StateNotifier<InterventionState> {
 
     // Fenêtre récente triée par timestamp croissant (ancien -> récent)
     final now = DateTime.now();
-    final window = messages
-        .where((m) => now.difference(m.timestamp).inMinutes <= _recentWindowMinutes)
-        .toList()
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    final window =
+        messages
+            .where(
+              (m) =>
+                  now.difference(m.timestamp).inMinutes <= _recentWindowMinutes,
+            )
+            .toList()
+          ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     // Liste complète triée par récent -> ancien pour les recherches rapides
-    final all = [...messages]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final all = [...messages]
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     final tension = _checkTension(window, all);
     if (tension != null) {
@@ -104,8 +119,19 @@ class ConversationAnalyzer extends StateNotifier<InterventionState> {
 
     // Score négatif simple (liste de mots)
     const negativeWords = [
-      'toujours', 'jamais', 'fatigué', 'fatiguée', 'laisse', 'arrête',
-      'marre', 'énervé', 'énervée', 'problème', 'haine', 'triste', 'plus jamais'
+      'toujours',
+      'jamais',
+      'fatigué',
+      'fatiguée',
+      'laisse',
+      'arrête',
+      'marre',
+      'énervé',
+      'énervée',
+      'problème',
+      'haine',
+      'triste',
+      'plus jamais',
     ];
     int negativeScore = 0;
     for (final msg in window) {
@@ -120,8 +146,11 @@ class ConversationAnalyzer extends StateNotifier<InterventionState> {
     final hasWarningTags = last10.any((m) {
       final async = _ref.read(annotationsByMessageProvider(m.id));
       return async.maybeWhen(
-        data: (anns) => anns.any((a) =>
-            a.tag == AnnotationTag.trigger || a.tag == AnnotationTag.dealbreaker),
+        data: (anns) => anns.any(
+          (a) =>
+              a.tag == AnnotationTag.trigger ||
+              a.tag == AnnotationTag.dealbreaker,
+        ),
         orElse: () => false,
       );
     });
@@ -148,13 +177,19 @@ class ConversationAnalyzer extends StateNotifier<InterventionState> {
     final Map<String, DateTime> lastBySender = {};
     for (final m in allDesc) {
       lastBySender.putIfAbsent(m.senderId, () => m.timestamp);
-      if (lastBySender.length >= 2) break; // on a les deux plus récents expéditeurs
+      if (lastBySender.length >= 2) {
+        break; // on a les deux plus récents expéditeurs
+      }
     }
 
-    if (lastBySender.length < 2) return null; // besoin d'échanges bilatéraux dans l'historique
+    if (lastBySender.length < 2) {
+      return null; // besoin d'échanges bilatéraux dans l'historique
+    }
 
     // Plus ancien des deux derniers messages distincts (dernier "des deux côtés")
-    final lastBothSides = lastBySender.values.reduce((a, b) => a.isBefore(b) ? a : b);
+    final lastBothSides = lastBySender.values.reduce(
+      (a, b) => a.isBefore(b) ? a : b,
+    );
 
     final diff = now.difference(lastBothSides);
     if (diff > _silenceDuration) {
@@ -164,10 +199,12 @@ class ConversationAnalyzer extends StateNotifier<InterventionState> {
     return null;
   }
 
-  bool _isSnoozing() => _snoozeUntil != null && DateTime.now().isBefore(_snoozeUntil!);
+  bool _isSnoozing() =>
+      _snoozeUntil != null && DateTime.now().isBefore(_snoozeUntil!);
 
   bool _isThrottled() =>
-      _lastBannerShown != null && DateTime.now().difference(_lastBannerShown!) < _bannerThrottle;
+      _lastBannerShown != null &&
+      DateTime.now().difference(_lastBannerShown!) < _bannerThrottle;
 
   void _triggerIntervention(InterventionStatus status, String reason) {
     _lastBannerShown = DateTime.now();
@@ -190,5 +227,5 @@ class ConversationAnalyzer extends StateNotifier<InterventionState> {
 
 final conversationAnalyzerProvider =
     StateNotifierProvider<ConversationAnalyzer, InterventionState>((ref) {
-  return ConversationAnalyzer(ref);
-});
+      return ConversationAnalyzer(ref);
+    });

@@ -1,12 +1,16 @@
 // lib/features/chat_lova/data/mock_lova_repository.dart
 
 import 'dart:async';
-import 'package:lova/features/chat_lova/models/lova_message.dart';
+
 import 'package:lova/features/chat_lova/data/lova_repository.dart';
+import 'package:lova/features/chat_lova/models/lova_message.dart';
 
 class MockLovaRepository implements LovaRepository {
   @override
-  Stream<LovaMessage> getResponse(String userMessage, List<LovaMessage> history) async* {
+  Stream<LovaMessage> getResponse(
+    String userMessage,
+    List<LovaMessage> history,
+  ) async* {
     yield LovaMessage(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       content: 'Je réfléchis à ta demande...',
@@ -17,7 +21,10 @@ class MockLovaRepository implements LovaRepository {
     await Future.delayed(const Duration(seconds: 1));
 
     yield LovaMessage(
-      id: DateTime.now().add(const Duration(milliseconds: 1)).microsecondsSinceEpoch.toString(),
+      id: DateTime.now()
+          .add(const Duration(milliseconds: 1))
+          .microsecondsSinceEpoch
+          .toString(),
       content: _generateResponse(userMessage),
       isFromUser: false,
       timestamp: DateTime.now(),

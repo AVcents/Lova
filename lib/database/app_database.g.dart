@@ -8,7 +8,9 @@ class $WeeklyCheckinsTable extends WeeklyCheckins
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
+
   $WeeklyCheckinsTable(this.attachedDatabase, [this._alias]);
+
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -52,13 +54,17 @@ class $WeeklyCheckinsTable extends WeeklyCheckins
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+
   @override
   List<GeneratedColumn> get $columns => [id, mood, timestamp, userId];
+
   @override
   String get aliasedName => _alias ?? actualTableName;
+
   @override
   String get actualTableName => $name;
   static const String $name = 'weekly_checkins';
+
   @override
   VerificationContext validateIntegrity(
     Insertable<WeeklyCheckin> instance, {
@@ -94,6 +100,7 @@ class $WeeklyCheckinsTable extends WeeklyCheckins
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
+
   @override
   WeeklyCheckin map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -128,12 +135,14 @@ class WeeklyCheckin extends DataClass implements Insertable<WeeklyCheckin> {
   final int mood;
   final DateTime timestamp;
   final String? userId;
+
   const WeeklyCheckin({
     required this.id,
     required this.mood,
     required this.timestamp,
     this.userId,
   });
+
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -169,6 +178,7 @@ class WeeklyCheckin extends DataClass implements Insertable<WeeklyCheckin> {
       userId: serializer.fromJson<String?>(json['userId']),
     );
   }
+
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -191,6 +201,7 @@ class WeeklyCheckin extends DataClass implements Insertable<WeeklyCheckin> {
     timestamp: timestamp ?? this.timestamp,
     userId: userId.present ? userId.value : this.userId,
   );
+
   WeeklyCheckin copyWithCompanion(WeeklyCheckinsCompanion data) {
     return WeeklyCheckin(
       id: data.id.present ? data.id.value : this.id,
@@ -213,6 +224,7 @@ class WeeklyCheckin extends DataClass implements Insertable<WeeklyCheckin> {
 
   @override
   int get hashCode => Object.hash(id, mood, timestamp, userId);
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -228,18 +240,21 @@ class WeeklyCheckinsCompanion extends UpdateCompanion<WeeklyCheckin> {
   final Value<int> mood;
   final Value<DateTime> timestamp;
   final Value<String?> userId;
+
   const WeeklyCheckinsCompanion({
     this.id = const Value.absent(),
     this.mood = const Value.absent(),
     this.timestamp = const Value.absent(),
     this.userId = const Value.absent(),
   });
+
   WeeklyCheckinsCompanion.insert({
     this.id = const Value.absent(),
     required int mood,
     this.timestamp = const Value.absent(),
     this.userId = const Value.absent(),
   }) : mood = Value(mood);
+
   static Insertable<WeeklyCheckin> custom({
     Expression<int>? id,
     Expression<int>? mood,
@@ -300,11 +315,14 @@ class WeeklyCheckinsCompanion extends UpdateCompanion<WeeklyCheckin> {
 
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
+
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $WeeklyCheckinsTable weeklyCheckins = $WeeklyCheckinsTable(this);
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [weeklyCheckins];
 }
@@ -333,6 +351,7 @@ class $$WeeklyCheckinsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
@@ -363,6 +382,7 @@ class $$WeeklyCheckinsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
@@ -393,6 +413,7 @@ class $$WeeklyCheckinsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
@@ -489,7 +510,9 @@ typedef $$WeeklyCheckinsTableProcessedTableManager =
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
+
   $AppDatabaseManager(this._db);
+
   $$WeeklyCheckinsTableTableManager get weeklyCheckins =>
       $$WeeklyCheckinsTableTableManager(_db, _db.weeklyCheckins);
 }

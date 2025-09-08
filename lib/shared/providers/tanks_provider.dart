@@ -1,26 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/tanks_persistence.dart';
+
+import 'package:lova/shared/services/tanks_persistence.dart';
 
 /// Types d'actions pour le Love Tank (US)
 enum LoveTankAction {
-  planMoment(8),        // +8 points
-  sendAttention(5),     // +5 points
+  planMoment(8), // +8 points
+  sendAttention(5), // +5 points
   mediationCompleted(6), // +6 points
-  duoCheckin(4),        // +4 points
-  applyAdvice(3);       // +3 points
+  duoCheckin(4), // +4 points
+  applyAdvice(3); // +3 points
 
   final int points;
+
   const LoveTankAction(this.points);
 }
 
 /// Types d'actions pour le Me Tank
 enum MeTankAction {
-  moodCheckin(3),       // +3 points
-  breath1min(3),        // +3 points
-  journalGratitude(4),  // +4 points
-  move5min(2);          // +2 points
+  moodCheckin(3), // +3 points
+  breath1min(3), // +3 points
+  journalGratitude(4), // +4 points
+  move5min(2); // +2 points
 
   final int points;
+
   const MeTankAction(this.points);
 }
 
@@ -61,11 +64,7 @@ class MeTankState {
     required this.streakDays,
   });
 
-  MeTankState copyWith({
-    int? value,
-    DateTime? lastActionAt,
-    int? streakDays,
-  }) {
+  MeTankState copyWith({int? value, DateTime? lastActionAt, int? streakDays}) {
     return MeTankState(
       value: value ?? this.value,
       lastActionAt: lastActionAt ?? this.lastActionAt,
@@ -82,7 +81,7 @@ class LoveTankNotifier extends StateNotifier<LoveTankState> {
   static const int _streakInterval = 7;
 
   LoveTankNotifier(this._persistence)
-      : super(const LoveTankState(value: 50, streakDays: 0)) {
+    : super(const LoveTankState(value: 50, streakDays: 0)) {
     _loadState();
   }
 
@@ -135,11 +134,9 @@ class LoveTankNotifier extends StateNotifier<LoveTankState> {
     );
 
     // Sauvegarde
-    await _persistence.saveLoveTank(LoveTankData(
-      value: newValue,
-      lastActionAt: now,
-      streakDays: newStreak,
-    ));
+    await _persistence.saveLoveTank(
+      LoveTankData(value: newValue, lastActionAt: now, streakDays: newStreak),
+    );
   }
 
   /// Applique le decay quotidien si nécessaire
@@ -156,16 +153,15 @@ class LoveTankNotifier extends StateNotifier<LoveTankState> {
       // Reset du streak si plus d'un jour sans action
       final newStreak = daysSinceLastAction > 1 ? 0 : state.streakDays;
 
-      state = state.copyWith(
-        value: newValue,
-        streakDays: newStreak,
-      );
+      state = state.copyWith(value: newValue, streakDays: newStreak);
 
-      await _persistence.saveLoveTank(LoveTankData(
-        value: newValue,
-        lastActionAt: state.lastActionAt,
-        streakDays: newStreak,
-      ));
+      await _persistence.saveLoveTank(
+        LoveTankData(
+          value: newValue,
+          lastActionAt: state.lastActionAt,
+          streakDays: newStreak,
+        ),
+      );
     }
   }
 
@@ -185,7 +181,7 @@ class MeTankNotifier extends StateNotifier<MeTankState> {
   static const int _streakInterval = 7;
 
   MeTankNotifier(this._persistence)
-      : super(const MeTankState(value: 50, streakDays: 0)) {
+    : super(const MeTankState(value: 50, streakDays: 0)) {
     _loadState();
   }
 
@@ -238,11 +234,9 @@ class MeTankNotifier extends StateNotifier<MeTankState> {
     );
 
     // Sauvegarde
-    await _persistence.saveMeTank(MeTankData(
-      value: newValue,
-      lastActionAt: now,
-      streakDays: newStreak,
-    ));
+    await _persistence.saveMeTank(
+      MeTankData(value: newValue, lastActionAt: now, streakDays: newStreak),
+    );
   }
 
   /// Applique le decay quotidien si nécessaire
@@ -259,16 +253,15 @@ class MeTankNotifier extends StateNotifier<MeTankState> {
       // Reset du streak si plus d'un jour sans action
       final newStreak = daysSinceLastAction > 1 ? 0 : state.streakDays;
 
-      state = state.copyWith(
-        value: newValue,
-        streakDays: newStreak,
-      );
+      state = state.copyWith(value: newValue, streakDays: newStreak);
 
-      await _persistence.saveMeTank(MeTankData(
-        value: newValue,
-        lastActionAt: state.lastActionAt,
-        streakDays: newStreak,
-      ));
+      await _persistence.saveMeTank(
+        MeTankData(
+          value: newValue,
+          lastActionAt: state.lastActionAt,
+          streakDays: newStreak,
+        ),
+      );
     }
   }
 
@@ -286,13 +279,17 @@ final tanksPersistenceProvider = Provider<TanksPersistence>((ref) {
 });
 
 /// Provider pour l'état du Love Tank
-final loveTankProvider = StateNotifierProvider<LoveTankNotifier, LoveTankState>((ref) {
-  final persistence = ref.watch(tanksPersistenceProvider);
-  return LoveTankNotifier(persistence);
-});
+final loveTankProvider = StateNotifierProvider<LoveTankNotifier, LoveTankState>(
+  (ref) {
+    final persistence = ref.watch(tanksPersistenceProvider);
+    return LoveTankNotifier(persistence);
+  },
+);
 
 /// Provider pour l'état du Me Tank
-final meTankProvider = StateNotifierProvider<MeTankNotifier, MeTankState>((ref) {
+final meTankProvider = StateNotifierProvider<MeTankNotifier, MeTankState>((
+  ref,
+) {
   final persistence = ref.watch(tanksPersistenceProvider);
   return MeTankNotifier(persistence);
 });

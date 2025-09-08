@@ -27,6 +27,7 @@ class DashboardModeNotifier extends StateNotifier<DashboardMode> {
   }
 }
 
-final dashboardModeProvider = StateNotifierProvider<DashboardModeNotifier, DashboardMode>((ref) {
-  return DashboardModeNotifier();
-});
+final dashboardModeProvider =
+    StateNotifierProvider<DashboardModeNotifier, DashboardMode>((ref) {
+      return DashboardModeNotifier();
+    });

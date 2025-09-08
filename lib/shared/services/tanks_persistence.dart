@@ -103,11 +103,7 @@ class LoveTankData {
     required this.streakDays,
   });
 
-  LoveTankData copyWith({
-    int? value,
-    DateTime? lastActionAt,
-    int? streakDays,
-  }) {
+  LoveTankData copyWith({int? value, DateTime? lastActionAt, int? streakDays}) {
     return LoveTankData(
       value: value ?? this.value,
       lastActionAt: lastActionAt ?? this.lastActionAt,
@@ -128,11 +124,7 @@ class MeTankData {
     required this.streakDays,
   });
 
-  MeTankData copyWith({
-    int? value,
-    DateTime? lastActionAt,
-    int? streakDays,
-  }) {
+  MeTankData copyWith({int? value, DateTime? lastActionAt, int? streakDays}) {
     return MeTankData(
       value: value ?? this.value,
       lastActionAt: lastActionAt ?? this.lastActionAt,

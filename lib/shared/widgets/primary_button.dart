@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+
+import 'package:lova/theme/colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String label;
@@ -22,7 +23,9 @@ class PrimaryButton extends StatelessWidget {
           backgroundColor: isDisabled ? AppColors.muted : AppColors.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
+          textStyle: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: Colors.white),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

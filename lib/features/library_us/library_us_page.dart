@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../shared/models/message_annotation.dart';
-import '../../shared/providers/annotations_provider.dart';
-import '../../shared/ui/semantic_colors.dart';
 import 'package:intl/intl.dart';
+
+import 'package:lova/shared/models/message_annotation.dart';
+import 'package:lova/shared/providers/annotations_provider.dart';
+import 'package:lova/shared/ui/semantic_colors.dart';
 
 class LibraryUsPage extends ConsumerStatefulWidget {
   final AnnotationTag? initialFilter;
   final String coupleId;
-  final Function(int)? scrollToMessage;  // Changé en int
+  final Function(int)? scrollToMessage; // Changé en int
 
   const LibraryUsPage({
     super.key,
@@ -67,7 +68,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
     final annotationsAsync = ref.watch(annotationsByCoupleProvider(filter));
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'Bibliothèque du couple',
@@ -81,10 +82,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: SemanticColors.border(context),
-          ),
+          child: Container(height: 1, color: SemanticColors.border(context)),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
@@ -103,10 +101,12 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
                 children: [
                   _buildFilterChip(null, 'Tous'),
                   const SizedBox(width: 8),
-                  ...AnnotationTag.values.map((tag) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: _buildFilterChip(tag, tag.emoji),
-                  )),
+                  ...AnnotationTag.values.map(
+                    (tag) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildFilterChip(tag, tag.emoji),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -137,17 +137,17 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: SemanticColors.neutralOnSurface(context),
-                  ),
-                  onPressed: () {
-                    _searchController.clear();
-                  },
-                )
+                        icon: Icon(
+                          Icons.clear,
+                          color: SemanticColors.neutralOnSurface(context),
+                        ),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      )
                     : null,
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -158,10 +158,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: colorScheme.primary,
-                    width: 1,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 1),
                 ),
               ),
             ),
@@ -185,9 +182,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
                   },
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +232,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
         });
       },
       selectedColor: colorScheme.primary.withOpacity(0.2),
-      backgroundColor: colorScheme.surfaceVariant,
+      backgroundColor: colorScheme.surfaceContainerHighest,
       side: BorderSide(
         color: isSelected
             ? colorScheme.primary
@@ -248,9 +243,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
         color: isSelected ? colorScheme.primary : colorScheme.onSurface,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 
@@ -308,10 +301,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
       color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: SemanticColors.border(context),
-          width: 1,
-        ),
+        side: BorderSide(color: SemanticColors.border(context), width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -405,7 +395,7 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withOpacity(0.3),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -453,7 +443,9 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
                       if (widget.scrollToMessage != null) {
                         widget.scrollToMessage!(annotation.messageId);
                       } else {
-                        context.push('/chat-couple?messageId=${annotation.messageId}');
+                        context.push(
+                          '/chat-couple?messageId=${annotation.messageId}',
+                        );
                       }
                     },
                     icon: const Icon(Icons.chat_bubble_outline, size: 18),
@@ -504,7 +496,9 @@ class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
 
     if (confirmed == true) {
       HapticFeedback.lightImpact();
-      await ref.read(annotationsNotifierProvider.notifier).removeAnnotation(annotation.id);
+      await ref
+          .read(annotationsNotifierProvider.notifier)
+          .removeAnnotation(annotation.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

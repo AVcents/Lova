@@ -1,4 +1,4 @@
-import 'suggestions_list.dart';
+import 'package:lova/features/suggestions/suggestions_list.dart';
 
 class SuggestionRepository {
   static final List<Suggestion> mockData = [
@@ -20,7 +20,9 @@ class SuggestionRepository {
   ];
 
   Future<List<Suggestion>> fetchSuggestions() async {
-    await Future.delayed(const Duration(milliseconds: 500)); // Simule un appel réseau
+    await Future.delayed(
+      const Duration(milliseconds: 500),
+    ); // Simule un appel réseau
     return mockData;
   }
 }

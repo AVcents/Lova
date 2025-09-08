@@ -1,6 +1,7 @@
 // lib/features/chat_couple/ui/breath_sheet.dart
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,13 +28,9 @@ class _BreathSheetState extends State<BreathSheet>
       duration: const Duration(seconds: 4),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _startBreathing();
   }
 
@@ -211,9 +208,7 @@ class _BreathSheetState extends State<BreathSheet>
             decoration: BoxDecoration(
               color: colorScheme.surface,
               border: Border(
-                top: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.12),
-                ),
+                top: BorderSide(color: colorScheme.outline.withOpacity(0.12)),
               ),
             ),
             child: SafeArea(
@@ -226,7 +221,7 @@ class _BreathSheetState extends State<BreathSheet>
                         HapticFeedback.lightImpact();
                         Navigator.of(context).pop();
                       },
-                      child: Text('Terminer'),
+                      child: const Text('Terminer'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -241,9 +236,9 @@ class _BreathSheetState extends State<BreathSheet>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Relancer',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),

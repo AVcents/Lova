@@ -53,13 +53,13 @@ class _MeDashboardViewState extends State<MeDashboardView> {
                         end: Alignment.bottomRight,
                         colors: isDark
                             ? [
-                          const Color(0xFFA12539).withOpacity(0.1),
-                          const Color(0xFFFF5A6E).withOpacity(0.1),
-                        ]
+                                const Color(0xFFA12539).withOpacity(0.1),
+                                const Color(0xFFFF5A6E).withOpacity(0.1),
+                              ]
                             : [
-                          const Color(0xFFFFA38F).withOpacity(0.08),
-                          const Color(0xFFFF6FA5).withOpacity(0.08),
-                        ],
+                                const Color(0xFFFFA38F).withOpacity(0.08),
+                                const Color(0xFFFF6FA5).withOpacity(0.08),
+                              ],
                       ),
                     ),
                   ),
@@ -161,7 +161,9 @@ class _MeDashboardViewState extends State<MeDashboardView> {
                                 Text(
                                   'Streak de connexion',
                                   style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurface.withOpacity(0.7),
+                                    color: colorScheme.onSurface.withOpacity(
+                                      0.7,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -267,11 +269,11 @@ class _MeDashboardViewState extends State<MeDashboardView> {
   }
 
   Widget _buildQuickAction(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -292,11 +294,7 @@ class _MeDashboardViewState extends State<MeDashboardView> {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: colorScheme.primary,
-              size: 28,
-            ),
+            Icon(icon, color: colorScheme.primary, size: 28),
             const SizedBox(height: 8),
             Text(
               label,
@@ -313,12 +311,12 @@ class _MeDashboardViewState extends State<MeDashboardView> {
   }
 
   Widget _buildInsightCard(
-      BuildContext context, {
-        required String title,
-        required String value,
-        required String subtitle,
-        required IconData icon,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -337,11 +335,7 @@ class _MeDashboardViewState extends State<MeDashboardView> {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                color: colorScheme.primary.withOpacity(0.7),
-                size: 20,
-              ),
+              Icon(icon, color: colorScheme.primary.withOpacity(0.7), size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

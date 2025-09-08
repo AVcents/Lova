@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lova/features/chat_lova/ui/composer_assist_sheet.dart';
 import 'package:lova/features/chat_lova/providers/lova_metrics_provider.dart';
+import 'package:lova/features/chat_lova/ui/composer_assist_sheet.dart';
 
 class InputBarCouple extends ConsumerStatefulWidget {
   final Function(String) onSend;
@@ -51,10 +51,8 @@ class InputBarCoupleState extends ConsumerState<InputBarCouple> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ComposerAssistSheet(
-        history: recentHistory,
-        initialContext: '',
-      ),
+      builder: (context) =>
+          ComposerAssistSheet(history: recentHistory, initialContext: ''),
     );
 
     if (selectedText != null && selectedText.isNotEmpty) {
@@ -73,7 +71,9 @@ class InputBarCoupleState extends ConsumerState<InputBarCouple> {
       _controller.text = '$currentText $text';
     }
 
-    _controller.selection = TextSelection.collapsed(offset: _controller.text.length);
+    _controller.selection = TextSelection.collapsed(
+      offset: _controller.text.length,
+    );
     _focusNode.requestFocus();
   }
 
@@ -109,21 +109,33 @@ class InputBarCoupleState extends ConsumerState<InputBarCouple> {
                     color: colorScheme.onSurface.withOpacity(0.6),
                   ),
                   filled: false,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline.withOpacity(0.3),
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline.withOpacity(0.3),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: colorScheme.primary, width: 1.4),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 1.4,
+                    ),
                   ),
                 ),
-                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -138,7 +150,7 @@ class InputBarCoupleState extends ConsumerState<InputBarCouple> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant,
+                    color: colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: colorScheme.outline.withOpacity(0.2),
@@ -160,7 +172,12 @@ class InputBarCoupleState extends ConsumerState<InputBarCouple> {
               button: true,
               child: InkWell(
                 borderRadius: BorderRadius.circular(24),
-                onTap: _canSend ? () { HapticFeedback.lightImpact(); _handleSend(); } : null,
+                onTap: _canSend
+                    ? () {
+                        HapticFeedback.lightImpact();
+                        _handleSend();
+                      }
+                    : null,
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 150),
                   opacity: _canSend ? 1.0 : 0.5,
@@ -180,7 +197,10 @@ class InputBarCoupleState extends ConsumerState<InputBarCouple> {
                           ),
                         ],
                       ),
-                      child: Icon(Icons.send_rounded, color: colorScheme.onPrimary),
+                      child: Icon(
+                        Icons.send_rounded,
+                        color: colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),

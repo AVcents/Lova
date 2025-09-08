@@ -63,23 +63,33 @@ class _InputBarLovaState extends ConsumerState<InputBarLova> {
                     color: colorScheme.onSurface.withOpacity(0.6),
                   ),
                   filled: false,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline.withOpacity(0.3),
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline.withOpacity(0.3),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: colorScheme.primary, width: 1.4),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 1.4,
+                    ),
                   ),
                 ),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
                 onSubmitted: (_) {},
               ),
             ),

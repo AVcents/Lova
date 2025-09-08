@@ -1,15 +1,15 @@
 // lib/shared/repositories/annotations_repository.dart
 
-import '../models/message_annotation.dart';
+import 'package:lova/shared/models/message_annotation.dart';
 
 /// Interface pour le repository des annotations de messages
 abstract class AnnotationsRepository {
   /// Liste toutes les annotations d'un couple, avec filtres optionnels
   Future<List<MessageAnnotation>> listByCouple(
-      String coupleId, {
-        AnnotationTag? filter,
-        String? query,
-      });
+    String coupleId, {
+    AnnotationTag? filter,
+    String? query,
+  });
 
   /// Liste toutes les annotations d'un message spécifique
   Future<List<MessageAnnotation>> listByMessage(int messageId);

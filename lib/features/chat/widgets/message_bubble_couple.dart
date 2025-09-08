@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lova/features/chat/database/drift_database.dart';
-import '../../../shared/models/message_annotation.dart';
-import '../../../shared/providers/annotations_provider.dart';
-import '../../../shared/ui/semantic_colors.dart';
-import 'tag_action_sheet.dart';
+
+import 'package:lova/shared/models/message_annotation.dart';
+import 'package:lova/shared/providers/annotations_provider.dart';
+import 'package:lova/features/chat/widgets/tag_action_sheet.dart';
 
 class MessageBubbleCouple extends ConsumerWidget {
   final Message message;
@@ -29,16 +29,24 @@ class MessageBubbleCouple extends ConsumerWidget {
     final isSentByMe = message.senderId == currentUserId;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final bubbleColor = isSentByMe ? colorScheme.primary : colorScheme.surfaceVariant;
-    final textColor = isSentByMe ? colorScheme.onPrimary : colorScheme.onSurface;
+    final bubbleColor = isSentByMe
+        ? colorScheme.primary
+        : colorScheme.surfaceContainerHighest;
+    final textColor = isSentByMe
+        ? colorScheme.onPrimary
+        : colorScheme.onSurface;
 
     // Récupérer les annotations pour ce message
-    final annotationsAsync = ref.watch(annotationsByMessageProvider(message.id));
+    final annotationsAsync = ref.watch(
+      annotationsByMessageProvider(message.id),
+    );
 
     return Align(
       alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
-        crossAxisAlignment: isSentByMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isSentByMe
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           // Bulle de message avec long press
           GestureDetector(
@@ -58,7 +66,9 @@ class MessageBubbleCouple extends ConsumerWidget {
               constraints: const BoxConstraints(maxWidth: 300),
               decoration: BoxDecoration(
                 color: bubbleColor,
-                border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
+                border: Border.all(
+                  color: colorScheme.outline.withOpacity(0.15),
+                ),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(12),
                   topRight: const Radius.circular(12),
@@ -86,10 +96,7 @@ class MessageBubbleCouple extends ConsumerWidget {
                 transitionBuilder: (child, animation) {
                   return FadeTransition(
                     opacity: animation,
-                    child: ScaleTransition(
-                      scale: animation,
-                      child: child,
-                    ),
+                    child: ScaleTransition(scale: animation, child: child),
                   );
                 },
                 child: Container(
@@ -99,7 +106,9 @@ class MessageBubbleCouple extends ConsumerWidget {
                   child: Wrap(
                     spacing: 4,
                     runSpacing: 4,
-                    alignment: isSentByMe ? WrapAlignment.end : WrapAlignment.start,
+                    alignment: isSentByMe
+                        ? WrapAlignment.end
+                        : WrapAlignment.start,
                     children: _buildTagChips(context, ref, annotations),
                   ),
                 ),
@@ -113,7 +122,11 @@ class MessageBubbleCouple extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildTagChips(BuildContext context, WidgetRef ref, List<MessageAnnotation> annotations) {
+  List<Widget> _buildTagChips(
+    BuildContext context,
+    WidgetRef ref,
+    List<MessageAnnotation> annotations,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -141,7 +154,7 @@ class MessageBubbleCouple extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
+                color: colorScheme.surfaceContainerHighest,
                 border: Border.all(
                   color: colorScheme.outline.withOpacity(0.15),
                   width: 1,
@@ -171,7 +184,7 @@ class MessageBubbleCouple extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant,
+              color: colorScheme.surfaceContainerHighest,
               border: Border.all(
                 color: colorScheme.outline.withOpacity(0.15),
                 width: 1,
@@ -181,10 +194,7 @@ class MessageBubbleCouple extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  entry.key.emoji,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                Text(entry.key.emoji, style: const TextStyle(fontSize: 12)),
                 if (entry.value > 1) ...[
                   const SizedBox(width: 4),
                   Text(

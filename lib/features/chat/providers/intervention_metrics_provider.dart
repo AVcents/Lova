@@ -24,11 +24,15 @@ class InterventionMetrics {
   }
 
   void logBreathCompleted(int duration) {
-    print('[Metrics] Breath exercise completed: ${duration}s at ${DateTime.now()}');
+    print(
+      '[Metrics] Breath exercise completed: ${duration}s at ${DateTime.now()}',
+    );
   }
 
   void logMediationCompleted(int stepsCompleted) {
-    print('[Metrics] Mediation completed: $stepsCompleted steps at ${DateTime.now()}');
+    print(
+      '[Metrics] Mediation completed: $stepsCompleted steps at ${DateTime.now()}',
+    );
   }
 }
 

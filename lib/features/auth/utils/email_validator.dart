@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class EmailValidator {
   // Regex amélioré : supporte sous-domaines et TLD longs
   static final RegExp _emailRegex = RegExp(
@@ -44,7 +42,7 @@ class EmailValidator {
 
     // Vérifier format
     if (!_emailRegex.hasMatch(email)) {
-      return EmailValidationResult(
+      return const EmailValidationResult(
         isValid: false,
         reason: 'format',
         error: 'Format d\'email invalide',
@@ -53,7 +51,7 @@ class EmailValidator {
 
     final parts = email.split('@');
     if (parts.length != 2) {
-      return EmailValidationResult(
+      return const EmailValidationResult(
         isValid: false,
         reason: 'format',
         error: 'Format d\'email invalide',
@@ -75,7 +73,7 @@ class EmailValidator {
 
     // Vérifier domaine valide
     if (!_validDomainRegex.hasMatch(domain)) {
-      return EmailValidationResult(
+      return const EmailValidationResult(
         isValid: false,
         reason: 'domain',
         error: 'Domaine invalide',
@@ -85,7 +83,7 @@ class EmailValidator {
     // Vérifier domaines temporaires (exact ou suffixe)
     for (final d in _disposableDomains) {
       if (domain == d || domain.endsWith('.$d')) {
-        return EmailValidationResult(
+        return const EmailValidationResult(
           isValid: false,
           reason: 'disposable',
           error: 'Les emails temporaires ne sont pas acceptés',

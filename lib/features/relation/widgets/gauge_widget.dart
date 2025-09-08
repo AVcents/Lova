@@ -40,10 +40,7 @@ class GaugeWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                _labelForValue(value),
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text(_labelForValue(value), style: const TextStyle(fontSize: 16)),
             ],
           ),
         ],

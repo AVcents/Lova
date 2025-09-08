@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../utils/password_validator.dart';
+
+import 'package:lova/features/auth/utils/password_validator.dart';
 
 class PasswordStrengthIndicator extends StatelessWidget {
   final PasswordValidationResult validation;
 
-  const PasswordStrengthIndicator({
-    super.key,
-    required this.validation,
-  });
+  const PasswordStrengthIndicator({super.key, required this.validation});
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +22,14 @@ class PasswordStrengthIndicator extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             gradient: LinearGradient(
               colors: [
-                PasswordValidator.getStrengthColor(validation.strength, context),
-                PasswordValidator.getStrengthColor(validation.strength, context).withOpacity(0.3),
+                PasswordValidator.getStrengthColor(
+                  validation.strength,
+                  context,
+                ),
+                PasswordValidator.getStrengthColor(
+                  validation.strength,
+                  context,
+                ).withOpacity(0.3),
               ],
               stops: [
                 _getProgressValue(validation.strength),
@@ -44,7 +48,10 @@ class PasswordStrengthIndicator extends StatelessWidget {
             Text(
               'Force: ${PasswordValidator.getStrengthText(validation.strength)}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: PasswordValidator.getStrengthColor(validation.strength, context),
+                color: PasswordValidator.getStrengthColor(
+                  validation.strength,
+                  context,
+                ),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -58,26 +65,10 @@ class PasswordStrengthIndicator extends StatelessWidget {
           spacing: 8,
           runSpacing: 4,
           children: [
-            _buildCriteria(
-              '8+ caractères',
-              validation.hasMinLength,
-              context,
-            ),
-            _buildCriteria(
-              'Majuscule',
-              validation.hasUpperCase,
-              context,
-            ),
-            _buildCriteria(
-              'Minuscule',
-              validation.hasLowerCase,
-              context,
-            ),
-            _buildCriteria(
-              'Chiffre',
-              validation.hasDigit,
-              context,
-            ),
+            _buildCriteria('8+ caractères', validation.hasMinLength, context),
+            _buildCriteria('Majuscule', validation.hasUpperCase, context),
+            _buildCriteria('Minuscule', validation.hasLowerCase, context),
+            _buildCriteria('Chiffre', validation.hasDigit, context),
             _buildCriteria(
               'Caractère spécial',
               validation.hasSpecialChar,
@@ -98,12 +89,10 @@ class PasswordStrengthIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: met
             ? Colors.green.withOpacity(0.1)
-            : theme.colorScheme.surfaceVariant,
+            : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: met
-              ? Colors.green
-              : theme.dividerColor,
+          color: met ? Colors.green : theme.dividerColor,
           width: 1,
         ),
       ),

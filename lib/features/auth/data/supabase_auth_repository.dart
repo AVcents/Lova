@@ -1,5 +1,5 @@
+import 'package:lova/features/auth/domain/auth_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../domain/auth_repository.dart';
 
 class SupabaseAuthRepository implements AuthRepository {
   final SupabaseClient _client;
@@ -7,27 +7,54 @@ class SupabaseAuthRepository implements AuthRepository {
   SupabaseAuthRepository(this._client);
 
   @override
-  Future<AuthResponse> signUp(String email, String password, {String? emailRedirectTo}) async {
-    final response = await _client.auth.signUp(
-      email: email,
-      password: password,
-      emailRedirectTo: emailRedirectTo,
-    );
+  Future<AuthResult> signUp({
+    required String email,
+    required String password,
+    String? emailRedirectTo,
+  }) async {
+    try {
+      final response = await _client.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: emailRedirectTo,
+      );
 
-    // Ne pas lever d'erreur si la session est null (confirmation email requise)
-    // Retourner la réponse pour que le contrôleur puisse décider
-    return response;
+      // Session peut être null si confirmation email requise
+      final user = response.user;
+      final msg = user == null
+          ? 'Confirmation email envoyée'
+          : 'Inscription réussie';
+      return AuthResult(success: true, message: msg, data: user);
+    } catch (e) {
+      return AuthResult(success: false, message: e.toString());
+    }
   }
 
   @override
-  Future<void> signIn(String email, String password) async {
-    final response = await _client.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+  Future<AuthResult> signIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
 
-    if (response.user == null) {
-      throw Exception('Connexion échouée : email ou mot de passe incorrect');
+      final user = response.user;
+      if (user == null) {
+        return AuthResult(
+          success: false,
+          message: 'Email ou mot de passe incorrect',
+        );
+      }
+      return AuthResult(
+        success: true,
+        message: 'Connexion réussie',
+        data: user,
+      );
+    } catch (e) {
+      return AuthResult(success: false, message: e.toString());
     }
   }
 
@@ -41,7 +68,16 @@ class SupabaseAuthRepository implements AuthRepository {
     return _client.auth.onAuthStateChange.map((event) => event.session?.user);
   }
 
-  Future<void> resendConfirmationEmail(String email, {String? emailRedirectTo}) async {
+  @override
+  User? currentUser() {
+    return _client.auth.currentUser;
+  }
+
+  @override
+  Future<void> resendConfirmationEmail(
+    String email, {
+    String? emailRedirectTo,
+  }) async {
     await _client.auth.resend(
       type: OtpType.signup,
       email: email,
@@ -49,6 +85,7 @@ class SupabaseAuthRepository implements AuthRepository {
     );
   }
 
+  @override
   Future<void> resetPassword(String email, {String? emailRedirectTo}) async {
     await _client.auth.resetPasswordForEmail(
       email,

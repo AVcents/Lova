@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:lova/features/auth/controller/auth_controller.dart';
-import '../../shared/widgets/app_scaffold.dart';
 import 'package:go_router/go_router.dart';
-import '../../shared/providers/theme_mode_provider.dart';
+import 'package:lova/features/auth/controller/auth_state_notifier.dart';
+import 'package:lova/features/auth/domain/auth_state.dart'; // rend AuthStateX (userOrNull, isBusy) disponible
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:lova/shared/providers/theme_mode_provider.dart';
+import 'package:lova/shared/widgets/app_scaffold.dart';
+
+final signingOutProvider = StateProvider<bool>((ref) => false);
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider);
+    final authState = ref.watch(authStateNotifierProvider);
+    final user = authState.userOrNull;
     ref.watch(themeModeProvider); // Force rebuild on theme change
 
     return AppScaffold(
@@ -26,7 +31,7 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 32),
 
             // Section Profil utilisateur
-            _buildUserSection(context, currentUser),
+            _buildUserSection(context, user),
 
             const SizedBox(height: 24),
 
@@ -71,11 +76,7 @@ class SettingsPage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.favorite,
-                color: Colors.white,
-                size: 28,
-              ),
+              const Icon(Icons.favorite, color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Text(
                 'LOVA',
@@ -98,15 +99,14 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildUserSection(BuildContext context, AsyncValue<User?> currentUser) {
+  Widget _buildUserSection(BuildContext context, User? user) {
     return _buildSection(
       context,
       title: 'Mon Profil',
       icon: Icons.person,
       children: [
-        currentUser.when(
-          data: (user) => user != null
-              ? _buildListTile(
+        if (user != null)
+          _buildListTile(
             context,
             icon: Icons.email,
             title: 'Email',
@@ -115,23 +115,14 @@ class SettingsPage extends ConsumerWidget {
               // Navigation vers édition profil
             },
           )
-              : _buildListTile(
+        else
+          _buildListTile(
             context,
             icon: Icons.login,
             title: 'Non connecté',
             subtitle: 'Veuillez vous connecter',
             onTap: () {},
           ),
-          loading: () => const ListTile(
-            leading: CircularProgressIndicator(),
-            title: Text('Chargement...'),
-          ),
-          error: (error, _) => ListTile(
-            leading: const Icon(Icons.error, color: Colors.red),
-            title: const Text('Erreur de chargement'),
-            subtitle: Text(error.toString()),
-          ),
-        ),
         _buildListTile(
           context,
           icon: Icons.edit,
@@ -170,8 +161,9 @@ class SettingsPage extends ConsumerWidget {
               secondary: const Icon(Icons.dark_mode),
               value: isDarkMode,
               onChanged: (value) {
-                ref.read(themeModeProvider.notifier).state =
-                    value ? ThemeMode.dark : ThemeMode.light;
+                ref.read(themeModeProvider.notifier).state = value
+                    ? ThemeMode.dark
+                    : ThemeMode.light;
               },
             );
           },
@@ -264,20 +256,28 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Widget _buildSignOutButton(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authControllerProvider);
+    final authState = ref.watch(authStateNotifierProvider);
+    final signingOut = ref.watch(signingOutProvider);
+    final isBusy = authState.maybeWhen(
+      signingIn: () => true,
+      signingUp: () => true,
+      orElse: () => false,
+    );
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ElevatedButton.icon(
-        onPressed: authState.isLoading
+        onPressed: (signingOut || isBusy)
             ? null
             : () async {
                 final shouldSignOut = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Déconnexion'),
-                    content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+                    content: const Text(
+                      'Êtes-vous sûr de vouloir vous déconnecter ?',
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
@@ -296,7 +296,10 @@ class SettingsPage extends ConsumerWidget {
 
                 if (shouldSignOut == true) {
                   try {
-                    await ref.read(authControllerProvider.notifier).signOut();
+                    ref.read(signingOutProvider.notifier).state = true;
+                    await ref
+                        .read(authStateNotifierProvider.notifier)
+                        .signOut();
 
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -308,21 +311,23 @@ class SettingsPage extends ConsumerWidget {
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Erreur : $e')),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
                     }
+                  } finally {
+                    ref.read(signingOutProvider.notifier).state = false;
                   }
                 }
               },
-        icon: authState.isLoading
+        icon: signingOut
             ? const SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.logout),
-        label: Text(authState.isLoading ? 'Déconnexion...' : 'Se déconnecter'),
+        label: Text(signingOut ? 'Déconnexion...' : 'Se déconnecter'),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red.shade50,
           foregroundColor: Colors.red.shade700,
@@ -336,7 +341,8 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, {
+  Widget _buildSection(
+    BuildContext context, {
     required String title,
     required IconData icon,
     required List<Widget> children,
@@ -361,11 +367,7 @@ class SettingsPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: const Color(0xFFE91E63),
-                  size: 24,
-                ),
+                Icon(icon, color: const Color(0xFFE91E63), size: 24),
                 const SizedBox(width: 12),
                 Text(
                   title,
@@ -384,12 +386,12 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Widget _buildListTile(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
@@ -403,15 +405,9 @@ class SettingsPage extends ConsumerWidget {
           size: 20,
         ),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
-      trailing: const Icon(
-        Icons.chevron_right,
-        color: Colors.grey,
-      ),
+      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
     );
   }

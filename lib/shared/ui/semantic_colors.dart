@@ -15,13 +15,13 @@ class SemanticColors {
     // Vert doux dérivé de la palette
     return isDark
         ? Color.alphaBlend(
-      scheme.primary.withOpacity(0.2),
-      const Color(0xFF4CAF50),
-    )
+            scheme.primary.withOpacity(0.2),
+            const Color(0xFF4CAF50),
+          )
         : Color.alphaBlend(
-      scheme.primary.withOpacity(0.1),
-      const Color(0xFF66BB6A),
-    );
+            scheme.primary.withOpacity(0.1),
+            const Color(0xFF66BB6A),
+          );
   }
 
   /// Couleur pour le niveau moyen de la jauge (25-74%)
@@ -33,13 +33,13 @@ class SemanticColors {
     // Orange/amber dérivé
     return isDark
         ? Color.alphaBlend(
-      scheme.primary.withOpacity(0.3),
-      const Color(0xFFFF9800),
-    )
+            scheme.primary.withOpacity(0.3),
+            const Color(0xFFFF9800),
+          )
         : Color.alphaBlend(
-      scheme.primary.withOpacity(0.2),
-      const Color(0xFFFFA726),
-    );
+            scheme.primary.withOpacity(0.2),
+            const Color(0xFFFFA726),
+          );
   }
 
   /// Couleur pour le niveau haut de la jauge (75-100%)
@@ -50,14 +50,11 @@ class SemanticColors {
 
     // Corail/or dérivé du primary avec teinte dorée
     return isDark
-        ? Color.alphaBlend(
-      scheme.secondary,
-      scheme.primary.withOpacity(0.9),
-    )
+        ? Color.alphaBlend(scheme.secondary, scheme.primary.withOpacity(0.9))
         : Color.alphaBlend(
-      const Color(0xFFFFD700).withOpacity(0.3),
-      scheme.primary,
-    );
+            const Color(0xFFFFD700).withOpacity(0.3),
+            scheme.primary,
+          );
   }
 
   /// Couleur neutre pour texte sur surface

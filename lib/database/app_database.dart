@@ -1,9 +1,11 @@
 import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'tables/weekly_checkins.dart';
+
+import 'package:lova/database/tables/weekly_checkins.dart';
 
 part 'app_database.g.dart'; // Drift va générer ce fichier automatiquement
 
@@ -16,11 +18,7 @@ class AppDatabase extends _$AppDatabase {
 
   // Méthode pour insérer un check-in
   Future<void> insertWeeklyCheckin(int mood) async {
-    into(weeklyCheckins).insert(
-      WeeklyCheckinsCompanion(
-        mood: Value(mood),
-      ),
-    );
+    into(weeklyCheckins).insert(WeeklyCheckinsCompanion(mood: Value(mood)));
   }
 
   // Lire tous les check-ins (utile pour tests ou graphique)

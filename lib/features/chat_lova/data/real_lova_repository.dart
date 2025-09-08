@@ -1,19 +1,23 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
+
 import 'package:lova/core/api/openai_api_client.dart';
-import 'package:lova/features/chat_lova/models/lova_message.dart';
 import 'package:lova/features/chat_lova/data/lova_repository.dart';
+import 'package:lova/features/chat_lova/models/lova_message.dart';
 
 class RealLovaRepository implements LovaRepository {
   final OpenAIApiClient _client = OpenAIApiClient();
 
   @override
-  Stream<LovaMessage> getResponse(String userInput, List<LovaMessage> history) async* {
+  Stream<LovaMessage> getResponse(
+    String userInput,
+    List<LovaMessage> history,
+  ) async* {
     // Validation des entrées
     if (userInput.trim().isEmpty) {
       yield LovaMessage(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
-        content: 'Je n\'ai pas reçu votre message. Pouvez-vous reformuler votre question ?',
+        content:
+            'Je n\'ai pas reçu votre message. Pouvez-vous reformuler votre question ?',
         isFromUser: false,
         timestamp: DateTime.now(),
       );
@@ -35,7 +39,10 @@ class RealLovaRepository implements LovaRepository {
 
         // Ignorer les chunks d'erreur
         if (textChunk.startsWith('[ERREUR]')) {
-          developer.log('Erreur détectée: $textChunk', name: 'RealLovaRepository');
+          developer.log(
+            'Erreur détectée: $textChunk',
+            name: 'RealLovaRepository',
+          );
           throw Exception(textChunk.substring(8));
         }
 
@@ -43,31 +50,43 @@ class RealLovaRepository implements LovaRepository {
         if (textChunk.isNotEmpty) {
           buffer.write(textChunk);
           hasReceivedContent = true;
-          developer.log('Buffer actuel: "${buffer.toString()}"', name: 'RealLovaRepository');
+          developer.log(
+            'Buffer actuel: "${buffer.toString()}"',
+            name: 'RealLovaRepository',
+          );
         }
       }
 
       developer.log('=== FIN RÉCEPTION ===', name: 'RealLovaRepository');
-      developer.log('Buffer final: "${buffer.toString()}"', name: 'RealLovaRepository');
+      developer.log(
+        'Buffer final: "${buffer.toString()}"',
+        name: 'RealLovaRepository',
+      );
 
       // Message final
       if (hasReceivedContent) {
         final finalContent = _cleanContent(buffer.toString());
         yield LovaMessage(
-          id: DateTime.now().add(const Duration(milliseconds: 1)).microsecondsSinceEpoch.toString(),
+          id: DateTime.now()
+              .add(const Duration(milliseconds: 1))
+              .microsecondsSinceEpoch
+              .toString(),
           content: finalContent,
           isFromUser: false,
           timestamp: DateTime.now(),
         );
       } else {
         yield LovaMessage(
-          id: DateTime.now().add(const Duration(milliseconds: 2)).microsecondsSinceEpoch.toString(),
-          content: 'Je rencontre des difficultés à répondre. Pouvez-vous réessayer ?',
+          id: DateTime.now()
+              .add(const Duration(milliseconds: 2))
+              .microsecondsSinceEpoch
+              .toString(),
+          content:
+              'Je rencontre des difficultés à répondre. Pouvez-vous réessayer ?',
           isFromUser: false,
           timestamp: DateTime.now(),
         );
       }
-
     } catch (e, stackTrace) {
       developer.log(
         'Erreur lors de la génération de réponse',
@@ -77,8 +96,12 @@ class RealLovaRepository implements LovaRepository {
       );
 
       yield LovaMessage(
-        id: DateTime.now().add(const Duration(milliseconds: 3)).microsecondsSinceEpoch.toString(),
-        content: 'Je rencontre une difficulté technique. Pouvez-vous réessayer dans quelques instants ?',
+        id: DateTime.now()
+            .add(const Duration(milliseconds: 3))
+            .microsecondsSinceEpoch
+            .toString(),
+        content:
+            'Je rencontre une difficulté technique. Pouvez-vous réessayer dans quelques instants ?',
         isFromUser: false,
         timestamp: DateTime.now(),
       );
@@ -86,7 +109,10 @@ class RealLovaRepository implements LovaRepository {
   }
 
   /// Construit la liste des messages pour OpenAI
-  List<Map<String, String>> _buildMessages(String userInput, List<LovaMessage> history) {
+  List<Map<String, String>> _buildMessages(
+    String userInput,
+    List<LovaMessage> history,
+  ) {
     final messages = <Map<String, String>>[
       {
         "role": "system",
@@ -132,7 +158,9 @@ Tu es là pour accompagner avec authenticité, pas pour donner des leçons. 🤗
     ];
 
     // Ajouter l'historique (limité aux 10 derniers messages pour éviter la surcharge)
-    final recentHistory = history.length > 10 ? history.sublist(history.length - 10) : history;
+    final recentHistory = history.length > 10
+        ? history.sublist(history.length - 10)
+        : history;
 
     for (final message in recentHistory) {
       messages.add({
@@ -142,10 +170,7 @@ Tu es là pour accompagner avec authenticité, pas pour donner des leçons. 🤗
     }
 
     // Ajouter le message actuel de l'utilisateur
-    messages.add({
-      "role": "user",
-      "content": userInput.trim(),
-    });
+    messages.add({"role": "user", "content": userInput.trim()});
 
     return messages;
   }
@@ -154,13 +179,16 @@ Tu es là pour accompagner avec authenticité, pas pour donner des leçons. 🤗
   String _cleanContent(String content) {
     if (content.isEmpty) return content;
 
-    developer.log('Contenu AVANT nettoyage: "$content"', name: 'RealLovaRepository');
+    developer.log(
+      'Contenu AVANT nettoyage: "$content"',
+      name: 'RealLovaRepository',
+    );
 
     // Étape 1: Nettoyer les caractères indésirables et normaliser
     String cleaned = content
-    // Supprimer les caractères de contrôle invisibles
+        // Supprimer les caractères de contrôle invisibles
         .replaceAll(RegExp(r'[\u0000-\u001F\u007F-\u009F]'), '')
-    // Normaliser les espaces et sauts de ligne
+        // Normaliser les espaces et sauts de ligne
         .replaceAll(RegExp(r'[ \t]+'), ' ')
         .replaceAll(RegExp(r'\n[ \t]*\n'), '\n\n')
         .trim();
@@ -169,26 +197,29 @@ Tu es là pour accompagner avec authenticité, pas pour donner des leçons. 🤗
 
     // Étape 2: Ajouter des espaces manquants après la ponctuation (SANS TOUCHER AUX MOTS)
     cleaned = cleaned
-    // Espace après point, virgule, etc. SEULEMENT si suivi d'une majuscule
-        .replaceAllMapped(RegExp(r'([.!?,:;])([A-ZÀ-Ÿ])'), (match) => '${match.group(1)} ${match.group(2)}');
+        // Espace après point, virgule, etc. SEULEMENT si suivi d'une majuscule
+        .replaceAllMapped(
+          RegExp(r'([.!?,:;])([A-ZÀ-Ÿ])'),
+          (match) => '${match.group(1)} ${match.group(2)}',
+        );
 
     developer.log('Après étape 2: "$cleaned"', name: 'RealLovaRepository');
 
     // Étape 3: Corrections spécifiques
     cleaned = cleaned
-    // Corriger les espaces avant la ponctuation (FIX du bug $1)
+        // Corriger les espaces avant la ponctuation (FIX du bug $1)
         .replaceAllMapped(RegExp(r'\s+([.!?,:;])'), (match) => match.group(1)!)
-    // Limiter les sauts de ligne multiples
+        // Limiter les sauts de ligne multiples
         .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-    // Supprimer les espaces en début/fin
+        // Supprimer les espaces en début/fin
         .trim();
 
     developer.log('Après étape 3: "$cleaned"', name: 'RealLovaRepository');
 
     // Étape 4: S'assurer que chaque phrase commence par une majuscule
     cleaned = cleaned.replaceAllMapped(
-        RegExp(r'([.!?]\s+)([a-zà-ÿ])'),
-            (match) => '${match.group(1)}${match.group(2)!.toUpperCase()}'
+      RegExp(r'([.!?]\s+)([a-zà-ÿ])'),
+      (match) => '${match.group(1)}${match.group(2)!.toUpperCase()}',
     );
 
     // Étape 5: Première lettre en majuscule si nécessaire

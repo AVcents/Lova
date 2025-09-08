@@ -1,20 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controller/auth_state_notifier.dart';
-import '../domain/auth_state.dart';
-import 'dart:async';
+
+import 'package:lova/features/auth/controller/auth_state_notifier.dart';
+import 'package:lova/features/auth/data/auth_providers.dart';
+import 'package:lova/features/auth/domain/auth_state.dart';
 
 class VerifyEmailPage extends ConsumerStatefulWidget {
   final String email;
   final String? errorCode;
 
-  const VerifyEmailPage({
-    super.key,
-    required this.email,
-    this.errorCode,
-  });
+  const VerifyEmailPage({super.key, required this.email, this.errorCode});
 
   @override
   ConsumerState<VerifyEmailPage> createState() => _VerifyEmailPageState();
@@ -50,21 +49,13 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
       vsync: this,
     );
 
-    _emailIconAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _emailIconController,
-      curve: Curves.easeInOut,
-    ));
+    _emailIconAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _emailIconController, curve: Curves.easeInOut),
+    );
 
-    _checkAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(
-      parent: _checkController,
-      curve: Curves.elasticOut,
-    ));
+    _checkAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _checkController, curve: Curves.elasticOut),
+    );
 
     // Démarrer le compte à rebours
     _startCountdown();
@@ -72,19 +63,19 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
     // Gérer les erreurs initiales
     _handleInitialError();
 
-    _authSub = ref.listenManual<AuthState>(
-      authStateNotifierProvider,
-      (previous, next) {
-        next.maybeWhen(
-          authenticated: (user) {
-            if (!_isVerified) {
-              _handleVerificationSuccess();
-            }
-          },
-          orElse: () {},
-        );
-      },
-    );
+    _authSub = ref.listenManual<AuthState>(authStateNotifierProvider, (
+      previous,
+      next,
+    ) {
+      next.maybeWhen(
+        authenticated: (user) {
+          if (!_isVerified) {
+            _handleVerificationSuccess();
+          }
+        },
+        orElse: () {},
+      );
+    });
   }
 
   @override
@@ -145,8 +136,9 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
       _resendMessage = null;
     });
 
-    await ref.read(authStateNotifierProvider.notifier)
-        .resendVerificationEmail(widget.email);
+    await ref
+        .read(authRepositoryProvider)
+        .resendConfirmationEmail(widget.email);
 
     setState(() {
       _resendMessage = 'Email envoyé avec succès !';
@@ -195,7 +187,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
             end: Alignment.bottomCenter,
             colors: [
               theme.colorScheme.primaryContainer.withOpacity(0.1),
-              theme.colorScheme.background,
+              theme.colorScheme.surface,
             ],
           ),
         ),
@@ -210,47 +202,53 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
                   duration: const Duration(milliseconds: 600),
                   child: _isVerified
                       ? ScaleTransition(
-                    scale: _checkAnimation,
-                    child: Container(
-                      key: const ValueKey('check'),
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: theme.colorScheme.primary.withOpacity(0.1),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.check_circle,
-                        size: 72,
-                        color: Colors.green,
-                      ),
-                    ),
-                  )
+                          scale: _checkAnimation,
+                          child: Container(
+                            key: const ValueKey('check'),
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: theme.colorScheme.primary.withOpacity(0.1),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withOpacity(
+                                  0.3,
+                                ),
+                                width: 2,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.check_circle,
+                              size: 72,
+                              color: Colors.green,
+                            ),
+                          ),
+                        )
                       : ScaleTransition(
-                    scale: _emailIconAnimation,
-                    child: Container(
-                      key: const ValueKey('email'),
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: theme.colorScheme.primary.withOpacity(0.06),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withOpacity(0.2),
-                          width: 2,
+                          scale: _emailIconAnimation,
+                          child: Container(
+                            key: const ValueKey('email'),
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: theme.colorScheme.primary.withOpacity(
+                                0.06,
+                              ),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withOpacity(
+                                  0.2,
+                                ),
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.mail_outline,
+                              size: 72,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Icon(
-                        Icons.mail_outline,
-                        size: 72,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -271,7 +269,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
                   Text(
                     _resendMessage!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.green),
+                      color: Colors.green,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
@@ -284,13 +283,15 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
                         : null,
                     child: _isResending
                         ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                        : Text(_canResend
-                        ? 'Renvoyer l\'email'
-                        : 'Renvoyer dans $_resendCountdown s'),
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            _canResend
+                                ? 'Renvoyer l\'email'
+                                : 'Renvoyer dans $_resendCountdown s',
+                          ),
                   ),
                 ),
               ],

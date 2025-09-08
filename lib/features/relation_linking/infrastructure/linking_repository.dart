@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:uuid/uuid.dart';
 
 class LinkingRepository {
@@ -6,7 +5,10 @@ class LinkingRepository {
 
   /// Génère un code UUID unique et stocke l'état "pending"
   String generateInvitationCode(String userId) {
-    final code = const Uuid().v4().substring(0, 6).toUpperCase(); // Ex: 'A1B2C3'
+    final code = const Uuid()
+        .v4()
+        .substring(0, 6)
+        .toUpperCase(); // Ex: 'A1B2C3'
     _pendingRelations[code] = userId;
     return code;
   }
