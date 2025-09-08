@@ -102,6 +102,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     return AuthResult(success: true, message: 'Déconnecté');
   }
 
+  Future<void> resendVerificationEmail(String email, {String? emailRedirectTo}) async {
+    await _repo.resendConfirmationEmail(email, emailRedirectTo: emailRedirectTo);
+  }
+
   // ---- Resend email timer ----
   void _startResendTimer() {
     _resendEmailTimer?.cancel();
