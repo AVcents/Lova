@@ -1,260 +1,300 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controller/auth_controller.dart';
-
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../controller/auth_state_notifier.dart';
+import '../domain/auth_state.dart';
+import 'dart:async';
 
 class VerifyEmailPage extends ConsumerStatefulWidget {
   final String email;
   final String? errorCode;
-  final String? errorDescription;
 
   const VerifyEmailPage({
     super.key,
     required this.email,
     this.errorCode,
-    this.errorDescription,
   });
 
   @override
   ConsumerState<VerifyEmailPage> createState() => _VerifyEmailPageState();
 }
 
-class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
+class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
+    with TickerProviderStateMixin {
+  late AnimationController _emailIconController;
+  late AnimationController _checkController;
+  late Animation<double> _emailIconAnimation;
+  late Animation<double> _checkAnimation;
+
   bool _isResending = false;
+  bool _canResend = false;
+  int _resendCountdown = 60;
+  Timer? _countdownTimer;
+  bool _isVerified = false;
   String? _resendMessage;
+  ProviderSubscription<AuthState>? _authSub;
 
   @override
   void initState() {
     super.initState();
-    // Écouter les changements d'auth pour rediriger automatiquement
-    _listenToAuthState();
+
+    // Animations
+    _emailIconController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _checkController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _emailIconAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _emailIconController,
+      curve: Curves.easeInOut,
+    ));
+
+    _checkAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(
+      parent: _checkController,
+      curve: Curves.elasticOut,
+    ));
+
+    // Démarrer le compte à rebours
+    _startCountdown();
+
+    // Gérer les erreurs initiales
+    _handleInitialError();
+
+    _authSub = ref.listenManual<AuthState>(
+      authStateNotifierProvider,
+      (previous, next) {
+        next.maybeWhen(
+          authenticated: (user) {
+            if (!_isVerified) {
+              _handleVerificationSuccess();
+            }
+          },
+          orElse: () {},
+        );
+      },
+    );
   }
 
-  void _listenToAuthState() {
-    ref.listenManual(authStateChangesProvider, (previous, next) {
-      next.whenData((authState) {
-        if (authState.event == AuthChangeEvent.signedIn && mounted) {
-          // Toast de succès
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Compte confirmé avec succès !'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
+  @override
+  void dispose() {
+    _emailIconController.dispose();
+    _checkController.dispose();
+    _countdownTimer?.cancel();
+    _authSub?.close();
+    super.dispose();
+  }
 
-          // Redirection vers dashboard
-          context.go('/dashboard');
-        }
-      });
+  void _startCountdown() {
+    setState(() {
+      _canResend = false;
+      _resendCountdown = 60;
+    });
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown > 0) {
+        setState(() {
+          _resendCountdown--;
+        });
+      } else {
+        setState(() {
+          _canResend = true;
+        });
+        timer.cancel();
+      }
     });
   }
 
+  void _handleInitialError() {
+    if (widget.errorCode == 'otp_expired') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Le lien a expiré. Renvoie un nouvel email.'),
+            backgroundColor: Colors.orange.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      });
+    }
+  }
+
   Future<void> _resendEmail() async {
+    if (!_canResend || _isResending) return;
+
+    HapticFeedback.lightImpact();
+
     setState(() {
       _isResending = true;
       _resendMessage = null;
     });
 
-    try {
-      await ref.read(authControllerProvider.notifier).resendConfirmationEmail(widget.email);
-      setState(() {
-        _resendMessage = 'Email envoyé avec succès !';
-      });
-    } catch (e) {
-      setState(() {
-        _resendMessage = 'Erreur lors de l\'envoi. Réessayer plus tard.';
-      });
-    } finally {
-      setState(() {
-        _isResending = false;
-      });
+    await ref.read(authStateNotifierProvider.notifier)
+        .resendVerificationEmail(widget.email);
+
+    setState(() {
+      _resendMessage = 'Email envoyé avec succès !';
+    });
+    _startCountdown();
+
+    setState(() {
+      _isResending = false;
+    });
+
+    // Effacer le message après 5 secondes
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _resendMessage = null;
+        });
+      }
+    });
+  }
+
+  Future<void> _handleVerificationSuccess() async {
+    setState(() {
+      _isVerified = true;
+    });
+
+    // Animation de succès
+    await _checkController.forward();
+
+    // Attendre 5 secondes pour montrer le succès
+    await Future.delayed(const Duration(seconds: 5));
+
+    if (mounted) {
+      context.go('/dashboard');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasError = widget.errorCode != null;
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Icône email
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.email_outlined,
-                  size: 64,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Titre
-              Text(
-                'Vérifie ton email',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Message principal
-              Text(
-                'Nous avons envoyé un lien de confirmation à',
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                widget.email,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                'Clique sur le lien dans l\'email pour activer ton compte.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              // Bannière d'erreur si lien expiré
-              if (hasError) ...[
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.errorCode == 'otp_expired'
-                              ? 'Lien expiré. Renvoie un nouvel email.'
-                              : widget.errorDescription ?? 'Une erreur est survenue.',
-                          style: theme.textTheme.bodyMedium,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.colorScheme.primaryContainer.withOpacity(0.1),
+              theme.colorScheme.background,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animation email ou check
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 600),
+                  child: _isVerified
+                      ? ScaleTransition(
+                    scale: _checkAnimation,
+                    child: Container(
+                      key: const ValueKey('check'),
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withOpacity(0.3),
+                          width: 2,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 32),
-
-              // Message de confirmation après renvoi
-              if (_resendMessage != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _resendMessage!.contains('succès')
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _resendMessage!,
-                    style: TextStyle(
-                      color: _resendMessage!.contains('succès')
-                          ? Colors.green
-                          : Colors.red,
-                      fontWeight: FontWeight.w500,
+                      child: const Icon(
+                        Icons.check_circle,
+                        size: 72,
+                        color: Colors.green,
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Bouton renvoyer email
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isResending ? null : _resendEmail,
-                  icon: _isResending
-                      ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                      : const Icon(Icons.refresh),
-                  label: Text(_isResending ? 'Envoi...' : 'Renvoyer l\'email'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      : ScaleTransition(
+                    scale: _emailIconAnimation,
+                    child: Container(
+                      key: const ValueKey('email'),
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: theme.colorScheme.primary.withOpacity(0.06),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withOpacity(0.2),
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.mail_outline,
+                        size: 72,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Bouton retour connexion
-              SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: () => context.go('/sign-in'),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Retour à la connexion'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                const SizedBox(height: 24),
+                Text(
+                  'Vérifie ta boîte mail',
+                  style: theme.textTheme.titleMedium,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Petit spinner d'attente
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.primary.withOpacity(0.5),
-                    ),
+                const SizedBox(height: 8),
+                Text(
+                  'Nous avons envoyé un lien à ${widget.email}.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                   ),
-                  const SizedBox(width: 8),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                if (_resendMessage != null) ...[
                   Text(
-                    'En attente de confirmation...',
+                    _resendMessage!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
-                    ),
+                        color: Colors.green),
+                    textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 8),
                 ],
-              ),
-            ],
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: (_canResend && !_isResending)
+                        ? _resendEmail
+                        : null,
+                    child: _isResending
+                        ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                        : Text(_canResend
+                        ? 'Renvoyer l\'email'
+                        : 'Renvoyer dans $_resendCountdown s'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

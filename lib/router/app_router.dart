@@ -1,9 +1,12 @@
 // lib/router/app_router.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/auth/controller/auth_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supa;
+import '../features/auth/controller/auth_state_notifier.dart';
 import 'package:lova/features/relation/relation_dashboard_page.dart';
 import '../../features/library_us/library_us_page.dart';
 import '../../shared/models/message_annotation.dart';
@@ -22,14 +25,25 @@ import '../features/profile/profile_page.dart';
 import '../features/checkin/weekly_checkin_page.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  late final StreamSubscription _sub;
+  GoRouterRefreshStream(Stream stream) {
+    _sub = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+}
+
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/sign-in',
+    refreshListenable: GoRouterRefreshStream(
+      supa.Supabase.instance.client.auth.onAuthStateChange,
+    ),
     routes: [
-      GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const RelationDashboardPage(),
-      ),
       GoRoute(
         path: '/sign-in',
         name: 'sign-in',
@@ -46,12 +60,9 @@ class AppRouter {
           // Récupérer l'email et les éventuelles erreurs depuis les query params
           final email = state.uri.queryParameters['email'] ?? '';
           final errorCode = state.uri.queryParameters['error_code'];
-          final errorDescription = state.uri.queryParameters['error_description'];
-
           return VerifyEmailPage(
             email: email,
             errorCode: errorCode,
-            errorDescription: errorDescription,
           );
         },
       ),
@@ -127,32 +138,48 @@ class AppRouter {
       ),
     ],
     redirect: (context, state) {
-      final ref = ProviderScope.containerOf(context);
-      final user = ref.read(currentUserProvider).value;
+    final ref = ProviderScope.containerOf(context);
+    final auth = ref.read(authStateNotifierProvider);
 
-      final isGoingToAuth = state.fullPath == '/sign-in' ||
-          state.fullPath == '/sign-up' ||
-          state.fullPath?.startsWith('/verify-email') == true;
+    final isAuth = auth.maybeWhen(
+      authenticated: (_) => true,
+      orElse: () => false,
+    );
+    final isEmailPending = auth.maybeWhen(
+      emailPending: (_, __) => true,
+      orElse: () => false,
+    );
 
-      // Si l'utilisateur est connecté et essaie d'aller vers les pages auth
-      if (user != null && isGoingToAuth) {
-        // Sauf s'il est sur verify-email avec un lien déjà confirmé
-        if (state.fullPath?.startsWith('/verify-email') == true) {
-          final errorCode = state.uri.queryParameters['error_code'];
-          if (errorCode == 'otp_disabled' || errorCode == 'email_already_confirmed') {
-            // Rediriger vers sign-in avec un message
-            return '/sign-in';
-          }
-        }
-        return '/dashboard';
+    final isGoingToAuth = state.fullPath == '/sign-in' ||
+        state.fullPath == '/sign-up' ||
+        (state.fullPath?.startsWith('/verify-email') == true);
+
+    if (isAuth && isGoingToAuth) {
+      return '/dashboard';
+    }
+
+    if (!isAuth && !isGoingToAuth) {
+      // Si email en attente, forcer la page de vérification
+      if (isEmailPending) {
+        final email = auth.maybeWhen(
+          emailPending: (e, __) => e,
+          orElse: () => '',
+        );
+        return '/verify-email?email=$email';
       }
+      return '/sign-in';
+    }
 
-      // Si l'utilisateur n'est pas connecté et essaie d'accéder au dashboard
-      if (user == null && !isGoingToAuth) {
-        return '/sign-in';
-      }
+    // Si l'utilisateur n'est pas authentifié mais essaie de sortir du flow auth alors qu'il est en emailPending
+    if (!isAuth && isEmailPending && state.fullPath != '/verify-email') {
+      final email = auth.maybeWhen(
+        emailPending: (e, __) => e,
+        orElse: () => '',
+      );
+      return '/verify-email?email=$email';
+    }
 
-      return null;
+    return null;
     },
   );
 }
