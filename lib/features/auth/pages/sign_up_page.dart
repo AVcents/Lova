@@ -18,7 +18,6 @@ class SignUpPage extends ConsumerStatefulWidget {
 class _SignUpPageState extends ConsumerState<SignUpPage>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -35,11 +34,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   bool _acceptTerms = false;
 
   // Focus nodes pour effet glow
-  final _firstNameFocusNode = FocusNode();
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
-  bool _firstNameFocused = false;
   bool _emailFocused = false;
   bool _passwordFocused = false;
   bool _confirmPasswordFocused = false;
@@ -73,9 +70,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     );
 
     // Focus listeners
-    _firstNameFocusNode.addListener(() {
-      setState(() => _firstNameFocused = _firstNameFocusNode.hasFocus);
-    });
     _emailFocusNode.addListener(() {
       setState(() => _emailFocused = _emailFocusNode.hasFocus);
     });
@@ -96,13 +90,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
   @override
   void dispose() {
-    _firstNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _shakeController.dispose();
     _formController.dispose();
-    _firstNameFocusNode.dispose();
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
@@ -271,78 +263,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                               ).animate(_formController),
                               child: Column(
                                 children: [
-                                  // Champ Prénom avec effet glow
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: _firstNameFocused
-                                          ? [
-                                              BoxShadow(
-                                                color: const Color(
-                                                  0xFFFF3D86,
-                                                ).withOpacity(0.3),
-                                                blurRadius: 20,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ]
-                                          : [],
-                                    ),
-                                    child: TextFormField(
-                                      controller: _firstNameController,
-                                      focusNode: _firstNameFocusNode,
-                                      textCapitalization:
-                                          TextCapitalization.words,
-                                      style: const TextStyle(fontSize: 16),
-                                      decoration: InputDecoration(
-                                        labelText: 'Prénom',
-                                        labelStyle: TextStyle(
-                                          color: _firstNameFocused
-                                              ? const Color(0xFFFF3D86)
-                                              : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
-                                        ),
-                                        prefixIcon: Icon(
-                                          Icons.person_outline_rounded,
-                                          color: _firstNameFocused
-                                              ? const Color(0xFFFF3D86)
-                                              : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.4),
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                          borderSide: const BorderSide(
-                                            color: Color(0xFFFF3D86),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        filled: true,
-                                        fillColor: isDark
-                                            ? Colors.white.withOpacity(0.05)
-                                            : Colors.white,
-                                      ),
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return 'Veuillez saisir un prénom';
-                                        }
-                                        return null;
-                                      },
-                                      autofillHints: const [
-                                        AutofillHints.givenName,
-                                      ],
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 16),
 
                                   // Champ Email avec effet glow
                                   AnimatedContainer(
