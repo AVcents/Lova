@@ -78,7 +78,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     });
     _confirmPasswordFocusNode.addListener(() {
       setState(
-        () => _confirmPasswordFocused = _confirmPasswordFocusNode.hasFocus,
+            () => _confirmPasswordFocused = _confirmPasswordFocusNode.hasFocus,
       );
     });
 
@@ -190,7 +190,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     return Scaffold(
       body: Stack(
         children: [
-          // Background statique (plus d'animation)
+          // Background statique harmonisé
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -198,15 +198,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF1A0F1C),
-                        const Color(0xFF2D1B2E),
-                        const Color(0xFF1A0F1C),
-                      ]
+                  const Color(0xFF1A0F1C),
+                  const Color(0xFF2D1B2E),
+                  const Color(0xFF1A0F1C),
+                ]
                     : [
-                        const Color(0xFFFFF0F5),
-                        const Color(0xFFFFE4F1),
-                        const Color(0xFFFFF0F5),
-                      ],
+                  const Color(0xFFFFF0F5),
+                  const Color(0xFFFFE4F1),
+                  const Color(0xFFFFF0F5),
+                ],
                 stops: const [0.0, 0.5, 1.0],
               ),
             ),
@@ -227,28 +227,42 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 32),
 
-                          // Logo LOVA statique et titre
+                          // En-tête avec logo et titre harmonisés
                           Column(
                             children: [
+                              // Logo avec taille standardisée
                               Image.asset(
                                 'assets/images/lova_logo.png',
-                                height: 100,
+                                height: 160,
                                 fit: BoxFit.contain,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 16),
+                              // Titre principal
                               Text(
-                                'Créer ton compte',
+                                'Inscription',
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 28,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              // Sous-titre
+                              Text(
+                                'Rejoins notre communauté !',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.textTheme.bodyMedium?.color
+                                      ?.withOpacity(0.7),
+                                  fontSize: 15,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 40),
 
                           // Champs de formulaire animés
                           FadeTransition(
@@ -271,14 +285,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: _emailFocused
                                           ? [
-                                              BoxShadow(
-                                                color: const Color(
-                                                  0xFFFF3D86,
-                                                ).withOpacity(0.3),
-                                                blurRadius: 20,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ]
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFFF3D86,
+                                          ).withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
                                           : [],
                                     ),
                                     child: TextFormField(
@@ -293,14 +307,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                           color: _emailFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
+                                              ?.withOpacity(0.6),
                                         ),
                                         prefixIcon: Icon(
                                           Icons.mail_outline_rounded,
                                           color: _emailFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.4),
+                                              ?.withOpacity(0.4),
                                         ),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(
@@ -355,14 +369,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: _passwordFocused
                                           ? [
-                                              BoxShadow(
-                                                color: const Color(
-                                                  0xFFFF3D86,
-                                                ).withOpacity(0.3),
-                                                blurRadius: 20,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ]
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFFF3D86,
+                                          ).withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
                                           : [],
                                     ),
                                     child: TextFormField(
@@ -378,14 +392,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                           color: _passwordFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
+                                              ?.withOpacity(0.6),
                                         ),
                                         prefixIcon: Icon(
                                           Icons.lock_outline_rounded,
                                           color: _passwordFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.4),
+                                              ?.withOpacity(0.4),
                                         ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
@@ -401,7 +415,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                           onPressed: () {
                                             setState(() {
                                               _passwordVisible =
-                                                  !_passwordVisible;
+                                              !_passwordVisible;
                                             });
                                           },
                                         ),
@@ -430,7 +444,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                           return 'Veuillez saisir un mot de passe';
                                         }
                                         final result =
-                                            PasswordValidator.validate(value);
+                                        PasswordValidator.validate(value);
                                         if (!result.isValid) {
                                           return 'Mot de passe trop faible';
                                         }
@@ -459,14 +473,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: _confirmPasswordFocused
                                           ? [
-                                              BoxShadow(
-                                                color: const Color(
-                                                  0xFFFF3D86,
-                                                ).withOpacity(0.3),
-                                                blurRadius: 20,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ]
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFFF3D86,
+                                          ).withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
                                           : [],
                                     ),
                                     child: TextFormField(
@@ -480,14 +494,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                           color: _confirmPasswordFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
+                                              ?.withOpacity(0.6),
                                         ),
                                         prefixIcon: Icon(
                                           Icons.lock_outline_rounded,
                                           color: _confirmPasswordFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.4),
+                                              ?.withOpacity(0.4),
                                         ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
@@ -503,7 +517,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                           onPressed: () {
                                             setState(() {
                                               _confirmPasswordVisible =
-                                                  !_confirmPasswordVisible;
+                                              !_confirmPasswordVisible;
                                             });
                                           },
                                         ),
@@ -576,7 +590,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                                 ),
                                                 TextSpan(
                                                   text:
-                                                      'conditions d\'utilisation',
+                                                  'conditions d\'utilisation',
                                                   style: TextStyle(
                                                     color: Color(
                                                       0xFFFF3D86,
@@ -602,16 +616,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                     text: 'S\'inscrire',
                                   ),
 
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 24),
 
-                                  // Lien connexion
+                                  // Lien connexion harmonisé
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 12,
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           'Déjà un compte ? ',
@@ -627,7 +641,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xFFFF3D86),
                                               decoration:
-                                                  TextDecoration.underline,
+                                              TextDecoration.underline,
                                               decorationColor: Color(
                                                 0xFFFF3D86,
                                               ),
@@ -638,7 +652,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                                     ),
                                   ),
 
-                                  const SizedBox(height: 40),
+                                  const SizedBox(height: 32),
                                 ],
                               ),
                             ),
@@ -657,7 +671,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   }
 }
 
-// Widget bouton premium (identique à SignInPage)
+// Widget bouton premium harmonisé
 class _PremiumButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -735,24 +749,24 @@ class _PremiumButtonState extends State<_PremiumButton>
                   child: Center(
                     child: widget.isLoading
                         ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    )
                         : Text(
-                            widget.text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                      widget.text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
                 ),
               ),

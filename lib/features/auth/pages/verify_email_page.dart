@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
-import 'package:lova/features/auth/data/auth_providers.dart';
 import 'package:lova/features/auth/domain/auth_state.dart';
 
 class VerifyEmailPage extends ConsumerStatefulWidget {
@@ -136,9 +135,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage>
       _resendMessage = null;
     });
 
-    await ref
-        .read(authRepositoryProvider)
-        .resendConfirmationEmail(widget.email);
+    await ref.read(authStateNotifierProvider.notifier)
+        .resendVerificationEmail(widget.email);
 
     setState(() {
       _resendMessage = 'Email envoyé avec succès !';

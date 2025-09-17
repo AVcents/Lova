@@ -219,15 +219,16 @@ class _SignInPageState extends ConsumerState<SignInPage>
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF1A0F1C),
-                        const Color(0xFF2D1B2E),
-                        const Color(0xFF1A0F1C),
-                      ]
+                  const Color(0xFF1A0F1C),
+                  const Color(0xFF2D1B2E),
+                  const Color(0xFF1A0F1C),
+                ]
                     : [
-                        const Color(0xFFFFF0F5),
-                        const Color(0xFFFFE4F1),
-                        const Color(0xFFFFF0F5),
-                      ],
+                  const Color(0xFFFFF0F5),
+                  const Color(0xFFFFE4F1),
+                  const Color(0xFFFFF0F5),
+                ],
+                stops: const [0.0, 0.5, 1.0],
               ),
             ),
           ),
@@ -247,37 +248,42 @@ class _SignInPageState extends ConsumerState<SignInPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 32),
 
-                          // En-tête simplifié: logo LOVA + sous-titre minimal (statique)
+                          // En-tête avec logo et titre harmonisés
                           Column(
                             children: [
-                              // Logo asset
+                              // Logo avec taille standardisée
                               Image.asset(
-                                'assets//images/lova_logo.png',
-                                height: 128,
+                                'assets/images/lova_logo.png',
+                                height: 160,
                                 fit: BoxFit.contain,
                               ),
+                              const SizedBox(height: 16),
+                              // Titre principal
+                              Text(
+                                'Connexion',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 28,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                               const SizedBox(height: 8),
-                              // Sous-titre léger
-                              Builder(
-                                builder: (context) {
-                                  final theme = Theme.of(context);
-                                  return Text(
-                                    'Connecte-toi pour continuer',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.textTheme.bodyMedium?.color
-                                          ?.withOpacity(0.7),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  );
-                                },
+                              // Sous-titre
+                              Text(
+                                'Ravi de te revoir !',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.textTheme.bodyMedium?.color
+                                      ?.withOpacity(0.7),
+                                  fontSize: 15,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 40),
 
                           // Champs de formulaire animés
                           FadeTransition(
@@ -299,14 +305,14 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: _emailFocused
                                           ? [
-                                              BoxShadow(
-                                                color: const Color(
-                                                  0xFFFF3D86,
-                                                ).withOpacity(0.3),
-                                                blurRadius: 20,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ]
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFFF3D86,
+                                          ).withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
                                           : [],
                                     ),
                                     child: TextFormField(
@@ -319,19 +325,19 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                       ],
                                       style: const TextStyle(fontSize: 16),
                                       decoration: InputDecoration(
-                                        labelText: 'Email',
+                                        labelText: 'Adresse email',
                                         labelStyle: TextStyle(
                                           color: _emailFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
+                                              ?.withOpacity(0.6),
                                         ),
                                         prefixIcon: Icon(
                                           Icons.mail_outline_rounded,
                                           color: _emailFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.4),
+                                              ?.withOpacity(0.4),
                                         ),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(
@@ -387,14 +393,14 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: _passwordFocused
                                           ? [
-                                              BoxShadow(
-                                                color: const Color(
-                                                  0xFFFF3D86,
-                                                ).withOpacity(0.3),
-                                                blurRadius: 20,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ]
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFFF3D86,
+                                          ).withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
                                           : [],
                                     ),
                                     child: TextFormField(
@@ -411,14 +417,14 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                           color: _passwordFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
+                                              ?.withOpacity(0.6),
                                         ),
                                         prefixIcon: Icon(
                                           Icons.lock_outline_rounded,
                                           color: _passwordFocused
                                               ? const Color(0xFFFF3D86)
                                               : theme.textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.4),
+                                              ?.withOpacity(0.4),
                                         ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
@@ -434,7 +440,7 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                           onPressed: () {
                                             setState(() {
                                               _isPasswordVisible =
-                                                  !_isPasswordVisible;
+                                              !_isPasswordVisible;
                                             });
                                           },
                                         ),
@@ -477,7 +483,7 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                   // Options avec design moderne
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
@@ -495,7 +501,7 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                               ),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(4),
+                                                BorderRadius.circular(4),
                                               ),
                                             ),
                                           ),
@@ -503,8 +509,8 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                             'Se souvenir',
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -535,7 +541,7 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                     text: 'Se connecter',
                                   ),
 
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 24),
 
                                   // Lien inscription mis en avant
                                   Container(
@@ -544,7 +550,7 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           'Pas encore de compte ? ',
@@ -560,7 +566,7 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xFFFF3D86),
                                               decoration:
-                                                  TextDecoration.underline,
+                                              TextDecoration.underline,
                                               decorationColor: Color(
                                                 0xFFFF3D86,
                                               ),
@@ -570,6 +576,8 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                       ],
                                     ),
                                   ),
+
+                                  const SizedBox(height: 32),
                                 ],
                               ),
                             ),
@@ -666,24 +674,24 @@ class _PremiumButtonState extends State<_PremiumButton>
                   child: Center(
                     child: widget.isLoading
                         ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    )
                         : Text(
-                            widget.text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                      widget.text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
                 ),
               ),

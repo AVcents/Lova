@@ -11,6 +11,8 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:lova/features/library_us/library_us_page.dart';
 import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
+import 'package:lova/features/onboarding/providers/onboarding_controller.dart';
+import 'package:lova/features/onboarding/presentation/onboarding_flow.dart';
 
 // 📹 Pages à créer plus tard (écrans vides pour l'instant)
 import 'package:lova/features/auth/pages/sign_in_page.dart';
@@ -45,6 +47,7 @@ class AppRouter {
     refreshListenable: GoRouterRefreshStream(
       supa.Supabase.instance.client.auth.onAuthStateChange,
     ),
+    debugLogDiagnostics: true,
     routes: [
       GoRoute(
         path: '/sign-in',
@@ -64,6 +67,12 @@ class AppRouter {
           final errorCode = state.uri.queryParameters['error_code'];
           return VerifyEmailPage(email: email, errorCode: errorCode);
         },
+      ),
+      // Nouvelle route pour l'onboarding
+      GoRoute(
+        path: '/onboarding',
+        name: OnboardingFlow.name,
+        builder: (context, state) => const OnboardingFlow(),
       ),
       GoRoute(
         path: '/mediation',
@@ -100,7 +109,7 @@ class AppRouter {
               if (filterName != null) {
                 try {
                   filter = AnnotationTag.values.firstWhere(
-                    (tag) => tag.name == filterName,
+                        (tag) => tag.name == filterName,
                   );
                 } catch (_) {
                   // Si le filtre n'est pas valide, on l'ignore
@@ -111,7 +120,7 @@ class AppRouter {
               final extra = state.extra as Map<String, dynamic>?;
               final coupleId = extra?['coupleId'] ?? 'couple_001';
               final scrollToMessage =
-                  extra?['scrollToMessage'] as Function(int)?;
+              extra?['scrollToMessage'] as Function(int)?;
 
               return LibraryUsPage(
                 initialFilter: filter,
@@ -139,7 +148,7 @@ class AppRouter {
         ],
       ),
     ],
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final ref = ProviderScope.containerOf(context);
       final auth = ref.read(authStateNotifierProvider);
 
@@ -154,13 +163,51 @@ class AppRouter {
 
       final isGoingToAuth =
           state.fullPath == '/sign-in' ||
-          state.fullPath == '/sign-up' ||
-          (state.fullPath?.startsWith('/verify-email') == true);
+              state.fullPath == '/sign-up' ||
+              (state.fullPath?.startsWith('/verify-email') == true);
 
-      if (isAuth && isGoingToAuth) {
-        return '/dashboard';
+      final isGoingToOnboarding = state.fullPath == '/onboarding';
+      final isDashboardRoute = state.fullPath == '/dashboard';
+      final isShellChild = state.fullPath == '/dashboard' ||
+          state.fullPath == '/chat-lova' ||
+          state.fullPath == '/chat-couple' ||
+          state.fullPath == '/library-us' ||
+          state.fullPath == '/settings' ||
+          state.fullPath == '/link-relation' ||
+          state.fullPath == '/profile' ||
+          state.fullPath == '/weekly-checkin';
+
+      // Allow dashboard shell access without bouncing when authenticated.
+      if (isAuth && isDashboardRoute) {
+        return null;
       }
 
+      // Si authentifié, vérifier l'onboarding
+      if (isAuth) {
+        // Vérifier si l'onboarding est complété
+        final hasCompletedOnboarding = await ref.read(
+          hasCompletedOnboardingProvider.future,
+        );
+
+        // Si l'utilisateur n'a pas complété l'onboarding et n'est pas déjà sur cette page
+        if (!hasCompletedOnboarding && !isGoingToOnboarding) {
+          return '/onboarding';
+        }
+
+        // Si l'onboarding est complété et l'utilisateur essaie d'y accéder
+        if (hasCompletedOnboarding && isGoingToOnboarding) {
+          // Redirige vers dashboard route si on tente d'accéder à l'onboarding
+          return '/dashboard';
+        }
+
+        // Si l'utilisateur authentifié essaie d'accéder aux pages d'auth
+        if (isGoingToAuth) {
+          // Redirige vers dashboard route si on tente d'accéder à une page d'auth
+          return '/dashboard';
+        }
+      }
+
+      // Gestion des utilisateurs non authentifiés
       if (!isAuth && !isGoingToAuth) {
         // Si email en attente, forcer la page de vérification
         if (isEmailPending) {
