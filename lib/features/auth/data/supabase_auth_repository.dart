@@ -41,7 +41,7 @@ class SupabaseAuthRepository implements AuthRepository {
       final response = await _client.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: emailRedirectTo,
+        emailRedirectTo: emailRedirectTo ?? 'loova://login-callback',
       );
 
       // Session peut être null si confirmation email requise
@@ -90,6 +90,26 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AuthResult> signInWithOtp({
+    required String email,
+    required OtpType type,
+    String? emailRedirectTo,
+  }) async {
+    try {
+      await _client.auth.signInWithOtp(
+        email: email,
+        emailRedirectTo: emailRedirectTo ?? 'loova://login-callback',
+      );
+      return AuthResult(success: true, message: 'Lien de connexion envoyé par email');
+    } on AuthException catch (e) {
+      final (mappedType, mappedMsg) = _mapAuthException(e);
+      return AuthResult(success: false, errorType: mappedType, message: mappedMsg);
+    } catch (e) {
+      return AuthResult(success: false, errorType: AuthErrorType.unknown, message: e.toString());
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
@@ -120,7 +140,7 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<void> resetPassword(String email, {String? emailRedirectTo}) async {
     await _client.auth.resetPasswordForEmail(
       email,
-      redirectTo: emailRedirectTo,
+      redirectTo: emailRedirectTo ?? 'loova://reset-password',
     );
   }
 }

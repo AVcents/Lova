@@ -29,6 +29,14 @@ void main() async {
     );
     print("✅ Supabase initialisé avec succès");
 
+    // 🔒 Déconnexion forcée au démarrage (DEV uniquement)
+    try {
+      await Supabase.instance.client.auth.signOut();
+      print("👋 Session utilisateur supprimée (mode dev)");
+    } catch (e) {
+      print("⚠️ Impossible de forcer la déconnexion: $e");
+    }
+
     // Configurer le listener global pour les deep links et auth state
     _setupAuthListener();
   } catch (e) {
@@ -82,3 +90,4 @@ void _setupAuthListener() {
     }
   });
 }
+

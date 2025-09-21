@@ -1,6 +1,8 @@
 // lib/features/onboarding/data/onboarding_repository.dart
 
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OnboardingRepository {
   final SupabaseClient _client;
@@ -130,3 +132,8 @@ class OnboardingRepository {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 }
+
+// Riverpod provider pour exposer le repository d'onboarding
+final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
+  return OnboardingRepository(Supabase.instance.client);
+});

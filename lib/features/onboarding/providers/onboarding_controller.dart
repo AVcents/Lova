@@ -4,6 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../data/onboarding_repository.dart';
 
+// === Onboarding flag synchrone (pour router sans async) ===
+final onboardingStateProvider = StateProvider<bool>((ref) => false);
+
+class OnboardingStateService {
+  static Future<void> initialize(WidgetRef ref) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+    try {
+      final repo = ref.read(onboardingRepositoryProvider);
+      final hasCompleted = await repo.hasCompletedOnboarding(userId);
+      ref.read(onboardingStateProvider.notifier).state = hasCompleted;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Erreur init onboarding: $e');
+    }
+  }
+}
+
 // Provider pour le repository
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
   return OnboardingRepository(Supabase.instance.client);
@@ -233,8 +251,7 @@ class OnboardingController extends StateNotifier<OnboardingState> {
   // Terminer l'onboarding
   Future<void> completeOnboarding() async {
     await _repository.completeOnboarding(_userId!);
-
-    ref.invalidate(hasCompletedOnboardingProvider);
+    ref.read(onboardingStateProvider.notifier).state = true;
 
     // Afficher le dialog de complétion
     state = state.copyWith(

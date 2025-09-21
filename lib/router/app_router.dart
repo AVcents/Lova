@@ -148,7 +148,7 @@ class AppRouter {
         ],
       ),
     ],
-    redirect: (context, state) async {
+    redirect: (context, state) {
       final ref = ProviderScope.containerOf(context);
       final auth = ref.read(authStateNotifierProvider);
 
@@ -184,10 +184,8 @@ class AppRouter {
 
       // Si authentifié, vérifier l'onboarding
       if (isAuth) {
-        // Vérifier si l'onboarding est complété
-        final hasCompletedOnboarding = await ref.read(
-          hasCompletedOnboardingProvider.future,
-        );
+        // Vérifier si l'onboarding est complété (lecture synchrone)
+        final hasCompletedOnboarding = ref.read(onboardingStateProvider);
 
         // Si l'utilisateur n'a pas complété l'onboarding et n'est pas déjà sur cette page
         if (!hasCompletedOnboarding && !isGoingToOnboarding) {
