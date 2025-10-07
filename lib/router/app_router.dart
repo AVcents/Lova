@@ -13,19 +13,35 @@ import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
 import 'package:lova/features/onboarding/providers/onboarding_controller.dart';
 import 'package:lova/features/onboarding/presentation/onboarding_flow.dart';
+import 'package:lova/features/Test/storage_test_page.dart';
 
-// 📹 Pages à créer plus tard (écrans vides pour l'instant)
+// Pages d'authentification
 import 'package:lova/features/auth/pages/sign_in_page.dart';
 import 'package:lova/features/auth/pages/sign_up_page.dart';
+import 'package:lova/features/auth/pages/forgot_password_page.dart';
 import 'package:lova/features/auth/pages/verify_email_page.dart';
 import 'package:lova/features/chat/chat_couple_page.dart';
 import 'package:lova/features/chat/chat_lova_page.dart';
-import 'package:lova/features/checkin/weekly_checkin_page.dart';
 import 'package:lova/features/mediation/mediation_flow.dart';
 import 'package:lova/features/profile/profile_page.dart';
 import 'package:lova/features/relation_linking/presentation/link_relation_page.dart';
 import 'package:lova/features/settings/settings_page.dart';
+
+
+// Pages de paramètres (imports corrigés)
+import 'package:lova/features/settings/services/pages/change_email_page.dart'; // Contient ChangeEmailPage ET ChangePasswordPage
+import 'package:lova/features/settings/services/pages/edit_profiles_page.dart'; // Contient EditProfilePage
+import 'package:lova/features/settings/services/pages/objectives_page.dart'; // 👈 NOUVEAU
+
 import 'package:lova/shared/widgets/bottom_nav_shell.dart';
+
+import 'package:lova/features/me_dashboard/presentation/checkin_page.dart';
+import 'package:lova/features/me_dashboard/presentation/journal_page.dart';
+import 'package:lova/features/me_dashboard/presentation/rituals_selection_page.dart';
+import 'package:lova/features/me_dashboard/presentation/widgets/rituals_history_section.dart' as rituals;
+import 'package:lova/features/me_dashboard/presentation/widgets/checkins_history_section.dart' as checkins;
+import 'package:lova/features/me_dashboard/presentation/widgets/journal_history_section.dart' as journals;
+import 'package:lova/features/me_dashboard/presentation/emotional_history_page.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription _sub;
@@ -43,16 +59,21 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/sign-in',
+    initialLocation: '/dashboard', // TEMPORAIRE: bypass onboarding
     refreshListenable: GoRouterRefreshStream(
       supa.Supabase.instance.client.auth.onAuthStateChange,
     ),
     debugLogDiagnostics: true,
     routes: [
+      // Routes d'authentification
       GoRoute(
         path: '/sign-in',
         name: 'sign-in',
         builder: (context, state) => const SignInPage(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordPage(),
       ),
       GoRoute(
         path: '/sign-up',
@@ -62,22 +83,122 @@ class AppRouter {
         path: '/verify-email',
         name: 'verify-email',
         builder: (context, state) {
-          // Récupérer l'email et les éventuelles erreurs depuis les query params
           final email = state.uri.queryParameters['email'] ?? '';
           final errorCode = state.uri.queryParameters['error_code'];
           return VerifyEmailPage(email: email, errorCode: errorCode);
         },
       ),
-      // Nouvelle route pour l'onboarding
+
+      // Gate et onboarding
+      GoRoute(
+        path: '/gate',
+        builder: (context, state) => const OnboardingGatePage(),
+      ),
       GoRoute(
         path: '/onboarding',
         name: OnboardingFlow.name,
         builder: (context, state) => const OnboardingFlow(),
       ),
+
+      // Autres routes hors navigation
       GoRoute(
         path: '/mediation',
         builder: (context, state) => const MediationFlowPage(),
       ),
+      GoRoute(
+        path: '/test-storage',
+        builder: (context, state) => const StorageTestPage(),
+      ),
+
+      // Routes de paramètres (hors bottom nav)
+      GoRoute(
+        path: '/settings/edit-profile',
+        builder: (context, state) => const EditProfilePage(),
+      ),
+      GoRoute(
+        path: '/settings/objectives_page',
+        builder: (context, state) => const ObjectivesPage(),
+      ),
+      GoRoute(
+        path: '/settings/change-email',
+        builder: (context, state) => const ChangeEmailPage(),
+      ),
+      GoRoute(
+        path: '/settings/change-password',
+        builder: (context, state) => const ChangePasswordPage(),
+      ),
+      GoRoute(
+        path: '/settings/notifications',
+        builder: (context, state) => const PlaceholderPage(title: 'Notifications'),
+      ),
+      GoRoute(
+        path: '/settings/preferences',
+        builder: (context, state) => const PlaceholderPage(title: 'Préférences'),
+      ),
+
+      // Routes de support et aide (placeholders)
+      GoRoute(
+        path: '/chat/history',
+        builder: (context, state) => const PlaceholderPage(title: 'Historique'),
+      ),
+      GoRoute(
+        path: '/favorites',
+        builder: (context, state) => const PlaceholderPage(title: 'Favoris'),
+      ),
+      GoRoute(
+        path: '/help',
+        builder: (context, state) => const PlaceholderPage(title: 'Centre d\'aide'),
+      ),
+      GoRoute(
+        path: '/contact',
+        builder: (context, state) => const PlaceholderPage(title: 'Nous contacter'),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (context, state) => const PlaceholderPage(title: 'Confidentialité'),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (context, state) => const PlaceholderPage(title: 'Conditions d\'utilisation'),
+      ),
+      // Routes ME Dashboard
+      GoRoute(
+        path: '/me/checkin',
+        name: 'meCheckin',
+        builder: (context, state) => const CheckinPage(),
+      ),
+      GoRoute(
+        path: '/me/journal',
+        name: 'meJournal',
+        builder: (context, state) => const JournalPage(),
+      ),
+      GoRoute(
+        path: '/me/rituals',
+        name: 'meRituals',
+        builder: (context, state) => const RitualsSelectionPage(),
+      ),
+      GoRoute(
+        path: '/me/ritual-history',
+        name: 'meRitualHistory',
+        builder: (context, state) => const rituals.RitualsHistorySection(),
+      ),
+      GoRoute(
+        path: '/me/checkins-history',
+        name: 'meCheckinsHistory',
+        builder: (context, state) => const checkins.CheckinsHistoryPage(),
+      ),
+      GoRoute(
+        path: '/me/journal-history',
+        name: 'meJournalHistory',
+        builder: (context, state) => const journals.JournalHistorySection(),
+      ),
+      GoRoute(
+        path: '/emotional-history',
+        name: 'emotionalHistory',
+        builder: (context, state) => const EmotionalHistoryPage(),
+      ),
+
+      // Routes avec bottom navigation
       ShellRoute(
         builder: (context, state, child) => BottomNavShell(child: child),
         routes: [
@@ -92,7 +213,6 @@ class AppRouter {
           GoRoute(
             path: '/chat-couple',
             builder: (context, state) {
-              // Récupérer le messageId depuis les query params
               final messageIdStr = state.uri.queryParameters['messageId'];
               final messageId = messageIdStr != null
                   ? int.tryParse(messageIdStr)
@@ -103,7 +223,6 @@ class AppRouter {
           GoRoute(
             path: '/library-us',
             builder: (context, state) {
-              // Récupérer les paramètres depuis l'URL ou extra
               final filterName = state.uri.queryParameters['filter'];
               AnnotationTag? filter;
               if (filterName != null) {
@@ -111,12 +230,9 @@ class AppRouter {
                   filter = AnnotationTag.values.firstWhere(
                         (tag) => tag.name == filterName,
                   );
-                } catch (_) {
-                  // Si le filtre n'est pas valide, on l'ignore
-                }
+                } catch (_) {}
               }
 
-              // Récupérer les données passées via extra
               final extra = state.extra as Map<String, dynamic>?;
               final coupleId = extra?['coupleId'] ?? 'couple_001';
               final scrollToMessage =
@@ -141,10 +257,6 @@ class AppRouter {
             path: '/profile',
             builder: (context, state) => const ProfilePage(),
           ),
-          GoRoute(
-            path: '/weekly-checkin',
-            builder: (context, state) => const WeeklyCheckinPage(),
-          ),
         ],
       ),
     ],
@@ -164,50 +276,26 @@ class AppRouter {
       final isGoingToAuth =
           state.fullPath == '/sign-in' ||
               state.fullPath == '/sign-up' ||
+              state.fullPath == '/forgot-password' ||  // 👈 AJOUT
               (state.fullPath?.startsWith('/verify-email') == true);
 
-      final isGoingToOnboarding = state.fullPath == '/onboarding';
-      final isDashboardRoute = state.fullPath == '/dashboard';
-      final isShellChild = state.fullPath == '/dashboard' ||
-          state.fullPath == '/chat-lova' ||
-          state.fullPath == '/chat-couple' ||
-          state.fullPath == '/library-us' ||
-          state.fullPath == '/settings' ||
-          state.fullPath == '/link-relation' ||
-          state.fullPath == '/profile' ||
-          state.fullPath == '/weekly-checkin';
-
-      // Allow dashboard shell access without bouncing when authenticated.
-      if (isAuth && isDashboardRoute) {
+      // CHANGEMENT: Permettre l'accès direct au dashboard si authentifié
+      if (isAuth && (state.fullPath == '/dashboard' ||
+          state.fullPath == '/gate' ||
+          state.fullPath?.startsWith('/settings') == true ||
+          state.fullPath?.startsWith('/chat') == true ||
+          state.fullPath?.startsWith('/library') == true ||
+          state.fullPath?.startsWith('/profile') == true)) {
         return null;
       }
 
-      // Si authentifié, vérifier l'onboarding
-      if (isAuth) {
-        // Vérifier si l'onboarding est complété (lecture synchrone)
-        final hasCompletedOnboarding = ref.read(onboardingStateProvider);
 
-        // Si l'utilisateur n'a pas complété l'onboarding et n'est pas déjà sur cette page
-        if (!hasCompletedOnboarding && !isGoingToOnboarding) {
-          return '/onboarding';
-        }
-
-        // Si l'onboarding est complété et l'utilisateur essaie d'y accéder
-        if (hasCompletedOnboarding && isGoingToOnboarding) {
-          // Redirige vers dashboard route si on tente d'accéder à l'onboarding
-          return '/dashboard';
-        }
-
-        // Si l'utilisateur authentifié essaie d'accéder aux pages d'auth
-        if (isGoingToAuth) {
-          // Redirige vers dashboard route si on tente d'accéder à une page d'auth
-          return '/dashboard';
-        }
+      if (isAuth && isGoingToAuth) {
+        // Ne plus forcer /gate, aller directement au dashboard
+        return '/dashboard';
       }
 
-      // Gestion des utilisateurs non authentifiés
       if (!isAuth && !isGoingToAuth) {
-        // Si email en attente, forcer la page de vérification
         if (isEmailPending) {
           final email = auth.maybeWhen(
             emailPending: (e, __) => e,
@@ -218,7 +306,6 @@ class AppRouter {
         return '/sign-in';
       }
 
-      // Si l'utilisateur n'est pas authentifié mais essaie de sortir du flow auth alors qu'il est en emailPending
       if (!isAuth && isEmailPending && state.fullPath != '/verify-email') {
         final email = auth.maybeWhen(
           emailPending: (e, __) => e,
@@ -230,4 +317,80 @@ class AppRouter {
       return null;
     },
   );
+}
+
+class OnboardingGatePage extends ConsumerWidget {
+  const OnboardingGatePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncStatus = ref.watch(hasCompletedOnboardingProvider);
+
+    return asyncStatus.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) {
+        // En cas d'erreur, aller au dashboard par défaut
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.go('/dashboard');
+        });
+        return const SizedBox.shrink();
+      },
+      data: (done) {
+        // Si onboarding complété OU si erreur de check, aller au dashboard
+        // Sinon aller à l'onboarding
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // CHANGEMENT: par défaut aller au dashboard
+          // L'onboarding ne se déclenche que si explicitement non complété
+          if (done == false) {
+            context.go('/onboarding');
+          } else {
+            context.go('/dashboard');
+          }
+        });
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+// Page placeholder pour les fonctionnalités à venir
+class PlaceholderPage extends StatelessWidget {
+  final String title;
+
+  const PlaceholderPage({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.construction,
+              size: 80,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Fonctionnalité bientôt disponible',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

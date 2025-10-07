@@ -9,6 +9,7 @@ final linkRelationControllerProvider =
   (ref) => LinkRelationController(ref, LinkingRepository(Supabase.instance.client)),
 );
 
+
 class LinkRelationController extends StateNotifier<RelationLinkingState> {
   final Ref ref;
   final LinkingRepository repository;
@@ -28,13 +29,15 @@ class LinkRelationController extends StateNotifier<RelationLinkingState> {
       state = RelationLinkingState.error('Impossible de générer le code.');
       rethrow;
     }
+
   }
 
+
   /// Tente de lier une relation avec un code
-  Future<void> linkWithCode(String code) async {
+  Future<void> linkWithCode(String code, String relationMode) async {
     state = RelationLinkingState.pending();
     try {
-      await repository.accept(code.trim().toUpperCase());
+      await repository.accept(code.trim().toUpperCase(), relationMode);
       state = RelationLinkingState.linked();
     } catch (e) {
       final msg = e.toString();
@@ -55,4 +58,6 @@ class LinkRelationController extends StateNotifier<RelationLinkingState> {
   void reset() {
     state = RelationLinkingState.idle();
   }
+
 }
+

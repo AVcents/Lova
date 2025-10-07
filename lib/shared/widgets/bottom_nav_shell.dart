@@ -39,13 +39,6 @@ class BottomNavShell extends StatelessWidget {
               onTap: () => context.go('/dashboard'),
             ),
             _buildNavItem(
-              icon: Icons.favorite,
-              label: 'Relation',
-              index: 1,
-              currentIndex: currentIndex,
-              onTap: () => context.go('/link-relation'),
-            ),
-            _buildNavItem(
               icon: Icons.chat_bubble,
               label: 'Lova',
               index: 2,
@@ -58,6 +51,13 @@ class BottomNavShell extends StatelessWidget {
               index: 3,
               currentIndex: currentIndex,
               onTap: () => context.go('/chat-couple'),
+            ),
+            _buildNavItem(
+              icon: Icons.storage,
+              label: 'Test',
+              index: 4,
+              currentIndex: currentIndex,
+              onTap: () => context.go('/test-storage'),
             ),
           ],
         ),
@@ -119,9 +119,9 @@ class BottomNavShell extends StatelessWidget {
   }
 
   int _getIndex(String location) {
-    if (location.contains('/link-relation')) return 1;
     if (location.contains('/chat-lova')) return 2;
     if (location.contains('/chat-couple')) return 3;
+    if (location.contains('/test-storage')) return 4;
     if (location.contains('/profile')) return 4;
     return 0;
   }

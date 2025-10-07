@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:lova/shared/providers/dashboard_mode_provider.dart';
-import 'package:lova/features/relation/me_dashboard_view.dart';
+import 'package:lova/features/me_dashboard/me_dashboard_view.dart';
 import 'package:lova/features/relation/us_dashboard_view.dart';
 import 'package:lova/features/relation/widgets/action_bar.dart';
 

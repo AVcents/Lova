@@ -9,6 +9,7 @@ import 'package:lova/shared/providers/tanks_provider.dart';
 import 'package:lova/shared/ui/semantic_colors.dart';
 import 'package:lova/features/relation/widgets/love_tank_gauge.dart';
 import 'package:lova/features/relation/widgets/me_tank_gauge.dart';
+import 'package:go_router/go_router.dart';
 
 class RelationActionBar extends ConsumerStatefulWidget {
   final DashboardMode mode;
@@ -198,7 +199,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
           label: 'Rituels rapides',
           child: MeTankGauge(
             value: meTankState.value,
-            onTap: () => showMeTankRitualsSheet(context, ref),
+            onTap: () => context.pushNamed('meRituals'),
           ),
         ),
 
@@ -305,7 +306,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        _showCheckinDialog();
+        context.pushNamed('meCheckin');
       },
       child: Semantics(
         label: 'Check-in humeur',
@@ -332,7 +333,7 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        _showJournalSheet();
+        context.pushNamed('meJournal');
       },
       child: Semantics(
         label: 'Journal rapide',
@@ -482,142 +483,4 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
     );
   }
 
-  void _showCheckinDialog() {
-    final colorScheme = Theme.of(context).colorScheme;
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        Widget emoji(String char) => InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            await ref
-                .read(meTankProvider.notifier)
-                .incrementBy(MeTankAction.moodCheckin);
-            if (mounted) {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Check-in enregistré +3'),
-                  backgroundColor: SemanticColors.success(context),
-                ),
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(char, style: const TextStyle(fontSize: 28)),
-          ),
-        );
-
-        return AlertDialog(
-          title: const Text('Ton humeur du moment'),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              '😞',
-              '😐',
-              '🙂',
-              '😊',
-              '🤩',
-            ].map((e) => emoji(e)).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Fermer'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showJournalSheet() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final controller1 = TextEditingController();
-    final controller2 = TextEditingController();
-    final controller3 = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: 20 + MediaQuery.of(ctx).viewInsets.bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Journal rapide',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller1,
-                decoration: const InputDecoration(
-                  labelText: 'Ce que j’ai bien fait',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller2,
-                decoration: const InputDecoration(
-                  labelText: 'Un besoin aujourd’hui',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller3,
-                decoration: const InputDecoration(labelText: 'Un merci'),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    HapticFeedback.lightImpact();
-                    await ref
-                        .read(meTankProvider.notifier)
-                        .incrementBy(MeTankAction.journalGratitude);
-                    if (mounted) {
-                      Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Journal enregistré +4'),
-                          backgroundColor: SemanticColors.success(context),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Enregistrer'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

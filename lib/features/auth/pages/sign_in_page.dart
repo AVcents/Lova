@@ -515,12 +515,9 @@ class _SignInPageState extends ConsumerState<SignInPage>
                                         ],
                                       ),
                                       TextButton(
-                                        onPressed: () =>
-                                            context.go('/forgot-password'),
+                                        onPressed: () => context.push('/forgot-password'),
                                         style: TextButton.styleFrom(
-                                          foregroundColor: const Color(
-                                            0xFFFF3D86,
-                                          ),
+                                          foregroundColor: const Color(0xFFFF3D86),
                                         ),
                                         child: const Text(
                                           'Mot de passe oublié ?',

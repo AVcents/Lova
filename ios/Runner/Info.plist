@@ -29,6 +29,7 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
@@ -57,5 +58,9 @@
 
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lova a besoin d'accéder au microphone pour transcrire votre journal vocal.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Lova utilise la reconnaissance vocale pour transcrire vos pensées en texte.</string>
 </dict>
 </plist>

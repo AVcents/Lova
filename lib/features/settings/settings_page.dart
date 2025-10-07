@@ -1,8 +1,11 @@
+// lib/features/settings/settings_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
-import 'package:lova/features/auth/domain/auth_state.dart'; // rend AuthStateX (userOrNull, isBusy) disponible
+import 'package:lova/features/auth/domain/auth_state.dart';
+import 'package:lova/features/settings/services/profile_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:lova/shared/providers/theme_mode_provider.dart';
@@ -17,7 +20,8 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateNotifierProvider);
     final user = authState.userOrNull;
-    ref.watch(themeModeProvider); // Force rebuild on theme change
+    final profileAsync = ref.watch(currentProfileProvider);
+    ref.watch(themeModeProvider);
 
     return AppScaffold(
       child: SingleChildScrollView(
@@ -25,34 +29,43 @@ class SettingsPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // En-tête avec titre et sous-titre
             _buildHeader(context),
-
             const SizedBox(height: 32),
 
-            // Section Profil utilisateur
-            _buildUserSection(context, user),
-
+            // SECTION 1: Mon Profil (le plus consulté)
+            _buildUserSection(context, user, profileAsync),
             const SizedBox(height: 24),
 
-            // Section Paramètres de l'app
-            _buildAppSettingsSection(context),
-
+            // SECTION 2: Ma Relation
+            _buildRelationSection(context, profileAsync),
             const SizedBox(height: 24),
 
-            // Section Conseils matrimoniaux
-            _buildMatrimonialSection(context),
-
+            // SECTION 3: Objectifs & Intérêts
+            _buildObjectivesSection(context),
             const SizedBox(height: 24),
 
-            // Section Support et aide
+            // SECTION 4: Sécurité
+            _buildSecuritySection(context),
+            const SizedBox(height: 24),
+
+            // SECTION 5: Préférences
+            _buildPreferencesSection(context, ref),
+            const SizedBox(height: 24),
+
+            // SECTION 6: Abonnement
+            _buildSubscriptionSection(context, profileAsync),
+            const SizedBox(height: 24),
+
+            // SECTION 7: Support & Aide
             _buildSupportSection(context),
+            const SizedBox(height: 24),
 
+            // SECTION 8: Légal
+            _buildLegalSection(context),
             const SizedBox(height: 40),
 
-            // Bouton de déconnexion
-            _buildSignOutButton(context, ref),
-
+            // Actions de compte
+            _buildAccountActions(context, ref),
             const SizedBox(height: 20),
           ],
         ),
@@ -79,7 +92,7 @@ class SettingsPage extends ConsumerWidget {
               const Icon(Icons.favorite, color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Text(
-                'LOVA',
+                'Paramètres',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -89,7 +102,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Votre conseiller matrimonial personnel',
+            'Gérez votre compte et vos préférences',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Colors.white.withOpacity(0.9),
             ),
@@ -99,58 +112,122 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildUserSection(BuildContext context, User? user) {
+  Widget _buildUserSection(BuildContext context, User? user, AsyncValue<UserProfile?> profileAsync) {
+    final profile = profileAsync.valueOrNull;
+
     return _buildSection(
       context,
       title: 'Mon Profil',
       icon: Icons.person,
       children: [
-        if (user != null)
+        if (user != null && profile != null) ...[
           _buildListTile(
             context,
             icon: Icons.email,
-            title: 'Email',
-            subtitle: user.email ?? 'Non défini',
-            onTap: () {
-              // Navigation vers édition profil
-            },
-          )
-        else
-          _buildListTile(
-            context,
-            icon: Icons.login,
-            title: 'Non connecté',
-            subtitle: 'Veuillez vous connecter',
-            onTap: () {},
+            title: user.email ?? 'Non défini',
+            subtitle: 'Adresse email',
+            onTap: null,
           ),
+          if (profile.firstName != null)
+            _buildListTile(
+              context,
+              icon: Icons.badge,
+              title: profile.firstName!,
+              subtitle: profile.prenom ?? 'Aucun surnom',
+              onTap: null,
+            ),
+        ],
         _buildListTile(
           context,
           icon: Icons.edit,
           title: 'Modifier mon profil',
-          subtitle: 'Préférences et informations personnelles',
+          subtitle: 'Photo, informations personnelles',
+          onTap: () => context.push('/settings/edit-profile'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRelationSection(BuildContext context, AsyncValue<UserProfile?> profileAsync) {
+    final profile = profileAsync.valueOrNull;
+    final hasRelation = profile?.relationId != null;
+
+    return _buildSection(
+      context,
+      title: 'Ma Relation',
+      icon: Icons.favorite,
+      children: [
+        _buildListTile(
+          context,
+          icon: hasRelation ? Icons.link : Icons.link_off,
+          title: hasRelation ? 'Relation liée' : 'Pas de relation',
+          subtitle: hasRelation
+              ? 'Gérer votre relation partenaire'
+              : 'Liez votre compte avec votre partenaire',
+          onTap: () => context.push('/link-relation'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildObjectivesSection(BuildContext context) {
+    return _buildSection(
+      context,
+      title: 'Objectifs & Centres d\'intérêt',
+      icon: Icons.psychology,
+      children: [
+        _buildListTile(
+          context,
+          icon: Icons.favorite_border,
+          title: 'Mes objectifs relationnels',
+          subtitle: 'Définir vos priorités de couple',
+          onTap: () => context.push('/settings/objectives_page'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSecuritySection(BuildContext context) {
+    return _buildSection(
+      context,
+      title: 'Sécurité',
+      icon: Icons.security,
+      children: [
+        _buildListTile(
+          context,
+          icon: Icons.email_outlined,
+          title: 'Changer l\'adresse email',
+          subtitle: 'Modifier votre email de connexion',
+          onTap: () => context.push('/settings/change-email'),
+        ),
+        _buildListTile(
+          context,
+          icon: Icons.lock_outline,
+          title: 'Changer le mot de passe',
+          subtitle: 'Mettre à jour votre mot de passe',
+          onTap: () => context.push('/settings/change-password'),
+        ),
+        _buildListTile(
+          context,
+          icon: Icons.phonelink_lock,
+          title: 'Authentification à deux facteurs',
+          subtitle: 'Bientôt disponible',
           onTap: () {
-            // Navigation vers édition profil
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Fonctionnalité bientôt disponible')),
+            );
           },
         ),
       ],
     );
   }
 
-  Widget _buildAppSettingsSection(BuildContext context) {
+  Widget _buildPreferencesSection(BuildContext context, WidgetRef ref) {
     return _buildSection(
       context,
-      title: 'Paramètres de l\'application',
-      icon: Icons.settings,
+      title: 'Préférences',
+      icon: Icons.tune,
       children: [
-        _buildListTile(
-          context,
-          icon: Icons.notifications,
-          title: 'Notifications',
-          subtitle: 'Gérer les alertes et rappels',
-          onTap: () {
-            // Navigation vers paramètres notifications
-          },
-        ),
         Consumer(
           builder: (context, ref, _) {
             final isDarkMode = ref.watch(themeModeProvider) == ThemeMode.dark;
@@ -158,7 +235,18 @@ class SettingsPage extends ConsumerWidget {
             return SwitchListTile(
               title: const Text('Mode sombre'),
               subtitle: const Text('Activer ou désactiver le thème sombre'),
-              secondary: const Icon(Icons.dark_mode),
+              secondary: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.dark_mode,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
+              ),
               value: isDarkMode,
               onChanged: (value) {
                 ref.read(themeModeProvider.notifier).state = value
@@ -168,51 +256,41 @@ class SettingsPage extends ConsumerWidget {
             );
           },
         ),
-        _buildListTile(
-          context,
-          icon: Icons.language,
-          title: 'Langue',
-          subtitle: 'Français',
-          onTap: () {
-            // Navigation vers paramètres langue
-          },
-        ),
       ],
     );
   }
 
-  Widget _buildMatrimonialSection(BuildContext context) {
+  Widget _buildSubscriptionSection(BuildContext context, AsyncValue<UserProfile?> profileAsync) {
+    final profile = profileAsync.valueOrNull;
+    final tier = profile?.subscriptionTier ?? 'free';
+    final isPremium = tier != 'free';
+
     return _buildSection(
       context,
-      title: 'Conseils matrimoniaux',
-      icon: Icons.psychology,
+      title: 'Abonnement',
+      icon: Icons.workspace_premium,
       children: [
         _buildListTile(
           context,
-          icon: Icons.favorite_border,
-          title: 'Mes préférences',
-          subtitle: 'Type de conseils et domaines d\'intérêt',
-          onTap: () {
-            // Navigation vers préférences conseils
-          },
+          icon: isPremium ? Icons.star : Icons.star_border,
+          title: isPremium ? 'Plan Premium' : 'Plan Gratuit',
+          subtitle: isPremium ? 'Gérer votre abonnement' : 'Découvrir les avantages Premium',
+          onTap: () => context.push('/settings/subscription'),
         ),
+        if (isPremium)
+          _buildListTile(
+            context,
+            icon: Icons.receipt_long,
+            title: 'Historique des paiements',
+            subtitle: 'Factures et reçus',
+            onTap: () => context.push('/settings/billing-history'),
+          ),
         _buildListTile(
           context,
-          icon: Icons.history,
-          title: 'Historique des conversations',
-          subtitle: 'Revoir vos échanges passés',
-          onTap: () {
-            // Navigation vers historique
-          },
-        ),
-        _buildListTile(
-          context,
-          icon: Icons.bookmark,
-          title: 'Conseils sauvegardés',
-          subtitle: 'Vos conseils favoris',
-          onTap: () {
-            // Navigation vers favoris
-          },
+          icon: Icons.share,
+          title: 'Inviter des amis',
+          subtitle: 'Gagnez des jours Premium gratuits',
+          onTap: () => context.push('/settings/referral'),
         ),
       ],
     );
@@ -221,7 +299,7 @@ class SettingsPage extends ConsumerWidget {
   Widget _buildSupportSection(BuildContext context) {
     return _buildSection(
       context,
-      title: 'Support et aide',
+      title: 'Support & Aide',
       icon: Icons.help,
       children: [
         _buildListTile(
@@ -229,33 +307,83 @@ class SettingsPage extends ConsumerWidget {
           icon: Icons.help_outline,
           title: 'Centre d\'aide',
           subtitle: 'FAQ et guides d\'utilisation',
-          onTap: () {
-            // Navigation vers aide
-          },
+          onTap: () => context.push('/help'),
+        ),
+        _buildListTile(
+          context,
+          icon: Icons.bug_report,
+          title: 'Signaler un bug',
+          subtitle: 'Nous aider à améliorer l\'app',
+          onTap: () => context.push('/settings/report-bug'),
         ),
         _buildListTile(
           context,
           icon: Icons.contact_support,
           title: 'Nous contacter',
           subtitle: 'Support technique et questions',
-          onTap: () {
-            // Navigation vers contact
-          },
+          onTap: () => context.push('/contact'),
         ),
         _buildListTile(
           context,
+          icon: Icons.bar_chart,
+          title: 'Mon activité',
+          subtitle: 'Statistiques et engagement',
+          onTap: () => context.push('/settings/activity'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLegalSection(BuildContext context) {
+    return _buildSection(
+      context,
+      title: 'Légal',
+      icon: Icons.gavel,
+      children: [
+        _buildListTile(
+          context,
           icon: Icons.privacy_tip,
-          title: 'Confidentialité',
-          subtitle: 'Politique de confidentialité',
+          title: 'Politique de confidentialité',
+          subtitle: 'Protection de vos données',
+          onTap: () => context.push('/privacy'),
+        ),
+        _buildListTile(
+          context,
+          icon: Icons.description,
+          title: 'Conditions d\'utilisation',
+          subtitle: 'Nos conditions générales',
+          onTap: () => context.push('/terms'),
+        ),
+        _buildListTile(
+          context,
+          icon: Icons.info_outline,
+          title: 'Mentions légales',
+          subtitle: 'Informations sur l\'éditeur',
+          onTap: () => context.push('/legal'),
+        ),
+        _buildListTile(
+          context,
+          icon: Icons.info,
+          title: 'À propos',
+          subtitle: 'Version 1.0.0',
           onTap: () {
-            // Navigation vers politique
+            showAboutDialog(
+              context: context,
+              applicationName: 'LOOVA',
+              applicationVersion: '1.0.0',
+              applicationIcon: const Icon(Icons.favorite, color: Color(0xFFE91E63)),
+              children: const [
+                Text('Votre conseiller matrimonial personnel basé sur l\'IA.\n\n'
+                    'Développé avec amour pour renforcer les relations.'),
+              ],
+            );
           },
         ),
       ],
     );
   }
 
-  Widget _buildSignOutButton(BuildContext context, WidgetRef ref) {
+  Widget _buildAccountActions(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateNotifierProvider);
     final signingOut = ref.watch(signingOutProvider);
     final isBusy = authState.maybeWhen(
@@ -267,86 +395,131 @@ class SettingsPage extends ConsumerWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ElevatedButton.icon(
-        onPressed: (signingOut || isBusy)
-            ? null
-            : () async {
-                final shouldSignOut = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Déconnexion'),
-                    content: const Text(
-                      'Êtes-vous sûr de vouloir vous déconnecter ?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Annuler'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.red,
-                        ),
-                        child: const Text('Se déconnecter'),
-                      ),
-                    ],
+      child: Column(
+        children: [
+          ElevatedButton.icon(
+            onPressed: (signingOut || isBusy)
+                ? null
+                : () async {
+              final shouldSignOut = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Déconnexion'),
+                  content: const Text(
+                    'Êtes-vous sûr de vouloir vous déconnecter ?',
                   ),
-                );
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Annuler'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                      child: const Text('Se déconnecter'),
+                    ),
+                  ],
+                ),
+              );
 
-                if (shouldSignOut == true) {
-                  try {
-                    ref.read(signingOutProvider.notifier).state = true;
-                    await ref
-                        .read(authStateNotifierProvider.notifier)
-                        .signOut();
+              if (shouldSignOut == true) {
+                try {
+                  ref.read(signingOutProvider.notifier).state = true;
+                  await ref
+                      .read(authStateNotifierProvider.notifier)
+                      .signOut();
 
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Déconnecté avec succès')),
-                      );
-
-                      // Redirection vers la page de connexion si nécessaire
-                      context.go('/sign-in');
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
-                    }
-                  } finally {
-                    ref.read(signingOutProvider.notifier).state = false;
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Déconnecté avec succès')),
+                    );
+                    context.go('/sign-in');
                   }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur : $e')),
+                    );
+                  }
+                } finally {
+                  ref.read(signingOutProvider.notifier).state = false;
                 }
-              },
-        icon: signingOut
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.logout),
-        label: Text(signingOut ? 'Déconnexion...' : 'Se déconnecter'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.shade50,
-          foregroundColor: Colors.red.shade700,
-          side: BorderSide(color: Colors.red.shade200),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+              }
+            },
+            icon: signingOut
+                ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+                : const Icon(Icons.logout),
+            label: Text(signingOut ? 'Déconnexion...' : 'Se déconnecter'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade50,
+              foregroundColor: Colors.red.shade700,
+              side: BorderSide(color: Colors.red.shade200),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
-        ),
+
+          const SizedBox(height: 16),
+
+          TextButton.icon(
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Supprimer le compte'),
+                  content: const Text(
+                    'Cette action est irréversible. Toutes vos données seront supprimées.\n\n'
+                        'Êtes-vous absolument sûr ?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Annuler'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                      child: const Text('Supprimer définitivement'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                final service = ref.read(profileServiceProvider);
+                final success = await service.deleteAccount();
+                if (success && context.mounted) {
+                  context.go('/sign-in');
+                }
+              }
+            },
+            icon: const Icon(Icons.delete_forever, size: 20),
+            label: const Text('Supprimer mon compte'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
+      BuildContext context, {
+        required String title,
+        required IconData icon,
+        required List<Widget> children,
+      }) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -386,12 +559,12 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Widget _buildListTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required String subtitle,
+        required VoidCallback? onTap,
+      }) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
@@ -407,8 +580,11 @@ class SettingsPage extends ConsumerWidget {
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      trailing: onTap != null
+          ? const Icon(Icons.chevron_right, color: Colors.grey)
+          : null,
       onTap: onTap,
+      enabled: onTap != null,
     );
   }
 }

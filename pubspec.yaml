@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  speech_to_text: ^6.6.0
+  wakelock_plus: ^1.2.0  # Empêche l'écran de se mettre en veille
   shared_preferences: 2.2.2
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.5.1   # état
@@ -49,6 +51,7 @@ dependencies:
   supabase_flutter: 2.3.4
   freezed_annotation: ^2.4.1
   flutter_animate: ^4.5.2
+  image_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:

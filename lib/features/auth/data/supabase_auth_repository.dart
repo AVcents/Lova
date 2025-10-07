@@ -98,8 +98,7 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       await _client.auth.signInWithOtp(
         email: email,
-        emailRedirectTo: emailRedirectTo ?? 'loova://login-callback',
-      );
+        emailRedirectTo: emailRedirectTo ?? 'https://loova.fr/auth/callback?next=loova://login-callback',      );
       return AuthResult(success: true, message: 'Lien de connexion envoyé par email');
     } on AuthException catch (e) {
       final (mappedType, mappedMsg) = _mapAuthException(e);
