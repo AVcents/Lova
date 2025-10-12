@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lova/features/me_dashboard/providers/me_providers.dart';
 
 class EmotionalStateCard extends ConsumerWidget {
@@ -214,13 +214,15 @@ class EmotionalStateCard extends ConsumerWidget {
 
   Widget _buildLastMonthSummary(
       BuildContext context,
-      Map<String, dynamic> summary,
+      Map<String, dynamic>? summary,
       ColorScheme colorScheme,
       TextTheme textTheme,
       ) {
-    final monthName = _getMonthName(summary['month'] as int);
-    final shortSummary = summary['short_summary'] as String;
-    final sentiment = summary['sentiment'] as String; // 'positive', 'neutral', 'difficult'
+    // Lecture tolérante des champs pour éviter les casts sur null
+    final int month   = (summary?['month'] as int?) ?? DateTime.now().month;
+    final String monthName = _getMonthName(month);
+    final String shortSummary = (summary?['short_summary'] as String?) ?? '';
+    final String sentiment    = (summary?['sentiment'] as String?) ?? 'neutral'; // 'positive', 'neutral', 'difficult'
 
     Color sentimentColor;
     IconData sentimentIcon;
@@ -261,7 +263,9 @@ class EmotionalStateCard extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          shortSummary,
+          shortSummary.isNotEmpty
+              ? shortSummary
+              : 'Aucune analyse disponible pour le mois dernier.',
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurface.withOpacity(0.8),
             height: 1.4,
@@ -305,7 +309,13 @@ final currentMonthCheckinsCountProvider = FutureProvider<int>((ref) async {
   final repository = ref.watch(meRepositoryProvider);
   final now = DateTime.now();
   final startOfMonth = DateTime(now.year, now.month, 1);
-  final checkins = await repository.getCheckinsHistory(days: now.day);
+final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return 0;
+
+  final checkins = await repository.getCheckinsHistoryForUser(
+    userId: userId,
+    days: now.day,
+  );
 
   // Filtrer pour ne garder que ceux du mois en cours
   return checkins.where((checkin) {

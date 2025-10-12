@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  json_annotation: ^4.8.1
+  fl_chart: ^0.66.0  # Pour les graphiques
   speech_to_text: ^6.6.0
   wakelock_plus: ^1.2.0  # Empêche l'écran de se mettre en veille
   shared_preferences: 2.2.2
@@ -56,6 +58,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+
+  json_serializable: ^6.7.1
   flutter_lints: ^4.0.0
   build_runner: ^2.4.12
   drift_dev: ^2.18.0

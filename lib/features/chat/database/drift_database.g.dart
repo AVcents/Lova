@@ -7,9 +7,7 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-
   $MessagesTable(this.attachedDatabase, [this._alias]);
-
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -82,7 +80,6 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
     ),
     defaultValue: const Constant(false),
   );
-
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -92,14 +89,11 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
     timestamp,
     isEncrypted,
   ];
-
   @override
   String get aliasedName => _alias ?? actualTableName;
-
   @override
   String get actualTableName => $name;
   static const String $name = 'messages';
-
   @override
   VerificationContext validateIntegrity(
     Insertable<Message> instance, {
@@ -156,7 +150,6 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
-
   @override
   Message map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -201,7 +194,6 @@ class Message extends DataClass implements Insertable<Message> {
   final String content;
   final DateTime timestamp;
   final bool isEncrypted;
-
   const Message({
     required this.id,
     required this.senderId,
@@ -210,7 +202,6 @@ class Message extends DataClass implements Insertable<Message> {
     required this.timestamp,
     required this.isEncrypted,
   });
-
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -248,7 +239,6 @@ class Message extends DataClass implements Insertable<Message> {
       isEncrypted: serializer.fromJson<bool>(json['isEncrypted']),
     );
   }
-
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -277,7 +267,6 @@ class Message extends DataClass implements Insertable<Message> {
     timestamp: timestamp ?? this.timestamp,
     isEncrypted: isEncrypted ?? this.isEncrypted,
   );
-
   Message copyWithCompanion(MessagesCompanion data) {
     return Message(
       id: data.id.present ? data.id.value : this.id,
@@ -309,7 +298,6 @@ class Message extends DataClass implements Insertable<Message> {
   @override
   int get hashCode =>
       Object.hash(id, senderId, receiverId, content, timestamp, isEncrypted);
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -329,7 +317,6 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<String> content;
   final Value<DateTime> timestamp;
   final Value<bool> isEncrypted;
-
   const MessagesCompanion({
     this.id = const Value.absent(),
     this.senderId = const Value.absent(),
@@ -338,7 +325,6 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.timestamp = const Value.absent(),
     this.isEncrypted = const Value.absent(),
   });
-
   MessagesCompanion.insert({
     this.id = const Value.absent(),
     required String senderId,
@@ -350,7 +336,6 @@ class MessagesCompanion extends UpdateCompanion<Message> {
        receiverId = Value(receiverId),
        content = Value(content),
        timestamp = Value(timestamp);
-
   static Insertable<Message> custom({
     Expression<int>? id,
     Expression<String>? senderId,
@@ -427,14 +412,11 @@ class MessagesCompanion extends UpdateCompanion<Message> {
 
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
-
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $MessagesTable messages = $MessagesTable(this);
-
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
-
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [messages];
 }
@@ -467,7 +449,6 @@ class $$MessagesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
@@ -508,7 +489,6 @@ class $$MessagesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
@@ -549,7 +529,6 @@ class $$MessagesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
@@ -656,9 +635,7 @@ typedef $$MessagesTableProcessedTableManager =
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
-
   $AppDatabaseManager(this._db);
-
   $$MessagesTableTableManager get messages =>
       $$MessagesTableTableManager(_db, _db.messages);
 }

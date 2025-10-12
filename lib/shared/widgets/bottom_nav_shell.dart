@@ -52,13 +52,6 @@ class BottomNavShell extends StatelessWidget {
               currentIndex: currentIndex,
               onTap: () => context.go('/chat-couple'),
             ),
-            _buildNavItem(
-              icon: Icons.storage,
-              label: 'Test',
-              index: 4,
-              currentIndex: currentIndex,
-              onTap: () => context.go('/test-storage'),
-            ),
           ],
         ),
       ),

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lova/features/me_dashboard/data/monthly_analysis_service.dart';
+
 import 'package:lova/features/me_dashboard/providers/me_providers.dart';
 
 class EmotionalHistoryPage extends ConsumerStatefulWidget {
@@ -30,6 +33,12 @@ class _EmotionalHistoryPageState extends ConsumerState<EmotionalHistoryPage>
       curve: Curves.easeInOut,
     );
     _animationController.forward();
+    // Force a fresh fetch when the page opens
+    Future.microtask(() {
+      ref.invalidate(monthlyAnalysesProvider);
+      // If you later add a specific lastMonthSummaryProvider, invalidate it here too.
+      // ref.invalidate(lastMonthSummaryProvider);
+    });
   }
 
   @override
@@ -50,6 +59,17 @@ class _EmotionalHistoryPageState extends ConsumerState<EmotionalHistoryPage>
         title: const Text('Historique émotionnel'),
         backgroundColor: colorScheme.surface,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Rafraîchir',
+            onPressed: () {
+              // Invalidate and immediately refresh the provider
+              ref.invalidate(monthlyAnalysesProvider);
+              ref.refresh(monthlyAnalysesProvider);
+            },
+          ),
+        ],
       ),
       body: monthlyAnalysesAsync.when(
         data: (analyses) {
@@ -144,12 +164,13 @@ class _MonthAnalysisCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final month = analysis['month'] as int;
-    final year = analysis['year'] as int;
+    final int month = (analysis['month'] as int?) ?? DateTime.now().month;
+    final int year = (analysis['year'] as int?) ?? DateTime.now().year;
     final monthName = _getMonthName(month);
-    final sentiment = analysis['sentiment'] as String;
-    final stats = analysis['stats'] as Map<String, dynamic>;
-    final aiInsight = analysis['ai_insight'] as String?;
+    final String sentiment = (analysis['sentiment'] as String?) ?? 'neutral';
+    final Map<String, dynamic> stats = (analysis['stats'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final String aiInsight = (analysis['ai_insight'] as String?) ?? '';
+    final List<dynamic> topTriggers = (stats['top_triggers'] as List?)?.cast<dynamic>() ?? const [];
 
     Color sentimentColor = _getSentimentColor(sentiment);
 
@@ -232,6 +253,28 @@ class _MonthAnalysisCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if ((aiInsight).isEmpty) ...[
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () async {
+                        final svc = MonthlyAnalysisService(Supabase.instance.client);
+                        final ok = await svc.triggerInsightGeneration(year: year, month: month);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(ok ? 'Analyse IA générée' : 'Échec de la génération')),
+                          );
+                        }
+                        // Rafraîchir la liste
+                        ref.invalidate(monthlyAnalysesProvider);
+                        ref.refresh(monthlyAnalysesProvider);
+                      },
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text("Générer l'analyse IA"),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Text(
                   'Statistiques du mois',
                   style: textTheme.titleMedium?.copyWith(
@@ -240,11 +283,9 @@ class _MonthAnalysisCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildStatsGrid(context, stats, colorScheme, textTheme),
-
                 const SizedBox(height: 24),
 
-                // Déclencheurs principaux
-                if (stats['top_triggers'] != null) ...[
+                if (topTriggers.isNotEmpty) ...[
                   Text(
                     'Déclencheurs principaux',
                     style: textTheme.titleSmall?.copyWith(
@@ -254,15 +295,14 @@ class _MonthAnalysisCard extends ConsumerWidget {
                   const SizedBox(height: 12),
                   _buildTriggersList(
                     context,
-                    stats['top_triggers'] as List<dynamic>,
+                    topTriggers,
                     colorScheme,
                     textTheme,
                   ),
                   const SizedBox(height: 24),
                 ],
 
-                // Analyse IA
-                if (aiInsight != null && aiInsight.isNotEmpty) ...[
+                if (aiInsight.isNotEmpty) ...[
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -318,12 +358,15 @@ class _MonthAnalysisCard extends ConsumerWidget {
       ColorScheme colorScheme,
       TextTheme textTheme,
       ) {
+    final int checkins = (stats['checkin_count'] as num?)?.toInt() ?? 0;
+    final double avgMood = (stats['average_mood'] as num?)?.toDouble() ?? 0.0;
+    final int positiveDays = (stats['positive_days'] as num?)?.toInt() ?? 0;
     return Row(
       children: [
         Expanded(
           child: _buildStatItem(
             Icons.check_circle,
-            '${stats['checkin_count']}',
+            '$checkins',
             'Check-ins',
             colorScheme,
             textTheme,
@@ -333,7 +376,7 @@ class _MonthAnalysisCard extends ConsumerWidget {
         Expanded(
           child: _buildStatItem(
             Icons.sentiment_satisfied,
-            '${stats['average_mood'].toStringAsFixed(1)}',
+            avgMood.toStringAsFixed(1),
             'Humeur moy.',
             colorScheme,
             textTheme,
@@ -343,7 +386,7 @@ class _MonthAnalysisCard extends ConsumerWidget {
         Expanded(
           child: _buildStatItem(
             Icons.trending_up,
-            '${stats['positive_days']}',
+            '$positiveDays',
             'Jours +',
             colorScheme,
             textTheme,
@@ -399,9 +442,10 @@ class _MonthAnalysisCard extends ConsumerWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: triggers.map((trigger) {
-        final name = trigger['name'] as String;
-        final count = trigger['count'] as int;
+      children: (triggers).map((t) {
+        final Map m = (t is Map) ? t : const {};
+        final String name = (m['name'] as String?) ?? '—';
+        final int count = (m['count'] as num?)?.toInt() ?? 0;
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
@@ -425,7 +469,7 @@ class _MonthAnalysisCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '$count×',
+                  '${count}×',
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSecondary,
                     fontWeight: FontWeight.bold,

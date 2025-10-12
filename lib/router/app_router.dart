@@ -13,7 +13,6 @@ import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
 import 'package:lova/features/onboarding/providers/onboarding_controller.dart';
 import 'package:lova/features/onboarding/presentation/onboarding_flow.dart';
-import 'package:lova/features/Test/storage_test_page.dart';
 
 // Pages d'authentification
 import 'package:lova/features/auth/pages/sign_in_page.dart';
@@ -43,6 +42,18 @@ import 'package:lova/features/me_dashboard/presentation/widgets/checkins_history
 import 'package:lova/features/me_dashboard/presentation/widgets/journal_history_section.dart' as journals;
 import 'package:lova/features/me_dashboard/presentation/emotional_history_page.dart';
 
+// Imports pour les routes Intentions
+import 'package:lova/features/me_dashboard/presentation/intentions_overview_page.dart';
+import 'package:lova/features/me_dashboard/presentation/intention_creation_wizard.dart';
+import 'package:lova/features/me_dashboard/presentation/intention_detail_page.dart';
+import 'package:lova/features/me_dashboard/presentation/intention_reflection_page.dart';
+
+import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_screen.dart';
+import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_results_screen.dart';
+import 'package:lova/features/us_dashboard/screens/games/connection_games_screen.dart';
+import 'package:lova/features/us_dashboard/screens/games/games_library_screen.dart';
+import 'package:lova/features/us_dashboard/screens/games/intimacy_card_game_screen.dart';
+import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription _sub;
 
@@ -104,10 +115,6 @@ class AppRouter {
       GoRoute(
         path: '/mediation',
         builder: (context, state) => const MediationFlowPage(),
-      ),
-      GoRoute(
-        path: '/test-storage',
-        builder: (context, state) => const StorageTestPage(),
       ),
 
       // Routes de paramètres (hors bottom nav)
@@ -196,6 +203,67 @@ class AppRouter {
         path: '/emotional-history',
         name: 'emotionalHistory',
         builder: (context, state) => const EmotionalHistoryPage(),
+      ),
+      // Dans votre GoRouter config
+      GoRoute(
+        path: '/intentions',
+        name: 'intentions',
+        builder: (context, state) => const IntentionsOverviewPage(),
+      ),
+      GoRoute(
+        path: '/intentions/create',
+        name: 'intentionsCreate',
+        builder: (context, state) => const IntentionCreationWizard(),
+      ),
+      GoRoute(
+        path: '/intentions/detail/:id',
+        name: 'intentionDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return IntentionDetailPage(intentionId: id);
+        },
+      ),
+      GoRoute(
+        path: '/intentions/reflection',
+        name: 'intentionReflection',
+        builder: (context, state) => const IntentionReflectionPage(),
+      ),
+
+      // Routes US Dashboard
+      GoRoute(
+        path: '/couple-checkin',
+        name: 'coupleCheckin',
+        builder: (context, state) => const CoupleCheckinScreen(),
+      ),
+      GoRoute(
+        path: '/couple-checkin-results',
+        name: 'coupleCheckinResults',
+        builder: (context, state) => const CoupleCheckinResultsScreen(),
+      ),
+      GoRoute(
+        path: '/couple-rituals',
+        name: 'coupleRituals',
+        builder: (context, state) => const CoupleRitualsLibraryScreen(),
+      ),
+      GoRoute(
+        path: '/connection-games',
+        name: 'connectionGames',
+        builder: (context, state) => const ConnectionGamesScreen(),
+      ),
+      GoRoute(
+        path: '/create-couple-ritual',
+        builder: (context, state) => const CoupleRitualsLibraryScreen(),
+      ),
+      // Route bibliothèque (remplace le placeholder)
+      GoRoute(
+        path: '/connection-games',
+        builder: (context, state) => const GamesLibraryScreen(),
+      ),
+
+// Route jeu intimité
+      GoRoute(
+        path: '/intimacy-card-game',
+        builder: (context, state) => const IntimacyCardGameScreen(),
       ),
 
       // Routes avec bottom navigation

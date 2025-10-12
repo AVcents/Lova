@@ -215,28 +215,57 @@ class JournalNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 }
+
 /// Provider pour le journal d'aujourd'hui
 final todayJournalProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final repository = ref.watch(meRepositoryProvider);
   return repository.getTodayJournal();
 });
+
+// ============================================
+// NOTIFICATIONS ACTION BAR - NOUVEAUX PROVIDERS
+// ============================================
+
+/// Provider pour vérifier si un rituel a été fait aujourd'hui
+final todayRitualProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final repository = ref.watch(meRepositoryProvider);
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return null;
+
+  final now = DateTime.now();
+  final startOfDay = DateTime(now.year, now.month, now.day);
+
+  final rituals = await repository.getActionsHistory(days: 1);
+
+  if (rituals.isEmpty) return null;
+
+  // Trouver le premier rituel d'aujourd'hui
+  for (final ritual in rituals) {
+    final timestamp = DateTime.parse(ritual['ts'] as String);
+    if (timestamp.isAfter(startOfDay) || timestamp.isAtSameMomentAs(startOfDay)) {
+      return ritual;
+    }
+  }
+
+  return null;
+});
+
 // ============================================
 // HISTORIQUES PROVIDERS
 // ============================================
 
 /// Historique du journal sur N jours (par défaut 30)
 final journalsHistoryProvider =
-    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>((ref, days) async {
+FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>((ref, days) async {
   final repository = ref.watch(meRepositoryProvider);
   final safeDays = days <= 0 ? 30 : days;
   final list = await repository.getJournalsHistory(days: safeDays);
-  // Toujours retourner une liste (jamais null)
   return list;
 });
 
 /// Historique des rituels/actions sur N jours (par défaut 30)
 final ritualsHistoryProvider =
-    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>((ref, days) async {
+FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>((ref, days) async {
   final repository = ref.watch(meRepositoryProvider);
   final safeDays = days <= 0 ? 30 : days;
   final list = await repository.getActionsHistory(days: safeDays);

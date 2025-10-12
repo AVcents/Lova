@@ -92,6 +92,37 @@ class MonthlyAnalysisService {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  /// Récupérer les intentions d'un mois spécifique
+  Future<List<Map<String, dynamic>>> _getIntentionsForMonth(int year, int month) async {
+    final startDate = DateTime(year, month, 1);
+    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
+
+    // On suppose une table 'me_intentions' avec colonnes:
+    // user_id UUID, ts/timestamp TIMESTAMPTZ, status TEXT, category TEXT
+    final response = await _supabase
+        .from('me_intentions')
+        .select()
+        .eq('user_id', _currentUserId!)
+        .gte('ts', startDate.toIso8601String())
+        .lte('ts', endDate.toIso8601String())
+        .order('ts', ascending: true);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  /// Extraire le top des catégories d'intentions sur la période
+  List<Map<String, dynamic>> _getTopCategories(List<Map<String, dynamic>> intentions, {int limit = 5}) {
+    final counts = <String, int>{};
+    for (final i in intentions) {
+      final cat = (i['category'] as String?)?.trim();
+      if (cat != null && cat.isNotEmpty) {
+        counts[cat] = (counts[cat] ?? 0) + 1;
+      }
+    }
+    final entries = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    return entries.take(limit).map((e) => {'name': e.key, 'count': e.value}).toList();
+  }
+
   /// Calculer les statistiques du mois
   Map<String, dynamic> _calculateStats(List<Map<String, dynamic>> checkins) {
     if (checkins.isEmpty) {
@@ -226,7 +257,7 @@ class MonthlyAnalysisService {
     };
   }
 
-  /// Générer l'analyse IA via OpenAI API
+  /// Générer l'analyse IA via OpenAI API via Edge Function
   Future<String> _generateAIInsight({
     required Map<String, dynamic> stats,
     required Map<String, dynamic> correlations,
@@ -246,7 +277,7 @@ Données du mois :
 - ${stats['difficult_days']} jours difficiles (humeur 1)
 
 Déclencheurs principaux :
-${stats['top_triggers'].map((t) => '- ${t['name']} : ${t['count']} fois').join('\n')}
+${(stats['top_triggers'] as List).map((t) => '- ' + (t['name']?.toString() ?? '') + ' : ' + (t['count']?.toString() ?? '0') + ' fois').join('\n')}
 
 Rituels et impact :
 - ${correlations['days_with_rituals']} jours avec rituels (humeur moyenne : ${correlations['avg_mood_with_rituals'].toStringAsFixed(1)})
@@ -269,17 +300,30 @@ IMPORTANT :
 ''';
 
     try {
-      // Appel via Edge Function Supabase
+      final userId = _currentUserId;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Appel via Edge Function Supabase avec payload complet
       final response = await _supabase.functions.invoke(
         'generate-monthly-insight',
-        body: {'prompt': prompt},
+        body: {
+          'user_id': userId,
+          'year': year,
+          'month': month,
+          'prompt': prompt,
+          'stats': stats,
+          'correlations': correlations,
+        },
       );
 
-      if (response.data != null && response.data['insight'] != null) {
-        return response.data['insight'] as String;
-      } else {
-        throw Exception('Invalid response from AI service');
+      // La fonction renvoie { ok, insight, used_fallback, ... }
+      final data = response.data;
+      if (response.status == 200 && data is Map && data['insight'] != null) {
+        return data['insight'] as String;
       }
+
+      // Si la réponse n'est pas conforme, fallback local
+      return _generateFallbackInsight(stats, correlations);
     } catch (e) {
       print('Error generating AI insight: $e');
       return _generateFallbackInsight(stats, correlations);
@@ -352,6 +396,22 @@ Pour le mois prochain, maintenir une pratique régulière des rituels et rester 
     required String aiInsight,
     required Map<String, dynamic> correlations,
   }) async {
+    // 1) Récupérer les intentions du mois et calculer le résumé
+    final intentions = await _getIntentionsForMonth(year, month);
+    final completedCount = intentions.where((i) => (i['status'] as String?) == 'completed').length;
+    final totalCount = intentions.length;
+    final completionRate = totalCount == 0
+        ? 0
+        : ((completedCount / totalCount) * 100).round();
+
+    final intentionsData = {
+      'completed': completedCount,
+      'total': totalCount,
+      'completion_rate': completionRate,
+      'top_categories': _getTopCategories(intentions),
+    };
+
+    // 2) Insérer l'analyse enrichie avec le résumé des intentions
     await _supabase.from('me_monthly_analyses').insert({
       'user_id': _currentUserId,
       'year': year,
@@ -361,6 +421,7 @@ Pour le mois prochain, maintenir une pratique régulière des rituels et rester 
       'short_summary': shortSummary,
       'ai_insight': aiInsight,
       'correlations': correlations,
+      'intentions_summary': intentionsData, // <= Nouveau champ JSONB
       'created_at': DateTime.now().toIso8601String(),
     });
   }
@@ -371,5 +432,38 @@ Pour le mois prochain, maintenir une pratique régulière des rituels et rester 
       'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
     ];
     return months[month - 1];
+  }
+
+  /// Déclencher manuellement la génération de l'insight pour un mois
+  Future<bool> triggerInsightGeneration({
+    required int year,
+    required int month,
+  }) async {
+    try {
+      final userId = _currentUserId;
+      if (userId == null) return false;
+
+      final response = await _supabase.functions.invoke(
+        'generate-monthly-insight',
+        body: {
+          'user_id': userId,
+          'year': year,
+          'month': month,
+          // Pas besoin de renvoyer stats/correlations ici si déjà en base.
+          // L'Edge Function mettra à jour `ai_insight` pour (user_id, year, month).
+          'prompt': 'Regénère l\'analyse pour ${month.toString().padLeft(2, '0')}/$year.'
+        },
+      );
+
+      if (response.status == 200) {
+        print('Insight regen OK: ${response.data}');
+        return true;
+      }
+      print('Insight regen failed: ${response.status} ${response.data}');
+      return false;
+    } catch (e) {
+      print('triggerInsightGeneration error: $e');
+      return false;
+    }
   }
 }

@@ -1,16 +1,26 @@
+// lib/features/relation/widgets/action_bar.dart
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:lova/shared/providers/dashboard_mode_provider.dart';
 import 'package:lova/shared/providers/tanks_provider.dart';
 import 'package:lova/shared/ui/semantic_colors.dart';
 import 'package:lova/features/relation/widgets/love_tank_gauge.dart';
-import 'package:lova/features/relation/widgets/me_tank_gauge.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:lova/features/me_dashboard/providers/me_providers.dart';
+import 'package:lova/shared/animations/circle_reveal_route.dart';
+import 'package:lova/shared/animations/circle_reveal_route.dart';
+import 'package:lova/features/me_dashboard/presentation/checkin_page.dart';
+import 'package:lova/features/me_dashboard/presentation/journal_page.dart';
+import 'package:lova/features/me_dashboard/presentation/rituals_selection_page.dart';
+import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_screen.dart';
+import 'package:lova/features/us_dashboard/screens/games/games_library_screen.dart';
+import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
 class RelationActionBar extends ConsumerStatefulWidget {
   final DashboardMode mode;
 
@@ -22,119 +32,36 @@ class RelationActionBar extends ConsumerStatefulWidget {
 
 class _RelationActionBarState extends ConsumerState<RelationActionBar>
     with TickerProviderStateMixin {
-  // Pour le mode US - Rupture
-  bool _isBreakupPressed = false;
-  double _breakupProgress = 0.0;
-  late AnimationController _breakupController;
-  int _warningStage = 0; // 0: none, 1: 30%, 2: 60%, 3: 90%
+  // ============================================
+  // VARIABLES D'ÉTAT - MODE US (COUPLE)
+  // ============================================
+  final GlobalKey _coupleCheckinButtonKey = GlobalKey();
+  final GlobalKey _coupleRitualsButtonKey = GlobalKey();
+  final GlobalKey _connectionGamesButtonKey = GlobalKey();
 
+// ============================================
+// VARIABLES D'ÉTAT - MODE ME (ANIMATION)
+// ============================================
+  final GlobalKey _checkinButtonKey = GlobalKey();
+  final GlobalKey _ritualsButtonKey = GlobalKey();
+  final GlobalKey _journalButtonKey = GlobalKey();
+
+  // ============================================
+  // LIFECYCLE
+  // ============================================
   @override
   void initState() {
     super.initState();
-    _breakupController = AnimationController(
-      duration: const Duration(seconds: 10),
-      vsync: this,
-    );
-
-    _breakupController.addListener(() {
-      setState(() {
-        _breakupProgress = _breakupController.value;
-
-        // Gestion des avertissements
-        if (_breakupProgress >= 0.3 && _warningStage < 1) {
-          _warningStage = 1;
-          _showWarningBanner('Respirer 1 min ?');
-          HapticFeedback.lightImpact();
-        } else if (_breakupProgress >= 0.6 && _warningStage < 2) {
-          _warningStage = 2;
-          _showWarningBanner('Essayer Médiation SOS ?');
-          HapticFeedback.mediumImpact();
-        } else if (_breakupProgress >= 0.9 && _warningStage < 3) {
-          _warningStage = 3;
-          _showWarningBanner('Vraiment certain ?');
-          HapticFeedback.heavyImpact();
-        }
-      });
-
-      if (_breakupController.value >= 1.0) {
-        _showBreakupConfirmation();
-      }
-    });
   }
 
   @override
   void dispose() {
-    _breakupController.dispose();
     super.dispose();
   }
 
-  void _showWarningBanner(String message) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: SemanticColors.warning(context),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 100, left: 20, right: 20),
-      ),
-    );
-  }
-
-  void _showBreakupConfirmation() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        final textTheme = Theme.of(context).textTheme;
-
-        return AlertDialog(
-          title: Text(
-            'Fin de relation',
-            style: textTheme.titleLarge?.copyWith(
-              color: colorScheme.error,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'C\'est important. Es-tu certain de vouloir mettre fin à cette relation ?',
-            style: textTheme.bodyLarge,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _resetBreakup();
-              },
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Relation terminée')),
-                );
-                _resetBreakup();
-              },
-              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
-              child: const Text('Confirmer'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _resetBreakup() {
-    setState(() {
-      _isBreakupPressed = false;
-      _breakupProgress = 0.0;
-      _warningStage = 0;
-    });
-    _breakupController.reset();
-  }
-
+  // ============================================
+  // BUILD PRINCIPAL
+  // ============================================
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -159,112 +86,101 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
     );
   }
 
+  // ============================================
+  // 💑 MODE US (COUPLE) - ACTIONS
+  // ============================================
   Widget _buildUsActions({Key? key}) {
-    final loveTankState = ref.watch(loveTankProvider);
+    // TODO: brancher relationshipProvider, todayCoupleCheckinProvider, todayCoupleRitualProvider
+    final double relationshipGauge = 0.85; // valeur par défaut 85%
+    final bool hasCheckinNotification = false;
+    final bool hasRitualNotification = false;
 
     return Row(
       key: key,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Bouton Rupture (gauche)
-        _buildBreakupButton(),
+        // Bouton Check-in de couple (gauche)
+        _buildCoupleCheckinButton(hasNotification: hasCheckinNotification),
 
-        // Love Tank Gauge (centre)
-        Semantics(
-          label: 'Booster notre jauge',
-          child: LoveTankGauge(
-            value: loveTankState.value,
-            onTap: () => showLoveTankBoosterSheet(context, ref),
-          ),
+        // Gauge centrale Rituels de couple (centre)
+        _buildCoupleRitualsGauge(
+          value: relationshipGauge,
+          hasNotification: hasRitualNotification,
         ),
 
-        // Moment+ (droite)
-        _buildMomentButton(),
+        // Bouton Jeux de connexion (droite)
+        _buildConnectionGamesButton(),
       ],
     );
   }
 
-  Widget _buildMeActions({Key? key}) {
-    final meTankState = ref.watch(meTankProvider);
 
-    return Row(
-      key: key,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Check-in (gauche)
-        _buildCheckinButton(),
-
-        // Me Tank Gauge (centre)
-        Semantics(
-          label: 'Rituels rapides',
-          child: MeTankGauge(
-            value: meTankState.value,
-            onTap: () => context.pushNamed('meRituals'),
-          ),
-        ),
-
-        // Journal+ (droite)
-        _buildJournalButton(),
-      ],
-    );
-  }
-
-  Widget _buildBreakupButton() {
+  // ============================================
+  // 💑 MODE US (COUPLE) — NOUVEAUX BOUTONS MODERNES
+  // ============================================
+  Widget _buildCoupleCheckinButton({bool hasNotification = false}) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          _isBreakupPressed = true;
-        });
-        _breakupController.forward();
+      key: _coupleCheckinButtonKey,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.pushWithCircleReveal(
+          page: const CoupleCheckinScreen(),
+          buttonKey: _coupleCheckinButtonKey,
+          gradientColors: hasNotification
+              ? const [Color(0xFFFF6B9D), Color(0xFFFFA06B)]
+              : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+        );
       },
-      onTapUp: (_) => _resetBreakup(),
-      onTapCancel: () => _resetBreakup(),
       child: Semantics(
-        label: 'Rupture',
-        child: Container(
-          width: 60,
-          height: 60,
+        label: 'Check-in de couple',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 65.0,
+          height: 65.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: colorScheme.surface,
-            border: Border.all(
-              color: _isBreakupPressed
-                  ? colorScheme.error.withOpacity(
-                      0.5 + (_breakupProgress * 0.5),
-                    )
-                  : colorScheme.onSurface.withOpacity(0.3),
-              width: 2,
+            gradient: LinearGradient(
+              colors: hasNotification
+                  ? [const Color(0xFFFF6B9D), const Color(0xFFFFA06B)]
+                  : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: hasNotification
+                    ? const Color(0xFFFF6B9D).withOpacity(0.4)
+                    : colorScheme.primary.withOpacity(0.2),
+                blurRadius: hasNotification ? 16.0 : 10.0,
+                offset: const Offset(0.0, 4.0),
+              ),
+            ],
           ),
           child: Stack(
-            alignment: Alignment.center,
             children: [
-              if (_isBreakupPressed)
-                SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: CircularProgressIndicator(
-                    value: _breakupProgress,
-                    strokeWidth: 3,
-                    backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      colorScheme.error.withOpacity(0.7),
+              const Center(
+                child: Icon(
+                  Icons.favorite_rounded,
+                  color: Colors.white,
+                  size: 30.0,
+                ),
+              ),
+              if (hasNotification)
+                Positioned(
+                  top: 6.0,
+                  right: 6.0,
+                  child: Container(
+                    width: 14.0,
+                    height: 14.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Color(0xFFFF6B9D), width: 2.5),
                     ),
                   ),
                 ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  _breakupProgress > 0.5 ? Icons.heart_broken : Icons.close,
-                  color: _isBreakupPressed
-                      ? colorScheme.error
-                      : colorScheme.onSurface,
-                  size: 28,
-                  key: ValueKey(_breakupProgress > 0.5),
-                ),
-              ),
             ],
           ),
         ),
@@ -272,215 +188,495 @@ class _RelationActionBarState extends ConsumerState<RelationActionBar>
     );
   }
 
-  Widget _buildMomentButton() {
+  Widget _buildCoupleRitualsGauge({
+    required double value,
+    bool hasNotification = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final percentage = (value * 100).round();
 
     return GestureDetector(
-      onTap: () => _showMomentSheet(),
-      child: Semantics(
-        label: 'Planifier un moment',
-        child: Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colorScheme.surface,
-            border: Border.all(
-              color: colorScheme.onSurface.withOpacity(0.3),
-              width: 2,
-            ),
-          ),
-          child: Icon(
-            Icons.add_circle_outline,
-            color: colorScheme.primary,
-            size: 28,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCheckinButton() {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
+      key: _coupleRitualsButtonKey,
       onTap: () {
-        HapticFeedback.lightImpact();
-        context.pushNamed('meCheckin');
+        HapticFeedback.mediumImpact();
+        context.pushWithCircleReveal(
+          page: const CoupleRitualsLibraryScreen(),
+          buttonKey: _coupleRitualsButtonKey,
+          gradientColors: hasNotification
+              ? const [Color(0xFFFF6B35), Color(0xFFFF9068)]
+              : [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+        );
       },
       child: Semantics(
-        label: 'Check-in humeur',
-        child: Container(
-          width: 60,
-          height: 60,
+        label: 'Rituels de couple',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 80.0,
+          height: 80.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: colorScheme.surface,
-            border: Border.all(
-              color: colorScheme.onSurface.withOpacity(0.3),
-              width: 2,
+            gradient: LinearGradient(
+              colors: hasNotification
+                  ? [const Color(0xFFFF6B35), const Color(0xFFFF9068)]
+                  : [
+                      colorScheme.primaryContainer.withOpacity(0.8),
+                      colorScheme.secondaryContainer.withOpacity(0.8),
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: hasNotification
+                    ? const Color(0xFFFF6B35).withOpacity(0.5)
+                    : colorScheme.primary.withOpacity(0.25),
+                blurRadius: hasNotification ? 20.0 : 12.0,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          child: Icon(Icons.mood, color: colorScheme.primary, size: 28),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildJournalButton() {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        context.pushNamed('meJournal');
-      },
-      child: Semantics(
-        label: 'Journal rapide',
-        child: Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colorScheme.surface,
-            border: Border.all(
-              color: colorScheme.onSurface.withOpacity(0.3),
-              width: 2,
-            ),
-          ),
-          child: Icon(
-            Icons.menu_book_outlined,
-            color: colorScheme.primary,
-            size: 28,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMomentSheet() {
-    final colorScheme = Theme.of(context).colorScheme;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        Widget tile(
-          IconData icon,
-          String title,
-          String subtitle,
-          VoidCallback onTap,
-        ) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Material(
-              color: colorScheme.primary.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: onTap,
-                child: ListTile(
-                  leading: Icon(icon, color: colorScheme.primary),
-                  title: Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
+          child: Stack(
+            children: [
+              Center(
+                child: SizedBox(
+                  width: 70.0,
+                  height: 70.0,
+                  child: CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 4.0,
+                    backgroundColor: Colors.white.withOpacity(0.25),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
-                  subtitle: Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.local_fire_department_rounded,
+                      color: Colors.white,
+                      size: 26.0,
                     ),
-                  ),
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '+8',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.primary,
+                    const SizedBox(height: 2.0),
+                    Text(
+                      '$percentage%',
+                      style: const TextStyle(
+                        fontSize: 11.0,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (hasNotification)
+                Positioned(
+                  top: 4.0,
+                  right: 4.0,
+                  child: Container(
+                    width: 16.0,
+                    height: 16.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Color(0xFFFF6B35), width: 2.5),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConnectionGamesButton({bool hasNotification = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      key: _connectionGamesButtonKey,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.pushWithCircleReveal(
+          page: const GamesLibraryScreen(),
+          buttonKey: _connectionGamesButtonKey,
+          gradientColors: const [Color(0xFFE91E63), Color(0xFF9C27B0)],
+        );
+      },
+      child: Semantics(
+        label: 'Jeux de connexion',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 65.0,
+          height: 65.0,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [Color(0xFFE91E63), Color(0xFF9C27B0)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.sports_esports_rounded,
+              color: Colors.white,
+              size: 30.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================
+  // 🧘 MODE ME - ACTIONS
+  // ============================================
+  Widget _buildMeActions({Key? key}) {
+    final meTankState = ref.watch(meTankProvider);
+    final todayCheckinAsync = ref.watch(todayCheckinProvider);
+    final todayRitualAsync = ref.watch(todayRitualProvider);
+    final todayJournalAsync = ref.watch(todayJournalProvider);
+
+    return Row(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        todayCheckinAsync.when(
+          data: (checkin) =>
+              _buildModernCheckinButton(hasNotification: checkin == null),
+          loading: () => _buildModernCheckinButton(hasNotification: false),
+          error: (_, __) => _buildModernCheckinButton(hasNotification: false),
+        ),
+        todayRitualAsync.when(
+          data: (ritual) =>
+              _buildModernTankGauge(
+                value: meTankState.value.toDouble(),
+                hasNotification: ritual == null,
+              ),
+          loading: () =>
+              _buildModernTankGauge(
+                value: meTankState.value.toDouble(),
+                hasNotification: false,
+              ),
+          error: (_, __) =>
+              _buildModernTankGauge(
+                value: meTankState.value.toDouble(),
+                hasNotification: false,
+              ),
+        ),
+        todayJournalAsync.when(
+          data: (journal) =>
+              _buildModernJournalButton(hasNotification: journal == null),
+          loading: () => _buildModernJournalButton(hasNotification: false),
+          error: (_, __) => _buildModernJournalButton(hasNotification: false),
+        ),
+      ],
+    );
+  }
+
+  // ============================================
+  // 🧘 MODE ME - BOUTON CHECK-IN (MODERNE)
+  // ============================================
+  Widget _buildModernCheckinButton({bool hasNotification = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      key: _checkinButtonKey,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+
+        // ✅ Animation toujours activée
+        context.pushWithCircleReveal(
+          page: const CheckinPage(),
+          buttonKey: _checkinButtonKey,
+          gradientColors: hasNotification
+              ? const [
+            Color(0xFFFF6B9D),
+            Color(0xFFFFA06B),
+          ]
+              : [
+            colorScheme.primaryContainer,
+            colorScheme.secondaryContainer,
+          ],
+        );
+      },
+      child: Semantics(
+        label: 'Check-in',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 65.0,
+          height: 65.0,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: hasNotification
+                  ? [
+                const Color(0xFFFF6B9D),
+                const Color(0xFFFFA06B),
+              ]
+                  : [
+                colorScheme.primaryContainer,
+                colorScheme.secondaryContainer,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: hasNotification
+                    ? const Color(0xFFFF6B9D).withOpacity(0.4)
+                    : colorScheme.primary.withOpacity(0.2),
+                blurRadius: hasNotification ? 16.0 : 10.0,
+                offset: const Offset(0.0, 4.0),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Icon(
+                  hasNotification ? Icons.favorite : Icons.favorite_rounded,
+                  color: Colors.white,
+                  size: 30.0,
+                ),
+              ),
+              if (hasNotification)
+                Positioned(
+                  top: 6.0,
+                  right: 6.0,
+                  child: Container(
+                    width: 14.0,
+                    height: 14.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFFF6B9D),
+                        width: 2.5,
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          );
-        }
-
-        Future<void> planAndClose(String label) async {
-          HapticFeedback.lightImpact();
-          await ref
-              .read(loveTankProvider.notifier)
-              .incrementBy(LoveTankAction.planMoment);
-          if (mounted) {
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Moment planifié ($label) +8'),
-                backgroundColor: SemanticColors.success(context),
-              ),
-            );
-          }
-        }
-
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Planifier un moment',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              tile(
-                Icons.schedule,
-                '30 minutes',
-                'Aujourd’hui',
-                () => planAndClose('30 min aujourd’hui'),
-              ),
-              tile(
-                Icons.alarm,
-                '60 minutes',
-                'Demain',
-                () => planAndClose('60 min demain'),
-              ),
-              tile(
-                Icons.weekend_outlined,
-                '120 minutes',
-                'Ce week-end',
-                () => planAndClose('120 min ce week-end'),
-              ),
-              const SizedBox(height: 8),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
+  // ============================================
+  // 🧘 MODE ME - TANK GAUGE (MODERNE)
+  // ============================================
+  Widget _buildModernTankGauge({
+    required double value,
+    bool hasNotification = false,
+  }) {
+    final colorScheme = Theme
+        .of(context)
+        .colorScheme;
+    final percentage = (value * 100).round();
+
+    return GestureDetector(
+      key: _ritualsButtonKey,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+
+        // ✅ Animation toujours activée
+        context.pushWithCircleReveal(
+          page: const RitualsSelectionPage(),
+          buttonKey: _ritualsButtonKey,
+          gradientColors: hasNotification
+              ? const [
+            Color(0xFF667EEA),
+            Color(0xFF764BA2),
+          ]
+              : [
+            colorScheme.primaryContainer,
+            colorScheme.secondaryContainer,
+          ],
+        );
+      },
+      child: Semantics(
+        label: 'Rituels rapides',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 80.0,
+          height: 80.0,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: hasNotification
+                  ? [
+                const Color(0xFF667EEA),
+                const Color(0xFF764BA2),
+              ]
+                  : [
+                colorScheme.primaryContainer.withOpacity(0.8),
+                colorScheme.secondaryContainer.withOpacity(0.8),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: hasNotification
+                    ? const Color(0xFF667EEA).withOpacity(0.5)
+                    : colorScheme.primary.withOpacity(0.25),
+                blurRadius: hasNotification ? 20.0 : 12.0,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: SizedBox(
+                  width: 70.0,
+                  height: 70.0,
+                  child: CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 4.0,
+                    backgroundColor: Colors.white.withOpacity(0.25),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.self_improvement,
+                      color: Colors.white,
+                      size: 26.0,
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      '$percentage%',
+                      style: const TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (hasNotification)
+                Positioned(
+                  top: 4.0,
+                  right: 4.0,
+                  child: Container(
+                    width: 16.0,
+                    height: 16.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFF667EEA),
+                        width: 2.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================
+  // 🧘 MODE ME - BOUTON JOURNAL (MODERNE)
+  // ============================================
+  Widget _buildModernJournalButton({bool hasNotification = false}) {
+    final colorScheme = Theme
+        .of(context)
+        .colorScheme;
+
+    return GestureDetector(
+      key: _journalButtonKey,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+
+        // ✅ Animation toujours activée
+        context.pushWithCircleReveal(
+          page: const JournalPage(),
+          buttonKey: _journalButtonKey,
+          gradientColors: hasNotification
+              ? const [
+            Color(0xFFF093FB),
+            Color(0xFFF5576C),
+          ]
+              : [
+            colorScheme.primaryContainer,
+            colorScheme.secondaryContainer,
+          ],
+        );
+      },
+      child: Semantics(
+        label: 'Journal rapide',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 65.0,
+          height: 65.0,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: hasNotification
+                  ? [
+                const Color(0xFFF093FB),
+                const Color(0xFFF5576C),
+              ]
+                  : [
+                colorScheme.primaryContainer,
+                colorScheme.secondaryContainer,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: hasNotification
+                    ? const Color(0xFFF093FB).withOpacity(0.4)
+                    : colorScheme.primary.withOpacity(0.2),
+                blurRadius: hasNotification ? 16.0 : 10.0,
+                offset: const Offset(0.0, 4.0),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Icon(
+                  Icons.auto_stories_rounded,
+                  color: hasNotification ? Colors.white : colorScheme.primary,
+                  size: 30.0,
+                ),
+              ),
+              if (hasNotification)
+                Positioned(
+                  top: 6.0,
+                  right: 6.0,
+                  child: Container(
+                    width: 14.0,
+                    height: 14.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFF093FB),
+                        width: 2.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

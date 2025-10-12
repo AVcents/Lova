@@ -26,7 +26,6 @@ mixin _$AuthState {
     required TResult Function(User user) authenticated,
     required TResult Function(String message, String? code) error,
   }) => throw _privateConstructorUsedError;
-
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? unauthenticated,
@@ -39,20 +38,13 @@ mixin _$AuthState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? unauthenticated,
-
     TResult Function()? signingIn,
-
     TResult Function()? signingUp,
-
     TResult Function(String email, String? message)? emailPending,
-
     TResult Function(User user)? authenticated,
-
     TResult Function(String message, String? code)? error,
-
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
-
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Unauthenticated value) unauthenticated,
@@ -62,7 +54,6 @@ mixin _$AuthState {
     required TResult Function(_Authenticated value) authenticated,
     required TResult Function(_Error value) error,
   }) => throw _privateConstructorUsedError;
-
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Unauthenticated value)? unauthenticated,

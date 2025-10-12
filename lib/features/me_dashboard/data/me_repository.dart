@@ -117,6 +117,29 @@ class MeRepository {
     }
   }
 
+  /// Récupérer l'historique des check-ins pour un utilisateur donné
+  Future<List<MeCheckin>> getCheckinsHistoryForUser({
+    required String userId,
+    int days = 30,
+  }) async {
+    try {
+      final startDate = DateTime.now().subtract(Duration(days: days));
+      final response = await _supabase
+          .from('me_checkins')
+          .select()
+          .eq('user_id', userId)
+          .gte('ts', startDate.toIso8601String())
+          .order('ts', ascending: false);
+
+      return (response as List)
+          .map((json) => MeCheckin.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error fetching checkins history for user $userId: $e');
+      return [];
+    }
+  }
+
   // ============================================
   // STREAK
   // ============================================
@@ -505,10 +528,10 @@ class MeRepository {
     if (_currentUserId == null) return null;
 
     try {
-      // NOTE: Table réelle existante: me_monthly_summary
+      // Table correcte: me_monthly_analyses
       final response = await _supabase
-          .from('me_monthly_summary')
-          .select()
+          .from('me_monthly_analyses')
+          .select('year, month, short_summary, ai_insight, stats, correlations, created_at, updated_at')
           .eq('user_id', _currentUserId!)
           .eq('year', year)
           .eq('month', month)
@@ -526,10 +549,10 @@ class MeRepository {
     if (_currentUserId == null) return [];
 
     try {
-      // NOTE: Table réelle existante: me_monthly_summary
+      // Table correcte: me_monthly_analyses
       final response = await _supabase
-          .from('me_monthly_summary')
-          .select()
+          .from('me_monthly_analyses')
+          .select('year, month, short_summary, ai_insight, stats, correlations, created_at, updated_at')
           .eq('user_id', _currentUserId!)
           .order('year', ascending: false)
           .order('month', ascending: false);
@@ -540,4 +563,5 @@ class MeRepository {
       return [];
     }
   }
+
 }

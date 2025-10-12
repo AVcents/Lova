@@ -1,15 +1,15 @@
-// lib/features/relation/me_dashboard_view.dart
+// lib/features/me_dashboard/presentation/me_dashboard_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lova/features/me_dashboard/presentation/checkin_page.dart';
-import 'package:lova/features/me_dashboard/presentation/journal_page.dart';
-import 'package:lova/features/me_dashboard/presentation/rituals_selection_page.dart';
+import 'package:intl/intl.dart';
 import 'package:lova/features/me_dashboard/providers/me_providers.dart';
 import 'package:lova/features/me_dashboard/presentation/widgets/emotional_state_card.dart';
+import 'package:lova/features/me_dashboard/presentation/widgets/no_intention_cta.dart';
+import 'package:lova/features/me_dashboard/presentation/widgets/intention_dashboard_card.dart';
+import 'package:lova/features/me_dashboard/providers/intentions_providers.dart';
 
 class MeDashboardView extends ConsumerStatefulWidget {
   const MeDashboardView({super.key});
@@ -19,373 +19,288 @@ class MeDashboardView extends ConsumerStatefulWidget {
 }
 
 class _MeDashboardViewState extends ConsumerState<MeDashboardView> {
-  String? selectedMood;
-
-  final List<Map<String, dynamic>> moods = [
-    {'emoji': '😊', 'label': 'Heureux', 'value': 5},
-    {'emoji': '😌', 'label': 'Calme', 'value': 4},
-    {'emoji': '😐', 'label': 'Neutre', 'value': 3},
-    {'emoji': '😔', 'label': 'Triste', 'value': 2},
-    {'emoji': '😤', 'label': 'Frustré', 'value': 1},
-  ];
-
-  Future<void> _saveCheckin(int mood) async {
-    final notifier = ref.read(checkinNotifierProvider.notifier);
-    final success = await notifier.createCheckin(mood: mood);
-
-    if (!mounted) return;
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Check-in enregistré'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      // Refresh les données
+  @override
+  void initState() {
+    super.initState();
+    // Après changement de compte/session, on invalide et on rafraîchit
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(streakProvider);
       ref.invalidate(weekMetricsProvider);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Check-in déjà effectué aujourd\'hui'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
+      ref.invalidate(todayCheckinProvider);
+      ref.invalidate(currentMonthCheckinsCountProvider);
+      ref.invalidate(lastMonthSummaryProvider);
+
+      ref.refresh(streakProvider);
+      ref.refresh(weekMetricsProvider);
+      ref.refresh(todayCheckinProvider);
+      ref.refresh(currentMonthCheckinsCountProvider);
+      ref.refresh(lastMonthSummaryProvider);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Watch les données en temps réel
     final streakAsync = ref.watch(streakProvider);
-    final metricsAsync = ref.watch(weekMetricsProvider);
     final todayCheckinAsync = ref.watch(todayCheckinProvider);
+    final primaryIntentionAsync = ref.watch(primaryActiveIntentionProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Carte héro - Humeur du jour
-          Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: colorScheme.outline.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Gradient décoratif subtil
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: isDark
-                            ? [
-                          const Color(0xFFA12539).withOpacity(0.1),
-                          const Color(0xFFFF5A6E).withOpacity(0.1),
-                        ]
-                            : [
-                          const Color(0xFFFFA38F).withOpacity(0.08),
-                          const Color(0xFFFF6FA5).withOpacity(0.08),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Comment je me sens',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+          // 🎯 1. ÉTAT ÉMOTIONNEL (HERO CARD)
+          const EmotionalStateCard(),
 
-                      // État du check-in
-                      todayCheckinAsync.when(
-                        data: (checkin) {
-                          if (checkin != null) {
-                            // Déjà fait aujourd'hui
-                            final moodData = moods.firstWhere(
-                                  (m) => m['value'] == checkin.mood,
-                              orElse: () => moods[2],
-                            );
-                            return Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: colorScheme.primaryContainer.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    moodData['emoji'],
-                                    style: const TextStyle(fontSize: 32),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Check-in du jour',
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: colorScheme.onSurface.withOpacity(0.7),
-                                        ),
-                                      ),
-                                      Text(
-                                        moodData['label'],
-                                        style: textTheme.titleMedium?.copyWith(
-                                          color: colorScheme.onSurface,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
+          const SizedBox(height: 20),
 
-                          // Pas encore fait - afficher les chips
-                          return Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: moods.map((mood) {
-                              final isSelected = selectedMood == mood['value'].toString();
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedMood = mood['value'].toString();
-                                  });
-                                  HapticFeedback.lightImpact();
-                                  _saveCheckin(mood['value']);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? colorScheme.primaryContainer
-                                        : colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? colorScheme.primary
-                                          : colorScheme.outline.withOpacity(0.3),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        mood['emoji'],
-                                        style: const TextStyle(fontSize: 20),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        mood['label'],
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: isSelected
-                                              ? colorScheme.onPrimaryContainer
-                                              : colorScheme.onSurface,
-                                          fontWeight: isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          );
-                        },
-                        loading: () => const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                        error: (_, __) => const Text('Erreur de chargement'),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Streak
-                      streakAsync.when(
-                        data: (streak) {
-                          final streakDays = streak?.currentStreak ?? 0;
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.local_fire_department,
-                                  color: colorScheme.primary,
-                                  size: 32,
-                                ),
-                                const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '$streakDays jour${streakDays > 1 ? 's' : ''}',
-                                      style: textTheme.titleLarge?.copyWith(
-                                        color: colorScheme.onSurface,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Streak de connexion',
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.onSurface.withOpacity(0.7),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          // 🔥 2. STREAK ENRICHI
+          _buildEnrichedStreakCard(
+            context,
+            streakAsync,
+            todayCheckinAsync,
           ),
 
           const SizedBox(height: 20),
 
-          // CTA Principal
-          ElevatedButton(
-            onPressed: () {
-              HapticFeedback.lightImpact();
+          // ⚡ 3. QUICK ACTIONS (avec badge notification)
+          todayCheckinAsync.when(
+            data: (todayCheckin) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildQuickAction(
+                      context,
+                      icon: Icons.check_circle_outline,
+                      label: 'Check-in',
+                      hasNotification: todayCheckin == null, // Badge si pas fait
+                      onTap: () {
+                        context.pushNamed('meCheckinsHistory');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildQuickAction(
+                      context,
+                      icon: Icons.self_improvement,
+                      label: 'Rituels',
+                      onTap: () {
+                        context.pushNamed('meRitualHistory');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildQuickAction(
+                      context,
+                      icon: Icons.edit_note,
+                      label: 'Journal',
+                      onTap: () {
+                        context.pushNamed('meJournalHistory');
+                      },
+                    ),
+                  ),
+                ],
+              );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 2,
-            ),
-            child: Text(
-              'Conseil pour moi',
-              style: textTheme.titleMedium?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            loading: () => _buildQuickActionsLoading(context),
+            error: (_, __) => _buildQuickActionsLoading(context),
           ),
 
           const SizedBox(height: 20),
 
-// Quick Actions
-          Row(
-            children: [
-              Expanded(
-                child: _buildQuickAction(
-                  context,
-                  icon: Icons.check_circle_outline,
-                  label: 'Check-in',
-                  onTap: () {
-                    context.pushNamed('meCheckinsHistory');
-                  },
-                ),
+          // 🎯 4. MON INTENTION
+          primaryIntentionAsync.when(
+            data: (intention) {
+              if (intention == null) {
+                return const NoIntentionCTA();
+              }
+              return IntentionDashboardCard(intention: intention);
+            },
+            loading: () => Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildQuickAction(
-                  context,
-                  icon: Icons.self_improvement,
-                  label: 'Rituels',
-                  onTap: () {
-                    context.pushNamed('meRitualHistory');
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildQuickAction(
-                  context,
-                  icon: Icons.edit_note,
-                  label: 'Journal',
-                  onTap: () {
-                    context.pushNamed('meJournalHistory');
-                  },
-                ),
-              ),
-            ],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            error: (_, __) => const SizedBox.shrink(),
           ),
 
           const SizedBox(height: 20),
-
-          // Insights personnels
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Card État émotionnel améliorée
-              const EmotionalStateCard(),
-              const SizedBox(height: 16),
-              // Conseil du jour (conservé)
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Conseil personnalisé à venir'),
-                    ),
-                  );
-                },
-                child: _buildInsightCard(
-                  context,
-                  title: 'Conseil du jour',
-                  value: 'Prendre du temps',
-                  subtitle: 'Toucher pour voir',
-                  icon: Icons.lightbulb_outline,
-                  isInteractive: true,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
 
+  // 🔥 NOUVEAU : Streak enrichi avec contexte
+  // 🔥 CORRIGÉ : Streak enrichi sans lastCheckinDate
+  Widget _buildEnrichedStreakCard(
+      BuildContext context,
+      AsyncValue<dynamic> streakAsync,
+      AsyncValue<dynamic> todayCheckinAsync,
+      ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primaryContainer.withOpacity(0.3),
+            colorScheme.secondaryContainer.withOpacity(0.2),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: streakAsync.when(
+        data: (streak) {
+          final streakDays = streak?.currentStreak ?? 0;
+
+          return Row(
+            children: [
+              // Icône de feu
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.local_fire_department,
+                  color: colorScheme.primary,
+                  size: 32,
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // Contenu
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '$streakDays',
+                          style: textTheme.headlineMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'jour${streakDays > 1 ? 's' : ''}',
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Streak de connexion',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+
+                    // Contexte enrichi : check-in du jour
+                    const SizedBox(height: 8),
+                    todayCheckinAsync.when(
+                      data: (todayCheckin) {
+                        if (todayCheckin != null) {
+                          // Check-in fait aujourd'hui
+                          final time = DateFormat.Hm('fr_FR').format(todayCheckin.timestamp);
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 14,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'Check-in fait aujourd\'hui à $time',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          // Pas encore fait aujourd'hui
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 14,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Check-in pas encore fait aujourd\'hui',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (_, __) => Center(
+          child: Text(
+            'Erreur de chargement',
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.error,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ⚡ Quick Action avec badge notification optionnel
+  // ⚡ Quick Action avec badge notification optionnel - CORRIGÉ
   Widget _buildQuickAction(
       BuildContext context, {
         required IconData icon,
         required String label,
         required VoidCallback onTap,
+        bool hasNotification = false,
       }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -396,94 +311,112 @@ class _MeDashboardViewState extends ConsumerState<MeDashboardView> {
         onTap();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8), // ✅ Ajout padding horizontal
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: colorScheme.outline.withOpacity(0.2),
-            width: 1,
+            color: hasNotification
+                ? colorScheme.primary.withOpacity(0.3)
+                : colorScheme.outline.withOpacity(0.2),
+            width: hasNotification ? 2 : 1,
           ),
         ),
-        child: Column(
+        child: Stack(
+          clipBehavior: Clip.none, // ✅ Permet au badge de dépasser
           children: [
-            Icon(icon, color: colorScheme.primary, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
+            // ✅ Centré avec Center widget
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // ✅ Taille minimale
+                mainAxisAlignment: MainAxisAlignment.center, // ✅ Centré verticalement
+                crossAxisAlignment: CrossAxisAlignment.center, // ✅ Centré horizontalement
+                children: [
+                  Icon(
+                    icon,
+                    color: hasNotification
+                        ? colorScheme.primary
+                        : colorScheme.primary.withOpacity(0.7),
+                    size: 28,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: hasNotification ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1, // ✅ Une seule ligne
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
+
+            // Badge de notification
+            if (hasNotification)
+              Positioned(
+                top: -4, // ✅ Positionné au-dessus du container
+                right: 8,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: colorScheme.surface,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInsightCard(
-      BuildContext context, {
-        required String title,
-        required String value,
-        required String subtitle,
-        required IconData icon,
-        bool isInteractive = false,
-      }) {
+  // Loading state pour les quick actions
+  Widget _buildQuickActionsLoading(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-          width: 1,
+    return Row(
+      children: [
+        Expanded(
+          child: _buildQuickAction(
+            context,
+            icon: Icons.check_circle_outline,
+            label: 'Check-in',
+            onTap: () {
+              context.pushNamed('meCheckinsHistory');
+            },
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: colorScheme.primary.withOpacity(0.7), size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
-              ),
-              if (isInteractive)
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 12,
-                  color: colorScheme.onSurface.withOpacity(0.4),
-                ),
-            ],
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildQuickAction(
+            context,
+            icon: Icons.self_improvement,
+            label: 'Rituels',
+            onTap: () {
+              context.pushNamed('meRitualHistory');
+            },
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildQuickAction(
+            context,
+            icon: Icons.edit_note,
+            label: 'Journal',
+            onTap: () {
+              context.pushNamed('meJournalHistory');
+            },
           ),
-          const SizedBox(height: 40),
-          Text(
-            subtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
