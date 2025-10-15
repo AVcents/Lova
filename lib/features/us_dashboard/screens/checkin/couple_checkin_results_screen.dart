@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lova/features/us_dashboard/providers/couple_checkin_provider.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:lova/features/us_dashboard/models/emotion_type.dart';
+import 'package:lova/features/us_dashboard/models/couple_checkin.dart';  // ← AJOUTE CETTE LIGNE
 
 class CoupleCheckinResultsScreen extends ConsumerWidget {
   const CoupleCheckinResultsScreen({Key? key}) : super(key: key);
@@ -10,7 +11,6 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final checkinAsync = ref.watch(coupleCheckinNotifierProvider);
-    final statsAsync = ref.watch(coupleCheckinStatsProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -19,7 +19,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
-          onPressed: () => context.go('/'),
+          onPressed: () => context.go('/dashboard'),
         ),
         title: Text(
           'Résultats',
@@ -31,7 +31,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
           if (checkin == null) {
             return _buildEmptyState(context);
           }
-          return _buildResults(context, checkin, statsAsync);
+          return _buildResults(context, checkin);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => _buildErrorState(context, error),
@@ -41,8 +41,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
 
   Widget _buildResults(
       BuildContext context,
-      dynamic checkin,
-      AsyncValue statsAsync,
+      CoupleCheckin checkin,  // ← BON (type connu)
       ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -64,11 +63,35 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
 
           const SizedBox(height: 24),
 
-          // Évolution sur 7 jours
-          statsAsync.when(
-            data: (stats) => _buildWeeklyTrend(context, stats),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+          // Évolution sur 7 jours (désactivé temporairement)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.timeline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Statistiques à venir',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Les tendances et statistiques seront disponibles après plusieurs check-ins',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -146,7 +169,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
   // SCORES DU JOUR
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Widget _buildTodayScores(BuildContext context, dynamic checkin) {
+  Widget _buildTodayScores(BuildContext context, CoupleCheckin checkin) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -168,7 +191,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
             context,
             emoji: '💞',
             label: 'Connexion',
-            score: checkin.connectionScore,
+            score: checkin.scoreConnection,
             color: const Color(0xFFFF6B9D),
           ),
           const SizedBox(height: 16),
@@ -177,7 +200,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
             context,
             emoji: '😊',
             label: 'Satisfaction',
-            score: checkin.satisfactionScore,
+            score: checkin.scoreSatisfaction,
             color: const Color(0xFF667EEA),
           ),
           const SizedBox(height: 16),
@@ -186,7 +209,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
             context,
             emoji: '💬',
             label: 'Communication',
-            score: checkin.communicationScore,
+            score: checkin.scoreCommunication,
             color: const Color(0xFFFFA06B),
           ),
 
@@ -202,7 +225,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                  checkin.emotionToday,
+                  checkin.emotion.emoji,
                   style: const TextStyle(fontSize: 24),
                 ),
               ),
@@ -218,7 +241,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      _getEmotionLabel(checkin.emotionToday),
+                      _getEmotionLabel(checkin.emotion),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -382,139 +405,6 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
     );
   }
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // ÉVOLUTION SUR 7 JOURS
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Widget _buildWeeklyTrend(BuildContext context, dynamic stats) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Évolution sur 7 jours',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B35).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Text('🔥', style: TextStyle(fontSize: 12)),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${stats.currentStreak} jours',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Graphique linéaire simple
-          SizedBox(
-            height: 150,
-            child: _buildSimpleLineChart(context),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Moyennes
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildAverageChip(
-                context,
-                label: 'Connexion',
-                value: stats.averageConnectionScore,
-                color: const Color(0xFFFF6B9D),
-              ),
-              _buildAverageChip(
-                context,
-                label: 'Satisfaction',
-                value: stats.averageSatisfactionScore,
-                color: const Color(0xFF667EEA),
-              ),
-              _buildAverageChip(
-                context,
-                label: 'Communication',
-                value: stats.averageCommunicationScore,
-                color: const Color(0xFFFFA06B),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimpleLineChart(BuildContext context) {
-    // Graphique simple avec fl_chart (placeholder)
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(
-          '📈 Graphique des tendances',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-          ),
-        ),
-      ),
-    );
-    // TODO: Implémenter le vrai graphique avec fl_chart
-  }
-
-  Widget _buildAverageChip(
-      BuildContext context, {
-        required String label,
-        required double value,
-        required Color color,
-      }) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            value.toStringAsFixed(1),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // INSIGHTS & RECOMMANDATIONS
@@ -579,20 +469,19 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
     );
   }
 
-  List<String> _generateInsights(dynamic checkin) {
-    List<String> insights = [];
+  List<String> _generateInsights(CoupleCheckin checkin) {    List<String> insights = [];
 
-    if (checkin.connectionScore >= 8) {
+    if (checkin.scoreConnection >= 8) {
       insights.add('Excellente connexion ! Continuez à nourrir votre relation.');
-    } else if (checkin.connectionScore <= 5) {
+    } else if (checkin.scoreConnection <= 5) {
       insights.add('Prenez du temps de qualité ensemble cette semaine.');
     }
 
-    if (checkin.communicationScore <= 5) {
+    if (checkin.scoreCommunication <= 5) {
       insights.add('Essayez un check-in quotidien de 5 minutes pour améliorer la communication.');
     }
 
-    if (checkin.emotionToday == '😔' || checkin.emotionToday == '😡') {
+    if (checkin.emotion == EmotionType.sad || checkin.emotion == EmotionType.angry) {
       insights.add('Tu sembles avoir besoin de soutien. Partage tes sentiments avec ton partenaire.');
     }
 
@@ -670,7 +559,7 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () => context.go('/'),
+            onPressed: () => context.go('/dashboard'),
             child: const Text('Retour'),
           ),
         ],
@@ -682,20 +571,28 @@ class CoupleCheckinResultsScreen extends ConsumerWidget {
   // HELPERS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  String _getEmotionLabel(String emoji) {
-    switch (emoji) {
-      case '😍':
-        return 'Amoureux';
-      case '😊':
-        return 'Heureux';
-      case '😐':
+  String _getEmotionLabel(EmotionType emotion) {
+    switch (emotion) {
+      case EmotionType.joyful:
+        return 'Joyeux';
+      case EmotionType.grateful:
+        return 'Reconnaissant';
+      case EmotionType.loved:
+        return 'Aimé';
+      case EmotionType.calm:
+        return 'Calme';
+      case EmotionType.neutral:
         return 'Neutre';
-      case '😔':
+      case EmotionType.tired:
+        return 'Fatigué';
+      case EmotionType.stressed:
+        return 'Stressé';
+      case EmotionType.sad:
         return 'Triste';
-      case '😡':
+      case EmotionType.frustrated:
+        return 'Frustré';
+      case EmotionType.angry:
         return 'En colère';
-      default:
-        return 'Inconnu';
     }
   }
 }

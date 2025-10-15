@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
+import 'package:lova/features/us_dashboard/widgets/checkin_status_card.dart';
+import 'package:lova/features/us_dashboard/providers/couple_checkin_provider.dart';
+
 
 class UsDashboardView extends ConsumerStatefulWidget {
   const UsDashboardView({Key? key}) : super(key: key);
@@ -14,15 +17,25 @@ class UsDashboardView extends ConsumerStatefulWidget {
 class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
 
   @override
+  void initState() {
+    super.initState();
+    // Rafraîchir le check-in à chaque ouverture
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(todayCoupleCheckinProvider);
+    });
+  }
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+
+          const CheckinStatusCard(),
           // ════════════════════════════════════════════════
           // GAUGE + QUICK ACTIONS
           // ════════════════════════════════════════════════
+
           _buildLoveGaugeSection(context),
 
           const SizedBox(height: 20),

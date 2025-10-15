@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "808911628939",
+    "project_id": "loova-63f53",
+    "storage_bucket": "loova-63f53.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808911628939:android:91bf4ea455ec4b3a21c28e",
+        "android_client_info": {
+          "package_name": "com.example.lova"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk0896Mher-WHNFQgA2tJ8hShYFIH9ebg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

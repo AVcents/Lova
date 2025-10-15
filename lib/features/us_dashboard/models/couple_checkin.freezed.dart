@@ -22,28 +22,42 @@ CoupleCheckin _$CoupleCheckinFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$CoupleCheckin {
   String get id => throw _privateConstructorUsedError;
-  String get coupleId => throw _privateConstructorUsedError;
-  String get userId =>
-      throw _privateConstructorUsedError; // Celui qui a fait le check-in
-  DateTime get createdAt =>
-      throw _privateConstructorUsedError; // Questions/Réponses
-  int get connectionScore =>
-      throw _privateConstructorUsedError; // 1-10 : "Comment te sens-tu connecté(e) à ton partenaire ?"
-  int get satisfactionScore =>
-      throw _privateConstructorUsedError; // 1-10 : "Es-tu satisfait(e) de la relation ?"
-  int get communicationScore =>
-      throw _privateConstructorUsedError; // 1-10 : "La communication est-elle fluide ?"
-  String get emotionToday =>
-      throw _privateConstructorUsedError; // Emoji : 😊, 😐, 😔, 😡, 😍
-  String? get whatWentWell =>
-      throw _privateConstructorUsedError; // "Qu'est-ce qui s'est bien passé cette semaine ?"
-  String? get whatNeedsAttention =>
-      throw _privateConstructorUsedError; // "Qu'est-ce qui nécessite de l'attention ?"
-  String? get gratitudeNote =>
-      throw _privateConstructorUsedError; // "Une chose pour laquelle tu es reconnaissant(e) ?"
-  // Métadonnées
-  bool get isCompleted => throw _privateConstructorUsedError; // ✅ CORRIGÉ
-  String? get partnerCheckinId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'relation_id')
+  String get relationId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'checkin_date')
+  DateTime get checkinDate => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt => throw _privateConstructorUsedError; // Scores
+  @JsonKey(name: 'score_connection')
+  int get scoreConnection => throw _privateConstructorUsedError;
+  @JsonKey(name: 'score_satisfaction')
+  int get scoreSatisfaction => throw _privateConstructorUsedError;
+  @JsonKey(name: 'score_communication')
+  int get scoreCommunication => throw _privateConstructorUsedError; // Émotion
+  @JsonKey(name: 'emotion', fromJson: _emotionFromJson, toJson: _emotionToJson)
+  EmotionType get emotion => throw _privateConstructorUsedError; // Textes + partage
+  @JsonKey(name: 'gratitude_text')
+  String? get gratitudeText => throw _privateConstructorUsedError;
+  @JsonKey(name: 'gratitude_shared')
+  bool? get gratitudeShared => throw _privateConstructorUsedError;
+  @JsonKey(name: 'concern_text')
+  String? get concernText => throw _privateConstructorUsedError;
+  @JsonKey(name: 'concern_shared')
+  bool? get concernShared => throw _privateConstructorUsedError;
+  @JsonKey(name: 'need_text')
+  String? get needText => throw _privateConstructorUsedError;
+  @JsonKey(name: 'need_shared')
+  bool? get needShared => throw _privateConstructorUsedError; // IA
+  @JsonKey(name: 'tone_detected')
+  String? get toneDetected => throw _privateConstructorUsedError;
+  @JsonKey(name: 'ai_tokens_used')
+  int? get aiTokensUsed => throw _privateConstructorUsedError; // Timestamps
+  @JsonKey(name: 'completed_at')
+  DateTime? get completedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this CoupleCheckin to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -64,18 +78,29 @@ abstract class $CoupleCheckinCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String coupleId,
-    String userId,
-    DateTime createdAt,
-    int connectionScore,
-    int satisfactionScore,
-    int communicationScore,
-    String emotionToday,
-    String? whatWentWell,
-    String? whatNeedsAttention,
-    String? gratitudeNote,
-    bool isCompleted,
-    String? partnerCheckinId,
+    @JsonKey(name: 'relation_id') String relationId,
+    @JsonKey(name: 'user_id') String userId,
+    @JsonKey(name: 'checkin_date') DateTime checkinDate,
+    @JsonKey(name: 'created_at') DateTime createdAt,
+    @JsonKey(name: 'score_connection') int scoreConnection,
+    @JsonKey(name: 'score_satisfaction') int scoreSatisfaction,
+    @JsonKey(name: 'score_communication') int scoreCommunication,
+    @JsonKey(
+      name: 'emotion',
+      fromJson: _emotionFromJson,
+      toJson: _emotionToJson,
+    )
+    EmotionType emotion,
+    @JsonKey(name: 'gratitude_text') String? gratitudeText,
+    @JsonKey(name: 'gratitude_shared') bool? gratitudeShared,
+    @JsonKey(name: 'concern_text') String? concernText,
+    @JsonKey(name: 'concern_shared') bool? concernShared,
+    @JsonKey(name: 'need_text') String? needText,
+    @JsonKey(name: 'need_shared') bool? needShared,
+    @JsonKey(name: 'tone_detected') String? toneDetected,
+    @JsonKey(name: 'ai_tokens_used') int? aiTokensUsed,
+    @JsonKey(name: 'completed_at') DateTime? completedAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -95,18 +120,24 @@ class _$CoupleCheckinCopyWithImpl<$Res, $Val extends CoupleCheckin>
   @override
   $Res call({
     Object? id = null,
-    Object? coupleId = null,
+    Object? relationId = null,
     Object? userId = null,
+    Object? checkinDate = null,
     Object? createdAt = null,
-    Object? connectionScore = null,
-    Object? satisfactionScore = null,
-    Object? communicationScore = null,
-    Object? emotionToday = null,
-    Object? whatWentWell = freezed,
-    Object? whatNeedsAttention = freezed,
-    Object? gratitudeNote = freezed,
-    Object? isCompleted = null,
-    Object? partnerCheckinId = freezed,
+    Object? scoreConnection = null,
+    Object? scoreSatisfaction = null,
+    Object? scoreCommunication = null,
+    Object? emotion = null,
+    Object? gratitudeText = freezed,
+    Object? gratitudeShared = freezed,
+    Object? concernText = freezed,
+    Object? concernShared = freezed,
+    Object? needText = freezed,
+    Object? needShared = freezed,
+    Object? toneDetected = freezed,
+    Object? aiTokensUsed = freezed,
+    Object? completedAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -114,54 +145,78 @@ class _$CoupleCheckinCopyWithImpl<$Res, $Val extends CoupleCheckin>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                       as String,
-            coupleId: null == coupleId
-                ? _value.coupleId
-                : coupleId // ignore: cast_nullable_to_non_nullable
+            relationId: null == relationId
+                ? _value.relationId
+                : relationId // ignore: cast_nullable_to_non_nullable
                       as String,
             userId: null == userId
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
                       as String,
+            checkinDate: null == checkinDate
+                ? _value.checkinDate
+                : checkinDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
-            connectionScore: null == connectionScore
-                ? _value.connectionScore
-                : connectionScore // ignore: cast_nullable_to_non_nullable
+            scoreConnection: null == scoreConnection
+                ? _value.scoreConnection
+                : scoreConnection // ignore: cast_nullable_to_non_nullable
                       as int,
-            satisfactionScore: null == satisfactionScore
-                ? _value.satisfactionScore
-                : satisfactionScore // ignore: cast_nullable_to_non_nullable
+            scoreSatisfaction: null == scoreSatisfaction
+                ? _value.scoreSatisfaction
+                : scoreSatisfaction // ignore: cast_nullable_to_non_nullable
                       as int,
-            communicationScore: null == communicationScore
-                ? _value.communicationScore
-                : communicationScore // ignore: cast_nullable_to_non_nullable
+            scoreCommunication: null == scoreCommunication
+                ? _value.scoreCommunication
+                : scoreCommunication // ignore: cast_nullable_to_non_nullable
                       as int,
-            emotionToday: null == emotionToday
-                ? _value.emotionToday
-                : emotionToday // ignore: cast_nullable_to_non_nullable
-                      as String,
-            whatWentWell: freezed == whatWentWell
-                ? _value.whatWentWell
-                : whatWentWell // ignore: cast_nullable_to_non_nullable
+            emotion: null == emotion
+                ? _value.emotion
+                : emotion // ignore: cast_nullable_to_non_nullable
+                      as EmotionType,
+            gratitudeText: freezed == gratitudeText
+                ? _value.gratitudeText
+                : gratitudeText // ignore: cast_nullable_to_non_nullable
                       as String?,
-            whatNeedsAttention: freezed == whatNeedsAttention
-                ? _value.whatNeedsAttention
-                : whatNeedsAttention // ignore: cast_nullable_to_non_nullable
+            gratitudeShared: freezed == gratitudeShared
+                ? _value.gratitudeShared
+                : gratitudeShared // ignore: cast_nullable_to_non_nullable
+                      as bool?,
+            concernText: freezed == concernText
+                ? _value.concernText
+                : concernText // ignore: cast_nullable_to_non_nullable
                       as String?,
-            gratitudeNote: freezed == gratitudeNote
-                ? _value.gratitudeNote
-                : gratitudeNote // ignore: cast_nullable_to_non_nullable
+            concernShared: freezed == concernShared
+                ? _value.concernShared
+                : concernShared // ignore: cast_nullable_to_non_nullable
+                      as bool?,
+            needText: freezed == needText
+                ? _value.needText
+                : needText // ignore: cast_nullable_to_non_nullable
                       as String?,
-            isCompleted: null == isCompleted
-                ? _value.isCompleted
-                : isCompleted // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            partnerCheckinId: freezed == partnerCheckinId
-                ? _value.partnerCheckinId
-                : partnerCheckinId // ignore: cast_nullable_to_non_nullable
+            needShared: freezed == needShared
+                ? _value.needShared
+                : needShared // ignore: cast_nullable_to_non_nullable
+                      as bool?,
+            toneDetected: freezed == toneDetected
+                ? _value.toneDetected
+                : toneDetected // ignore: cast_nullable_to_non_nullable
                       as String?,
+            aiTokensUsed: freezed == aiTokensUsed
+                ? _value.aiTokensUsed
+                : aiTokensUsed // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            completedAt: freezed == completedAt
+                ? _value.completedAt
+                : completedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -179,18 +234,29 @@ abstract class _$$CoupleCheckinImplCopyWith<$Res>
   @useResult
   $Res call({
     String id,
-    String coupleId,
-    String userId,
-    DateTime createdAt,
-    int connectionScore,
-    int satisfactionScore,
-    int communicationScore,
-    String emotionToday,
-    String? whatWentWell,
-    String? whatNeedsAttention,
-    String? gratitudeNote,
-    bool isCompleted,
-    String? partnerCheckinId,
+    @JsonKey(name: 'relation_id') String relationId,
+    @JsonKey(name: 'user_id') String userId,
+    @JsonKey(name: 'checkin_date') DateTime checkinDate,
+    @JsonKey(name: 'created_at') DateTime createdAt,
+    @JsonKey(name: 'score_connection') int scoreConnection,
+    @JsonKey(name: 'score_satisfaction') int scoreSatisfaction,
+    @JsonKey(name: 'score_communication') int scoreCommunication,
+    @JsonKey(
+      name: 'emotion',
+      fromJson: _emotionFromJson,
+      toJson: _emotionToJson,
+    )
+    EmotionType emotion,
+    @JsonKey(name: 'gratitude_text') String? gratitudeText,
+    @JsonKey(name: 'gratitude_shared') bool? gratitudeShared,
+    @JsonKey(name: 'concern_text') String? concernText,
+    @JsonKey(name: 'concern_shared') bool? concernShared,
+    @JsonKey(name: 'need_text') String? needText,
+    @JsonKey(name: 'need_shared') bool? needShared,
+    @JsonKey(name: 'tone_detected') String? toneDetected,
+    @JsonKey(name: 'ai_tokens_used') int? aiTokensUsed,
+    @JsonKey(name: 'completed_at') DateTime? completedAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -209,18 +275,24 @@ class __$$CoupleCheckinImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? coupleId = null,
+    Object? relationId = null,
     Object? userId = null,
+    Object? checkinDate = null,
     Object? createdAt = null,
-    Object? connectionScore = null,
-    Object? satisfactionScore = null,
-    Object? communicationScore = null,
-    Object? emotionToday = null,
-    Object? whatWentWell = freezed,
-    Object? whatNeedsAttention = freezed,
-    Object? gratitudeNote = freezed,
-    Object? isCompleted = null,
-    Object? partnerCheckinId = freezed,
+    Object? scoreConnection = null,
+    Object? scoreSatisfaction = null,
+    Object? scoreCommunication = null,
+    Object? emotion = null,
+    Object? gratitudeText = freezed,
+    Object? gratitudeShared = freezed,
+    Object? concernText = freezed,
+    Object? concernShared = freezed,
+    Object? needText = freezed,
+    Object? needShared = freezed,
+    Object? toneDetected = freezed,
+    Object? aiTokensUsed = freezed,
+    Object? completedAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$CoupleCheckinImpl(
@@ -228,54 +300,78 @@ class __$$CoupleCheckinImplCopyWithImpl<$Res>
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
                   as String,
-        coupleId: null == coupleId
-            ? _value.coupleId
-            : coupleId // ignore: cast_nullable_to_non_nullable
+        relationId: null == relationId
+            ? _value.relationId
+            : relationId // ignore: cast_nullable_to_non_nullable
                   as String,
         userId: null == userId
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
                   as String,
+        checkinDate: null == checkinDate
+            ? _value.checkinDate
+            : checkinDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
-        connectionScore: null == connectionScore
-            ? _value.connectionScore
-            : connectionScore // ignore: cast_nullable_to_non_nullable
+        scoreConnection: null == scoreConnection
+            ? _value.scoreConnection
+            : scoreConnection // ignore: cast_nullable_to_non_nullable
                   as int,
-        satisfactionScore: null == satisfactionScore
-            ? _value.satisfactionScore
-            : satisfactionScore // ignore: cast_nullable_to_non_nullable
+        scoreSatisfaction: null == scoreSatisfaction
+            ? _value.scoreSatisfaction
+            : scoreSatisfaction // ignore: cast_nullable_to_non_nullable
                   as int,
-        communicationScore: null == communicationScore
-            ? _value.communicationScore
-            : communicationScore // ignore: cast_nullable_to_non_nullable
+        scoreCommunication: null == scoreCommunication
+            ? _value.scoreCommunication
+            : scoreCommunication // ignore: cast_nullable_to_non_nullable
                   as int,
-        emotionToday: null == emotionToday
-            ? _value.emotionToday
-            : emotionToday // ignore: cast_nullable_to_non_nullable
-                  as String,
-        whatWentWell: freezed == whatWentWell
-            ? _value.whatWentWell
-            : whatWentWell // ignore: cast_nullable_to_non_nullable
+        emotion: null == emotion
+            ? _value.emotion
+            : emotion // ignore: cast_nullable_to_non_nullable
+                  as EmotionType,
+        gratitudeText: freezed == gratitudeText
+            ? _value.gratitudeText
+            : gratitudeText // ignore: cast_nullable_to_non_nullable
                   as String?,
-        whatNeedsAttention: freezed == whatNeedsAttention
-            ? _value.whatNeedsAttention
-            : whatNeedsAttention // ignore: cast_nullable_to_non_nullable
+        gratitudeShared: freezed == gratitudeShared
+            ? _value.gratitudeShared
+            : gratitudeShared // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        concernText: freezed == concernText
+            ? _value.concernText
+            : concernText // ignore: cast_nullable_to_non_nullable
                   as String?,
-        gratitudeNote: freezed == gratitudeNote
-            ? _value.gratitudeNote
-            : gratitudeNote // ignore: cast_nullable_to_non_nullable
+        concernShared: freezed == concernShared
+            ? _value.concernShared
+            : concernShared // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        needText: freezed == needText
+            ? _value.needText
+            : needText // ignore: cast_nullable_to_non_nullable
                   as String?,
-        isCompleted: null == isCompleted
-            ? _value.isCompleted
-            : isCompleted // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        partnerCheckinId: freezed == partnerCheckinId
-            ? _value.partnerCheckinId
-            : partnerCheckinId // ignore: cast_nullable_to_non_nullable
+        needShared: freezed == needShared
+            ? _value.needShared
+            : needShared // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        toneDetected: freezed == toneDetected
+            ? _value.toneDetected
+            : toneDetected // ignore: cast_nullable_to_non_nullable
                   as String?,
+        aiTokensUsed: freezed == aiTokensUsed
+            ? _value.aiTokensUsed
+            : aiTokensUsed // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        completedAt: freezed == completedAt
+            ? _value.completedAt
+            : completedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -286,18 +382,29 @@ class __$$CoupleCheckinImplCopyWithImpl<$Res>
 class _$CoupleCheckinImpl implements _CoupleCheckin {
   const _$CoupleCheckinImpl({
     required this.id,
-    required this.coupleId,
-    required this.userId,
-    required this.createdAt,
-    required this.connectionScore,
-    required this.satisfactionScore,
-    required this.communicationScore,
-    required this.emotionToday,
-    this.whatWentWell,
-    this.whatNeedsAttention,
-    this.gratitudeNote,
-    this.isCompleted = false,
-    this.partnerCheckinId,
+    @JsonKey(name: 'relation_id') required this.relationId,
+    @JsonKey(name: 'user_id') required this.userId,
+    @JsonKey(name: 'checkin_date') required this.checkinDate,
+    @JsonKey(name: 'created_at') required this.createdAt,
+    @JsonKey(name: 'score_connection') required this.scoreConnection,
+    @JsonKey(name: 'score_satisfaction') required this.scoreSatisfaction,
+    @JsonKey(name: 'score_communication') required this.scoreCommunication,
+    @JsonKey(
+      name: 'emotion',
+      fromJson: _emotionFromJson,
+      toJson: _emotionToJson,
+    )
+    required this.emotion,
+    @JsonKey(name: 'gratitude_text') this.gratitudeText,
+    @JsonKey(name: 'gratitude_shared') this.gratitudeShared,
+    @JsonKey(name: 'concern_text') this.concernText,
+    @JsonKey(name: 'concern_shared') this.concernShared,
+    @JsonKey(name: 'need_text') this.needText,
+    @JsonKey(name: 'need_shared') this.needShared,
+    @JsonKey(name: 'tone_detected') this.toneDetected,
+    @JsonKey(name: 'ai_tokens_used') this.aiTokensUsed,
+    @JsonKey(name: 'completed_at') this.completedAt,
+    @JsonKey(name: 'updated_at') this.updatedAt,
   });
 
   factory _$CoupleCheckinImpl.fromJson(Map<String, dynamic> json) =>
@@ -306,45 +413,68 @@ class _$CoupleCheckinImpl implements _CoupleCheckin {
   @override
   final String id;
   @override
-  final String coupleId;
+  @JsonKey(name: 'relation_id')
+  final String relationId;
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
-  // Celui qui a fait le check-in
   @override
+  @JsonKey(name: 'checkin_date')
+  final DateTime checkinDate;
+  @override
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
-  // Questions/Réponses
+  // Scores
   @override
-  final int connectionScore;
-  // 1-10 : "Comment te sens-tu connecté(e) à ton partenaire ?"
+  @JsonKey(name: 'score_connection')
+  final int scoreConnection;
   @override
-  final int satisfactionScore;
-  // 1-10 : "Es-tu satisfait(e) de la relation ?"
+  @JsonKey(name: 'score_satisfaction')
+  final int scoreSatisfaction;
   @override
-  final int communicationScore;
-  // 1-10 : "La communication est-elle fluide ?"
+  @JsonKey(name: 'score_communication')
+  final int scoreCommunication;
+  // Émotion
   @override
-  final String emotionToday;
-  // Emoji : 😊, 😐, 😔, 😡, 😍
+  @JsonKey(name: 'emotion', fromJson: _emotionFromJson, toJson: _emotionToJson)
+  final EmotionType emotion;
+  // Textes + partage
   @override
-  final String? whatWentWell;
-  // "Qu'est-ce qui s'est bien passé cette semaine ?"
+  @JsonKey(name: 'gratitude_text')
+  final String? gratitudeText;
   @override
-  final String? whatNeedsAttention;
-  // "Qu'est-ce qui nécessite de l'attention ?"
+  @JsonKey(name: 'gratitude_shared')
+  final bool? gratitudeShared;
   @override
-  final String? gratitudeNote;
-  // "Une chose pour laquelle tu es reconnaissant(e) ?"
-  // Métadonnées
+  @JsonKey(name: 'concern_text')
+  final String? concernText;
   @override
-  @JsonKey()
-  final bool isCompleted;
-  // ✅ CORRIGÉ
+  @JsonKey(name: 'concern_shared')
+  final bool? concernShared;
   @override
-  final String? partnerCheckinId;
+  @JsonKey(name: 'need_text')
+  final String? needText;
+  @override
+  @JsonKey(name: 'need_shared')
+  final bool? needShared;
+  // IA
+  @override
+  @JsonKey(name: 'tone_detected')
+  final String? toneDetected;
+  @override
+  @JsonKey(name: 'ai_tokens_used')
+  final int? aiTokensUsed;
+  // Timestamps
+  @override
+  @JsonKey(name: 'completed_at')
+  final DateTime? completedAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'CoupleCheckin(id: $id, coupleId: $coupleId, userId: $userId, createdAt: $createdAt, connectionScore: $connectionScore, satisfactionScore: $satisfactionScore, communicationScore: $communicationScore, emotionToday: $emotionToday, whatWentWell: $whatWentWell, whatNeedsAttention: $whatNeedsAttention, gratitudeNote: $gratitudeNote, isCompleted: $isCompleted, partnerCheckinId: $partnerCheckinId)';
+    return 'CoupleCheckin(id: $id, relationId: $relationId, userId: $userId, checkinDate: $checkinDate, createdAt: $createdAt, scoreConnection: $scoreConnection, scoreSatisfaction: $scoreSatisfaction, scoreCommunication: $scoreCommunication, emotion: $emotion, gratitudeText: $gratitudeText, gratitudeShared: $gratitudeShared, concernText: $concernText, concernShared: $concernShared, needText: $needText, needShared: $needShared, toneDetected: $toneDetected, aiTokensUsed: $aiTokensUsed, completedAt: $completedAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -353,49 +483,66 @@ class _$CoupleCheckinImpl implements _CoupleCheckin {
         (other.runtimeType == runtimeType &&
             other is _$CoupleCheckinImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.coupleId, coupleId) ||
-                other.coupleId == coupleId) &&
+            (identical(other.relationId, relationId) ||
+                other.relationId == relationId) &&
             (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.checkinDate, checkinDate) ||
+                other.checkinDate == checkinDate) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.connectionScore, connectionScore) ||
-                other.connectionScore == connectionScore) &&
-            (identical(other.satisfactionScore, satisfactionScore) ||
-                other.satisfactionScore == satisfactionScore) &&
-            (identical(other.communicationScore, communicationScore) ||
-                other.communicationScore == communicationScore) &&
-            (identical(other.emotionToday, emotionToday) ||
-                other.emotionToday == emotionToday) &&
-            (identical(other.whatWentWell, whatWentWell) ||
-                other.whatWentWell == whatWentWell) &&
-            (identical(other.whatNeedsAttention, whatNeedsAttention) ||
-                other.whatNeedsAttention == whatNeedsAttention) &&
-            (identical(other.gratitudeNote, gratitudeNote) ||
-                other.gratitudeNote == gratitudeNote) &&
-            (identical(other.isCompleted, isCompleted) ||
-                other.isCompleted == isCompleted) &&
-            (identical(other.partnerCheckinId, partnerCheckinId) ||
-                other.partnerCheckinId == partnerCheckinId));
+            (identical(other.scoreConnection, scoreConnection) ||
+                other.scoreConnection == scoreConnection) &&
+            (identical(other.scoreSatisfaction, scoreSatisfaction) ||
+                other.scoreSatisfaction == scoreSatisfaction) &&
+            (identical(other.scoreCommunication, scoreCommunication) ||
+                other.scoreCommunication == scoreCommunication) &&
+            (identical(other.emotion, emotion) || other.emotion == emotion) &&
+            (identical(other.gratitudeText, gratitudeText) ||
+                other.gratitudeText == gratitudeText) &&
+            (identical(other.gratitudeShared, gratitudeShared) ||
+                other.gratitudeShared == gratitudeShared) &&
+            (identical(other.concernText, concernText) ||
+                other.concernText == concernText) &&
+            (identical(other.concernShared, concernShared) ||
+                other.concernShared == concernShared) &&
+            (identical(other.needText, needText) ||
+                other.needText == needText) &&
+            (identical(other.needShared, needShared) ||
+                other.needShared == needShared) &&
+            (identical(other.toneDetected, toneDetected) ||
+                other.toneDetected == toneDetected) &&
+            (identical(other.aiTokensUsed, aiTokensUsed) ||
+                other.aiTokensUsed == aiTokensUsed) &&
+            (identical(other.completedAt, completedAt) ||
+                other.completedAt == completedAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
-    coupleId,
+    relationId,
     userId,
+    checkinDate,
     createdAt,
-    connectionScore,
-    satisfactionScore,
-    communicationScore,
-    emotionToday,
-    whatWentWell,
-    whatNeedsAttention,
-    gratitudeNote,
-    isCompleted,
-    partnerCheckinId,
-  );
+    scoreConnection,
+    scoreSatisfaction,
+    scoreCommunication,
+    emotion,
+    gratitudeText,
+    gratitudeShared,
+    concernText,
+    concernShared,
+    needText,
+    needShared,
+    toneDetected,
+    aiTokensUsed,
+    completedAt,
+    updatedAt,
+  ]);
 
   /// Create a copy of CoupleCheckin
   /// with the given fields replaced by the non-null parameter values.
@@ -414,18 +561,29 @@ class _$CoupleCheckinImpl implements _CoupleCheckin {
 abstract class _CoupleCheckin implements CoupleCheckin {
   const factory _CoupleCheckin({
     required final String id,
-    required final String coupleId,
-    required final String userId,
-    required final DateTime createdAt,
-    required final int connectionScore,
-    required final int satisfactionScore,
-    required final int communicationScore,
-    required final String emotionToday,
-    final String? whatWentWell,
-    final String? whatNeedsAttention,
-    final String? gratitudeNote,
-    final bool isCompleted,
-    final String? partnerCheckinId,
+    @JsonKey(name: 'relation_id') required final String relationId,
+    @JsonKey(name: 'user_id') required final String userId,
+    @JsonKey(name: 'checkin_date') required final DateTime checkinDate,
+    @JsonKey(name: 'created_at') required final DateTime createdAt,
+    @JsonKey(name: 'score_connection') required final int scoreConnection,
+    @JsonKey(name: 'score_satisfaction') required final int scoreSatisfaction,
+    @JsonKey(name: 'score_communication') required final int scoreCommunication,
+    @JsonKey(
+      name: 'emotion',
+      fromJson: _emotionFromJson,
+      toJson: _emotionToJson,
+    )
+    required final EmotionType emotion,
+    @JsonKey(name: 'gratitude_text') final String? gratitudeText,
+    @JsonKey(name: 'gratitude_shared') final bool? gratitudeShared,
+    @JsonKey(name: 'concern_text') final String? concernText,
+    @JsonKey(name: 'concern_shared') final bool? concernShared,
+    @JsonKey(name: 'need_text') final String? needText,
+    @JsonKey(name: 'need_shared') final bool? needShared,
+    @JsonKey(name: 'tone_detected') final String? toneDetected,
+    @JsonKey(name: 'ai_tokens_used') final int? aiTokensUsed,
+    @JsonKey(name: 'completed_at') final DateTime? completedAt,
+    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
   }) = _$CoupleCheckinImpl;
 
   factory _CoupleCheckin.fromJson(Map<String, dynamic> json) =
@@ -434,310 +592,64 @@ abstract class _CoupleCheckin implements CoupleCheckin {
   @override
   String get id;
   @override
-  String get coupleId;
+  @JsonKey(name: 'relation_id')
+  String get relationId;
   @override
-  String get userId; // Celui qui a fait le check-in
+  @JsonKey(name: 'user_id')
+  String get userId;
   @override
-  DateTime get createdAt; // Questions/Réponses
+  @JsonKey(name: 'checkin_date')
+  DateTime get checkinDate;
   @override
-  int get connectionScore; // 1-10 : "Comment te sens-tu connecté(e) à ton partenaire ?"
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt; // Scores
   @override
-  int get satisfactionScore; // 1-10 : "Es-tu satisfait(e) de la relation ?"
+  @JsonKey(name: 'score_connection')
+  int get scoreConnection;
   @override
-  int get communicationScore; // 1-10 : "La communication est-elle fluide ?"
+  @JsonKey(name: 'score_satisfaction')
+  int get scoreSatisfaction;
   @override
-  String get emotionToday; // Emoji : 😊, 😐, 😔, 😡, 😍
+  @JsonKey(name: 'score_communication')
+  int get scoreCommunication; // Émotion
   @override
-  String? get whatWentWell; // "Qu'est-ce qui s'est bien passé cette semaine ?"
+  @JsonKey(name: 'emotion', fromJson: _emotionFromJson, toJson: _emotionToJson)
+  EmotionType get emotion; // Textes + partage
   @override
-  String? get whatNeedsAttention; // "Qu'est-ce qui nécessite de l'attention ?"
+  @JsonKey(name: 'gratitude_text')
+  String? get gratitudeText;
   @override
-  String? get gratitudeNote; // "Une chose pour laquelle tu es reconnaissant(e) ?"
-  // Métadonnées
+  @JsonKey(name: 'gratitude_shared')
+  bool? get gratitudeShared;
   @override
-  bool get isCompleted; // ✅ CORRIGÉ
+  @JsonKey(name: 'concern_text')
+  String? get concernText;
   @override
-  String? get partnerCheckinId;
+  @JsonKey(name: 'concern_shared')
+  bool? get concernShared;
+  @override
+  @JsonKey(name: 'need_text')
+  String? get needText;
+  @override
+  @JsonKey(name: 'need_shared')
+  bool? get needShared; // IA
+  @override
+  @JsonKey(name: 'tone_detected')
+  String? get toneDetected;
+  @override
+  @JsonKey(name: 'ai_tokens_used')
+  int? get aiTokensUsed; // Timestamps
+  @override
+  @JsonKey(name: 'completed_at')
+  DateTime? get completedAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt;
 
   /// Create a copy of CoupleCheckin
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$CoupleCheckinImplCopyWith<_$CoupleCheckinImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-mixin _$CoupleCheckinStats {
-  double get averageConnectionScore => throw _privateConstructorUsedError;
-  double get averageSatisfactionScore => throw _privateConstructorUsedError;
-  double get averageCommunicationScore => throw _privateConstructorUsedError;
-  List<CoupleCheckin> get recentCheckins => throw _privateConstructorUsedError;
-  int get totalCheckins => throw _privateConstructorUsedError;
-  int get currentStreak => throw _privateConstructorUsedError;
-
-  /// Create a copy of CoupleCheckinStats
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $CoupleCheckinStatsCopyWith<CoupleCheckinStats> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $CoupleCheckinStatsCopyWith<$Res> {
-  factory $CoupleCheckinStatsCopyWith(
-    CoupleCheckinStats value,
-    $Res Function(CoupleCheckinStats) then,
-  ) = _$CoupleCheckinStatsCopyWithImpl<$Res, CoupleCheckinStats>;
-  @useResult
-  $Res call({
-    double averageConnectionScore,
-    double averageSatisfactionScore,
-    double averageCommunicationScore,
-    List<CoupleCheckin> recentCheckins,
-    int totalCheckins,
-    int currentStreak,
-  });
-}
-
-/// @nodoc
-class _$CoupleCheckinStatsCopyWithImpl<$Res, $Val extends CoupleCheckinStats>
-    implements $CoupleCheckinStatsCopyWith<$Res> {
-  _$CoupleCheckinStatsCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of CoupleCheckinStats
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? averageConnectionScore = null,
-    Object? averageSatisfactionScore = null,
-    Object? averageCommunicationScore = null,
-    Object? recentCheckins = null,
-    Object? totalCheckins = null,
-    Object? currentStreak = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            averageConnectionScore: null == averageConnectionScore
-                ? _value.averageConnectionScore
-                : averageConnectionScore // ignore: cast_nullable_to_non_nullable
-                      as double,
-            averageSatisfactionScore: null == averageSatisfactionScore
-                ? _value.averageSatisfactionScore
-                : averageSatisfactionScore // ignore: cast_nullable_to_non_nullable
-                      as double,
-            averageCommunicationScore: null == averageCommunicationScore
-                ? _value.averageCommunicationScore
-                : averageCommunicationScore // ignore: cast_nullable_to_non_nullable
-                      as double,
-            recentCheckins: null == recentCheckins
-                ? _value.recentCheckins
-                : recentCheckins // ignore: cast_nullable_to_non_nullable
-                      as List<CoupleCheckin>,
-            totalCheckins: null == totalCheckins
-                ? _value.totalCheckins
-                : totalCheckins // ignore: cast_nullable_to_non_nullable
-                      as int,
-            currentStreak: null == currentStreak
-                ? _value.currentStreak
-                : currentStreak // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
-}
-
-/// @nodoc
-abstract class _$$CoupleCheckinStatsImplCopyWith<$Res>
-    implements $CoupleCheckinStatsCopyWith<$Res> {
-  factory _$$CoupleCheckinStatsImplCopyWith(
-    _$CoupleCheckinStatsImpl value,
-    $Res Function(_$CoupleCheckinStatsImpl) then,
-  ) = __$$CoupleCheckinStatsImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    double averageConnectionScore,
-    double averageSatisfactionScore,
-    double averageCommunicationScore,
-    List<CoupleCheckin> recentCheckins,
-    int totalCheckins,
-    int currentStreak,
-  });
-}
-
-/// @nodoc
-class __$$CoupleCheckinStatsImplCopyWithImpl<$Res>
-    extends _$CoupleCheckinStatsCopyWithImpl<$Res, _$CoupleCheckinStatsImpl>
-    implements _$$CoupleCheckinStatsImplCopyWith<$Res> {
-  __$$CoupleCheckinStatsImplCopyWithImpl(
-    _$CoupleCheckinStatsImpl _value,
-    $Res Function(_$CoupleCheckinStatsImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of CoupleCheckinStats
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? averageConnectionScore = null,
-    Object? averageSatisfactionScore = null,
-    Object? averageCommunicationScore = null,
-    Object? recentCheckins = null,
-    Object? totalCheckins = null,
-    Object? currentStreak = null,
-  }) {
-    return _then(
-      _$CoupleCheckinStatsImpl(
-        averageConnectionScore: null == averageConnectionScore
-            ? _value.averageConnectionScore
-            : averageConnectionScore // ignore: cast_nullable_to_non_nullable
-                  as double,
-        averageSatisfactionScore: null == averageSatisfactionScore
-            ? _value.averageSatisfactionScore
-            : averageSatisfactionScore // ignore: cast_nullable_to_non_nullable
-                  as double,
-        averageCommunicationScore: null == averageCommunicationScore
-            ? _value.averageCommunicationScore
-            : averageCommunicationScore // ignore: cast_nullable_to_non_nullable
-                  as double,
-        recentCheckins: null == recentCheckins
-            ? _value._recentCheckins
-            : recentCheckins // ignore: cast_nullable_to_non_nullable
-                  as List<CoupleCheckin>,
-        totalCheckins: null == totalCheckins
-            ? _value.totalCheckins
-            : totalCheckins // ignore: cast_nullable_to_non_nullable
-                  as int,
-        currentStreak: null == currentStreak
-            ? _value.currentStreak
-            : currentStreak // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
-}
-
-/// @nodoc
-
-class _$CoupleCheckinStatsImpl implements _CoupleCheckinStats {
-  const _$CoupleCheckinStatsImpl({
-    required this.averageConnectionScore,
-    required this.averageSatisfactionScore,
-    required this.averageCommunicationScore,
-    required final List<CoupleCheckin> recentCheckins,
-    required this.totalCheckins,
-    required this.currentStreak,
-  }) : _recentCheckins = recentCheckins;
-
-  @override
-  final double averageConnectionScore;
-  @override
-  final double averageSatisfactionScore;
-  @override
-  final double averageCommunicationScore;
-  final List<CoupleCheckin> _recentCheckins;
-  @override
-  List<CoupleCheckin> get recentCheckins {
-    if (_recentCheckins is EqualUnmodifiableListView) return _recentCheckins;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_recentCheckins);
-  }
-
-  @override
-  final int totalCheckins;
-  @override
-  final int currentStreak;
-
-  @override
-  String toString() {
-    return 'CoupleCheckinStats(averageConnectionScore: $averageConnectionScore, averageSatisfactionScore: $averageSatisfactionScore, averageCommunicationScore: $averageCommunicationScore, recentCheckins: $recentCheckins, totalCheckins: $totalCheckins, currentStreak: $currentStreak)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CoupleCheckinStatsImpl &&
-            (identical(other.averageConnectionScore, averageConnectionScore) ||
-                other.averageConnectionScore == averageConnectionScore) &&
-            (identical(
-                  other.averageSatisfactionScore,
-                  averageSatisfactionScore,
-                ) ||
-                other.averageSatisfactionScore == averageSatisfactionScore) &&
-            (identical(
-                  other.averageCommunicationScore,
-                  averageCommunicationScore,
-                ) ||
-                other.averageCommunicationScore == averageCommunicationScore) &&
-            const DeepCollectionEquality().equals(
-              other._recentCheckins,
-              _recentCheckins,
-            ) &&
-            (identical(other.totalCheckins, totalCheckins) ||
-                other.totalCheckins == totalCheckins) &&
-            (identical(other.currentStreak, currentStreak) ||
-                other.currentStreak == currentStreak));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    averageConnectionScore,
-    averageSatisfactionScore,
-    averageCommunicationScore,
-    const DeepCollectionEquality().hash(_recentCheckins),
-    totalCheckins,
-    currentStreak,
-  );
-
-  /// Create a copy of CoupleCheckinStats
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$CoupleCheckinStatsImplCopyWith<_$CoupleCheckinStatsImpl> get copyWith =>
-      __$$CoupleCheckinStatsImplCopyWithImpl<_$CoupleCheckinStatsImpl>(
-        this,
-        _$identity,
-      );
-}
-
-abstract class _CoupleCheckinStats implements CoupleCheckinStats {
-  const factory _CoupleCheckinStats({
-    required final double averageConnectionScore,
-    required final double averageSatisfactionScore,
-    required final double averageCommunicationScore,
-    required final List<CoupleCheckin> recentCheckins,
-    required final int totalCheckins,
-    required final int currentStreak,
-  }) = _$CoupleCheckinStatsImpl;
-
-  @override
-  double get averageConnectionScore;
-  @override
-  double get averageSatisfactionScore;
-  @override
-  double get averageCommunicationScore;
-  @override
-  List<CoupleCheckin> get recentCheckins;
-  @override
-  int get totalCheckins;
-  @override
-  int get currentStreak;
-
-  /// Create a copy of CoupleCheckinStats
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$CoupleCheckinStatsImplCopyWith<_$CoupleCheckinStatsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

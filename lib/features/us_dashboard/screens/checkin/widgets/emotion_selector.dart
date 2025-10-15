@@ -1,8 +1,10 @@
+// lib/features/us_dashboard/screens/checkin/widgets/emotion_selector.dart
 import 'package:flutter/material.dart';
+import 'package:lova/features/us_dashboard/models/emotion_type.dart';
 
 class EmotionSelector extends StatelessWidget {
-  final String selectedEmotion;
-  final Function(String) onEmotionSelected;
+  final EmotionType selectedEmotion;
+  final Function(EmotionType) onEmotionSelected;
 
   const EmotionSelector({
     Key? key,
@@ -10,14 +12,7 @@ class EmotionSelector extends StatelessWidget {
     required this.onEmotionSelected,
   }) : super(key: key);
 
-  static const List<String> emotions = ['😍', '😊', '😐', '😔', '😡'];
-  static const List<String> labels = [
-    'Amoureux',
-    'Heureux',
-    'Neutre',
-    'Triste',
-    'En colère',
-  ];
+  static final List<EmotionType> emotions = EmotionType.values;
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +21,11 @@ class EmotionSelector extends StatelessWidget {
       runSpacing: 16,
       alignment: WrapAlignment.center,
       children: List.generate(emotions.length, (index) {
-        final isSelected = emotions[index] == selectedEmotion;
+        final emotion = emotions[index];
+        final isSelected = emotion == selectedEmotion;
 
         return GestureDetector(
-          onTap: () => onEmotionSelected(emotions[index]),
+          onTap: () => onEmotionSelected(emotion),
           child: Column(
             children: [
               AnimatedContainer(
@@ -50,19 +46,23 @@ class EmotionSelector extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    emotions[index],
+                    emotion.emoji,
                     style: TextStyle(fontSize: isSelected ? 36 : 32),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                labels[index],
+                emotion.label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight:
+                  isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      : Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.7),
                 ),
               ),
             ],

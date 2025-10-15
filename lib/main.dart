@@ -5,20 +5,26 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app_links/app_links.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:lova/app.dart';
 import 'package:lova/shared/providers/annotations_provider.dart';
 import 'package:lova/shared/providers/tanks_provider.dart';
 import 'package:lova/shared/repositories/annotations_repository_memory.dart';
 import 'package:lova/shared/services/tanks_persistence.dart';
-import 'package:intl/date_symbol_data_local.dart'; // 👈 Ajoutez cet import
+import 'package:lova/core/services/firebase_service.dart';  // ⬅️ AJOUT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Charger les variables d'environnement
   await dotenv.load();
+
   await initializeDateFormatting('fr_FR', null);
+
+  // ⬅️ INITIALISER FIREBASE EN PREMIER
+  await FirebaseService.initialize();
+
   // Initialiser Supabase avec gestion d'erreur robuste
   try {
     print("🔍 Tentative d'initialisation Supabase...");
@@ -41,7 +47,6 @@ void main() async {
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
         autoRefreshToken: true,
-        // Le deep linking est géré par le scheme dans iOS/Android config
       ),
     );
 
@@ -54,8 +59,6 @@ void main() async {
   } catch (e, stackTrace) {
     print("❌ Erreur Supabase: $e");
     print("Stack trace: $stackTrace");
-    // En développement, vous pouvez continuer sans Supabase
-    // En production, il faudrait gérer cette erreur différemment
   }
 
   // Initialiser les services de persistance
@@ -85,7 +88,8 @@ void _setupAuthListener() {
       switch (event) {
         case AuthChangeEvent.signedIn:
           print("✅ Utilisateur connecté : ${session?.user.email}");
-          // La création du profil est gérée dans AuthStateNotifier
+          // ⬅️ SAUVEGARDER LE FCM TOKEN APRÈS CONNEXION
+          FirebaseService.saveFCMTokenForCurrentUser();
           break;
 
         case AuthChangeEvent.signedOut:
@@ -179,7 +183,6 @@ Future<void> _handleIncomingAuthUri(Uri uri) async {
     } catch (e) {
       print("❌ Erreur exchangeCodeForSession: $e");
 
-      // Gérer les erreurs spécifiques
       if (e.toString().contains('invalid_grant')) {
         print("   → Code expiré ou déjà utilisé");
       } else if (e.toString().contains('invalid_request')) {
@@ -200,32 +203,9 @@ Future<void> _handleIncomingAuthUri(Uri uri) async {
     return;
   }
 
-  // Si on arrive ici, c'est un callback sans code ni erreur
   print("⚠️ Callback reçu mais sans code ni erreur");
 
-  // Legacy: gestion par fragment (ne devrait pas arriver avec PKCE)
   if (uri.fragment.isNotEmpty) {
     print("ℹ️ Fragment détecté mais PKCE utilise les query params, ignoré");
   }
 }
-
-// Configuration des deep links pour chaque plateforme :
-//
-// iOS (ios/Runner/Info.plist) :
-// <key>CFBundleURLTypes</key>
-// <array>
-//   <dict>
-//     <key>CFBundleURLSchemes</key>
-//     <array>
-//       <string>loova</string>
-//     </array>
-//   </dict>
-// </array>
-//
-// Android (android/app/src/main/AndroidManifest.xml) :
-// <intent-filter android:autoVerify="true">
-//   <action android:name="android.intent.action.VIEW" />
-//   <category android:name="android.intent.category.DEFAULT" />
-//   <category android:name="android.intent.category.BROWSABLE" />
-//   <data android:scheme="loova" android:host="login-callback" />
-// </intent-filter>
