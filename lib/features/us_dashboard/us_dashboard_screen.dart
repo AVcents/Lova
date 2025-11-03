@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
 import 'package:lova/features/us_dashboard/widgets/checkin_status_card.dart';
 import 'package:lova/features/us_dashboard/providers/couple_checkin_provider.dart';
+import 'package:lova/features/sos/screens/sos_launch_dialog.dart';
 
 
 class UsDashboardView extends ConsumerStatefulWidget {
@@ -37,6 +38,57 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
           // ════════════════════════════════════════════════
 
           _buildLoveGaugeSection(context),
+
+          const SizedBox(height: 20),
+
+          // ════════════════════════════════════════════════
+          // SECTIONS HISTORIQUES
+          // ════════════════════════════════════════════════
+          Row(
+            children: [
+              Expanded(
+                child: _HistorySection(
+                  icon: Icons.favorite,
+                  title: 'Check-ins',
+                  subtitle: 'Historique',
+                  onTap: () => context.push('/couple-checkin-history'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _HistorySection(
+                  icon: Icons.self_improvement,
+                  title: 'Rituels',
+                  subtitle: 'Historique',
+                  onTap: () => context.push('/couple-ritual-history'),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            children: [
+              Expanded(
+                child: _HistorySection(
+                  icon: Icons.crisis_alert,
+                  title: 'SOS',
+                  subtitle: 'Historique',
+                  onTap: () => context.push('/sos-history'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _HistorySection(
+                  icon: Icons.menu_book,
+                  title: 'Journal',
+                  subtitle: 'Bientôt',
+                  onTap: null,
+                ),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 20),
 
@@ -86,7 +138,10 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
                   icon: Icons.favorite_border,
                   label: 'SOS Couple',
                   onTap: () {
-                    // TODO: Navigation SOS
+                    showDialog(
+                      context: context,
+                      builder: (_) => const SosLaunchDialog(),
+                    );
                   },
                 ),
               ),
@@ -416,6 +471,72 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HistorySection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  const _HistorySection({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDisabled = onTap == null;
+
+    return Card(
+      elevation: 0,
+      color: isDisabled ? Colors.grey.shade100 : colorScheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 32,
+                color: isDisabled ? Colors.grey : colorScheme.primary,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled
+                      ? Colors.grey.shade600
+                      : colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  fontSize: 12,
+                  color: isDisabled
+                      ? Colors.grey.shade500
+                      : colorScheme.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lova/features/us_dashboard/models/couple_checkin.dart';
 import 'package:lova/features/us_dashboard/models/emotion_type.dart';
 import 'package:lova/features/us_dashboard/services/couple_checkin_service.dart';
-import 'package:uuid/uuid.dart'; // Ajoute en haut
 
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
@@ -38,9 +37,24 @@ final todayCoupleCheckinProvider = FutureProvider.autoDispose<CoupleCheckin?>((r
 });
 
 final coupleCheckinHistoryProvider =
-FutureProvider<List<CoupleCheckin>>((ref) async {
-  // TODO: fetch history
-  return [];
+FutureProvider.autoDispose<List<CoupleCheckin>>((ref) async {
+  final sb = ref.watch(supabaseClientProvider);
+
+  // Auth guard
+  final userId = sb.auth.currentUser?.id;
+  if (userId == null) return [];
+
+  // Récupérer les 30 derniers check-ins de l'utilisateur actuel
+  final data = await sb
+      .from('couple_checkins')
+      .select()
+      .eq('user_id', userId)
+      .order('checkin_date', ascending: false)
+      .limit(30);
+
+  return (data as List)
+      .map((json) => CoupleCheckin.fromJson(json))
+      .toList();
 });
 
 class CoupleCheckinController extends AsyncNotifier<CoupleCheckin?> {

@@ -109,7 +109,7 @@ class RitualInfoBottomSheet extends StatelessWidget {
                     context,
                     icon: Icons.lightbulb_outline,
                     title: 'Comment faire ?',
-                    content: ritual.instructions,
+                    content: ritual.instructions.map((step) => step['text'] as String? ?? '').join('\n'),
                     color: CoupleRitualsData.getColorForRitual(ritual.id),
                   ),
 

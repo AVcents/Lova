@@ -92,6 +92,18 @@ void _setupAuthListener() {
           FirebaseService.saveFCMTokenForCurrentUser();
           break;
 
+      // ⬅️ AJOUTER CE CAS
+        case AuthChangeEvent.initialSession:
+          if (session != null) {
+            print("✅ Session existante : ${session.user.email}");
+            FirebaseService.saveFCMTokenForCurrentUser();
+          }
+          break;
+
+        case AuthChangeEvent.signedOut:
+          print("👋 Utilisateur déconnecté");
+          break;
+
         case AuthChangeEvent.signedOut:
           print("👋 Utilisateur déconnecté");
           break;

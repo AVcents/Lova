@@ -41,8 +41,13 @@ class _CoupleRitualsLibraryScreenState
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final rituals = ref.watch(coupleRitualsProvider);
+    final ritualsAsync = ref.watch(coupleRitualsProvider);
     final todayMinutes = ref.watch(todayCoupleRitualsMinutesProvider);
+
+    final rituals = ritualsAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => <CoupleRitual>[],
+    );
 
     // Filtrer par catégorie
     final filteredRituals = _selectedCategory == 'all'
@@ -290,11 +295,18 @@ class _CoupleRitualsLibraryScreenState
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
+    // Trier : favoris d'abord
+    final sortedRituals = [...rituals]..sort((a, b) {
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      return 0;
+    });
+
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-      itemCount: rituals.length,
+      itemCount: sortedRituals.length,
       itemBuilder: (context, index) {
-        final ritual = rituals[index];
+        final ritual = sortedRituals[index];
 
         return TweenAnimationBuilder<double>(
           duration: Duration(milliseconds: 300 + (index * 50)),

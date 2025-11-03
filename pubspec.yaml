@@ -33,7 +33,7 @@ dependencies:
 
   json_annotation: ^4.8.1
   fl_chart: ^0.66.0  # Pour les graphiques
-  speech_to_text: ^6.6.0
+  speech_to_text: ^7.0.0
   wakelock_plus: ^1.2.0  # Empêche l'écran de se mettre en veille
   shared_preferences: 2.2.2
   cupertino_icons: ^1.0.8
@@ -57,6 +57,9 @@ dependencies:
   firebase_core: ^3.8.0  # Au lieu de ^2.24.2
   firebase_messaging: ^15.0.0  # Au lieu de ^14.7.9
   flutter_local_notifications: ^17.0.0  # Au lieu de ^16.3.0
+  timeago: ^3.7.1
+  lottie: ^3.1.0
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +89,7 @@ flutter:
   assets:
     - .env
     - assets/images/lova_logo.png
+    - assets/animations/
 
   fonts:
     - family: Astrid

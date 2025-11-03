@@ -32,9 +32,6 @@ class FirebaseService {
       // Écouter les messages
       _setupMessageListeners();
 
-      // Sauvegarder le token
-      await _saveFCMToken();
-
       print('✅ Firebase initialized successfully');
     } catch (e) {
       print('❌ Firebase initialization error: $e');

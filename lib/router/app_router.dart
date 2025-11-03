@@ -31,6 +31,8 @@ import 'package:lova/features/settings/settings_page.dart';
 import 'package:lova/features/settings/services/pages/change_email_page.dart'; // Contient ChangeEmailPage ET ChangePasswordPage
 import 'package:lova/features/settings/services/pages/edit_profiles_page.dart'; // Contient EditProfilePage
 import 'package:lova/features/settings/services/pages/objectives_page.dart'; // 👈 NOUVEAU
+import 'package:lova/features/notifications/test_notification_page.dart';
+import 'package:lova/features/notifications/pages/notifications_page.dart';
 
 import 'package:lova/shared/widgets/bottom_nav_shell.dart';
 
@@ -50,10 +52,14 @@ import 'package:lova/features/me_dashboard/presentation/intention_reflection_pag
 
 import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_screen.dart';
 import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_results_screen.dart';
-import 'package:lova/features/us_dashboard/screens/games/connection_games_screen.dart';
+import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_history_page.dart';
 import 'package:lova/features/us_dashboard/screens/games/games_library_screen.dart';
 import 'package:lova/features/us_dashboard/screens/games/intimacy_card_game_screen.dart';
+import 'package:lova/features/us_dashboard/screens/games/deck_selection_screen.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
+import 'package:lova/features/us_dashboard/screens/rituals/couple_ritual_history_page.dart';
+import 'package:lova/features/sos/screens/sos_history_page.dart';
+import 'package:lova/features/splash/splash_screen.dart';
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription _sub;
 
@@ -70,12 +76,18 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/dashboard', // TEMPORAIRE: bypass onboarding
+    initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(
       supa.Supabase.instance.client.auth.onAuthStateChange,
     ),
     debugLogDiagnostics: true,
     routes: [
+      // Splash Screen
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const SplashScreen(),
+      ),
+
       // Routes d'authentification
       GoRoute(
         path: '/sign-in',
@@ -141,6 +153,16 @@ class AppRouter {
       GoRoute(
         path: '/settings/preferences',
         builder: (context, state) => const PlaceholderPage(title: 'Préférences'),
+      ),
+      GoRoute(
+        path: '/settings/test-notifications',
+        builder: (context, state) => const TestNotificationPage(),
+      ),
+
+      // Route notifications
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsPage(),
       ),
 
       // Routes de support et aide (placeholders)
@@ -241,29 +263,68 @@ class AppRouter {
         builder: (context, state) => const CoupleCheckinResultsScreen(),
       ),
       GoRoute(
+        path: '/couple-checkin-history',
+        name: 'coupleCheckinHistory',
+        builder: (context, state) => const CoupleCheckinHistoryPage(),
+      ),
+      GoRoute(
+        path: '/couple-ritual-history',
+        name: 'coupleRitualHistory',
+        builder: (context, state) => const CoupleRitualHistoryPage(),
+      ),
+      GoRoute(
         path: '/couple-rituals',
         name: 'coupleRituals',
         builder: (context, state) => const CoupleRitualsLibraryScreen(),
       ),
       GoRoute(
+        path: '/sos-history',
+        name: 'sosHistory',
+        builder: (context, state) => const SosHistoryPage(),
+      ),
+      GoRoute(
         path: '/connection-games',
         name: 'connectionGames',
-        builder: (context, state) => const ConnectionGamesScreen(),
+        builder: (context, state) => const GamesLibraryScreen(),
       ),
       GoRoute(
         path: '/create-couple-ritual',
         builder: (context, state) => const CoupleRitualsLibraryScreen(),
       ),
-      // Route bibliothèque (remplace le placeholder)
+
+// Routes jeux
       GoRoute(
-        path: '/connection-games',
-        builder: (context, state) => const GamesLibraryScreen(),
+        path: '/deck-selection',
+        name: 'deckSelection',
+        builder: (context, state) {
+          print('🚏 [DEBUG] /deck-selection route - state.extra: ${state.extra}');
+          print('🚏 [DEBUG] state.extra type: ${state.extra.runtimeType}');
+
+          final gameId = state.extra as String?;
+          print('🚏 [DEBUG] gameId after cast: $gameId');
+
+          if (gameId == null) {
+            print('❌ [DEBUG] gameId is NULL in route');
+            return Scaffold(
+              appBar: AppBar(title: const Text('Erreur')),
+              body: const Center(
+                child: Text('Erreur: gameId manquant'),
+              ),
+            );
+          }
+
+          print('✅ [DEBUG] Creating DeckSelectionScreen with gameId: $gameId');
+          return DeckSelectionScreen(gameId: gameId);
+        },
       ),
 
-// Route jeu intimité
       GoRoute(
-        path: '/intimacy-card-game',
-        builder: (context, state) => const IntimacyCardGameScreen(),
+        path: '/intimacy-card-game/:sessionId',
+        name: 'intimacyCardGame',
+        builder: (context, state) {
+          final sessionId = state.pathParameters['sessionId']!;
+          return IntimacyCardGameScreen(sessionId: sessionId);
+        },
       ),
 
       // Routes avec bottom navigation
@@ -285,7 +346,11 @@ class AppRouter {
               final messageId = messageIdStr != null
                   ? int.tryParse(messageIdStr)
                   : null;
-              return ChatCouplePage(initialMessageId: messageId);
+              final sosSessionId = state.uri.queryParameters['sos_session'];
+              return ChatCouplePage(
+                initialMessageId: messageId,
+                sosSessionId: sosSessionId,
+              );
             },
           ),
           GoRoute(

@@ -5,9 +5,8 @@ import 'package:lova/features/us_dashboard/providers/games_provider.dart';
 import 'package:lova/features/us_dashboard/screens/games/widgets/game_library_card.dart';
 import 'package:lova/features/us_dashboard/models/game.dart';
 
-
 class GamesLibraryScreen extends ConsumerWidget {
-  const GamesLibraryScreen({Key? key}) : super(key: key);
+  const GamesLibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +26,21 @@ class GamesLibraryScreen extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (error, stack) => SliverFillRemaining(
-              child: Center(child: Text('Erreur: $error')),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Erreur: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => ref.invalidate(gamesLibraryProvider),
+                      child: const Text('Réessayer'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -62,16 +75,16 @@ class GamesLibraryScreen extends ConsumerWidget {
                 Text(
                   'Bibliothèque de jeux',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Des jeux pour renforcer votre connexion',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
+                        color: Colors.white70,
+                      ),
                 ),
               ],
             ),
@@ -82,12 +95,63 @@ class GamesLibraryScreen extends ConsumerWidget {
         icon: const Icon(Icons.arrow_back, color: Colors.white),
         onPressed: () => context.pop(),
       ),
+      actions: [
+        // Badge sessions actives
+        Consumer(
+          builder: (context, ref, child) {
+            final countAsync = ref.watch(activeGamesCountProvider);
+            final count = countAsync.whenData((n) => n).value ?? 0;
+
+            if (count == 0) return const SizedBox.shrink();
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.videogame_asset, color: Colors.white),
+                    onPressed: () {
+                      // TODO: Afficher modal avec liste des parties actives
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('$count partie(s) en cours')),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List games) {
-    final availableGames = games.where((g) => g.status == GameStatus.available).toList();
-    final upcomingGames = games.where((g) => g.status != GameStatus.available).toList();
+  Widget _buildContent(BuildContext context, WidgetRef ref, List<Game> games) {
+    final availableGames =
+        games.where((g) => g.status == GameStatus.available).toList();
+    final upcomingGames =
+        games.where((g) => g.status != GameStatus.available).toList();
 
     return SliverList(
       delegate: SliverChildListDelegate([
@@ -100,31 +164,24 @@ class GamesLibraryScreen extends ConsumerWidget {
             child: Text(
               'Disponible maintenant',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
           const SizedBox(height: 16),
           ...availableGames.map((game) => Padding(
-            padding: const EdgeInsets.only(bottom: 16, left: 20, right: 20),
-            child: GameLibraryCard(
-              game: game,
-              onTap: () {
-                if (game.id == 'loova_intimacy') {
-                  // Incrémenter le compteur
-                  ref.read(gamesLibraryProvider.notifier).incrementPlayCount(game.id);
-                  // Lancer le jeu
-                  context.push('/intimacy-card-game');
-                }
-              },
-              onFavorite: () {
-                ref.read(gamesLibraryProvider.notifier).toggleFavorite(game.id);
-              },
-            ),
-          )),
+                padding: const EdgeInsets.only(bottom: 16, left: 20, right: 20),
+                child: GameLibraryCard(
+                  game: game,
+                  onTap: () => _handleGameTap(context, ref, game),
+                  onFavorite: () {
+                    ref.read(gamesLibraryProvider.notifier).toggleFavorite(game.id);
+                  },
+                ),
+              )),
         ],
 
-        // Section À venir
+        // Section À venir / Premium
         if (upcomingGames.isNotEmpty) ...[
           const SizedBox(height: 24),
           Padding(
@@ -132,20 +189,18 @@ class GamesLibraryScreen extends ConsumerWidget {
             child: Text(
               'Bientôt disponible',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
           const SizedBox(height: 16),
           ...upcomingGames.map((game) => Padding(
-            padding: const EdgeInsets.only(bottom: 16, left: 20, right: 20),
-            child: GameLibraryCard(
-              game: game,
-              onTap: () {
-                _showLockedDialog(context, game);
-              },
-            ),
-          )),
+                padding: const EdgeInsets.only(bottom: 16, left: 20, right: 20),
+                child: GameLibraryCard(
+                  game: game,
+                  onTap: () => _showLockedDialog(context, game),
+                ),
+              )),
         ],
 
         const SizedBox(height: 100),
@@ -153,7 +208,37 @@ class GamesLibraryScreen extends ConsumerWidget {
     );
   }
 
-  void _showLockedDialog(BuildContext context, game) {
+  void _handleGameTap(BuildContext context, WidgetRef ref, Game game) {
+    print('🎮 [DEBUG] _handleGameTap - game.id: ${game.id}, status: ${game.status}');
+
+    if (game.status != GameStatus.available) {
+      print('🎮 [DEBUG] Game not available, showing locked dialog');
+      _showLockedDialog(context, game);
+      return;
+    }
+
+    // Si c'est le jeu de questions, aller vers la sélection de paquet
+    if (game.id == 'loova_intimacy') {
+      print('🎮 [DEBUG] Intimacy game clicked, incrementing play count');
+      ref.read(gamesLibraryProvider.notifier).incrementPlayCount(game.id);
+
+      print('🎮 [DEBUG] Navigating to /deck-selection with gameId: ${game.id}');
+      try {
+        context.push('/deck-selection', extra: game.id);
+        print('✅ [DEBUG] Navigation successful');
+      } catch (e, stack) {
+        print('❌ [DEBUG] Navigation ERROR: $e');
+        print('❌ [DEBUG] Stack: $stack');
+      }
+    } else {
+      print('🎮 [DEBUG] Other game clicked: ${game.id}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${game.name} arrive bientôt !')),
+      );
+    }
+  }
+
+  void _showLockedDialog(BuildContext context, Game game) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -163,9 +248,11 @@ class GamesLibraryScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (game.status == GameStatus.comingSoon)
-              const Text('Ce jeu sera bientôt disponible ! Restez connecté pour être notifié.')
+              const Text(
+                  'Ce jeu sera bientôt disponible ! Restez connecté pour être notifié.')
             else if (game.status == GameStatus.premium)
-              const Text('Ce jeu est réservé aux membres Premium. Passez à Premium pour y accéder.'),
+              const Text(
+                  'Ce jeu est réservé aux membres Premium. Passez à Premium pour y accéder.'),
           ],
         ),
         actions: [

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter:*)",
+      "Bash(echo $JAVA_HOME)",
+      "Bash(/usr/libexec/java_home:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx supabase functions deploy:*)",
+      "Bash(supabase functions deploy:*)",
+      "Bash(tree:*)",
+      "Bash(dart run build_runner build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

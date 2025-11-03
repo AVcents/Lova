@@ -7,6 +7,7 @@ import 'package:lova/shared/providers/dashboard_mode_provider.dart';
 import 'package:lova/features/me_dashboard/me_dashboard_view.dart';
 import 'package:lova/features/us_dashboard/us_dashboard_screen.dart';
 import 'package:lova/features/relation/widgets/action_bar.dart';
+import 'package:lova/features/notifications/providers/notifications_provider.dart';
 
 class RelationDashboardPage extends ConsumerStatefulWidget {
   const RelationDashboardPage({super.key});
@@ -202,27 +203,37 @@ class _RelationDashboardPageState extends ConsumerState<RelationDashboardPage>
 
           const Spacer(),
 
-          // Bouton notifications
+          // Bouton notifications avec badge
           GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Notifications')));
-            },
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.onSurface.withOpacity(0.3),
-                  width: 2,
+            onTap: () => context.push('/notifications'),
+            child: Badge(
+              isLabelVisible: ref.watch(unreadCountProvider) > 0,
+              label: Text(
+                ref.watch(unreadCountProvider) > 99
+                  ? '99+'
+                  : '${ref.watch(unreadCountProvider)}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
                 ),
               ),
-              child: Icon(
-                Icons.notifications_outlined,
-                color: colorScheme.onSurface,
-                size: 24,
+              backgroundColor: Colors.red,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.onSurface.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.notifications_outlined,
+                  color: colorScheme.onSurface,
+                  size: 24,
+                ),
               ),
             ),
           ),

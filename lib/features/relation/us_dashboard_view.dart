@@ -229,6 +229,46 @@ class UsDashboardView extends ConsumerWidget {
 
           const SizedBox(height: 20),
 
+          // Sections historiques (comme ME dashboard)
+          Row(
+            children: [
+              Expanded(
+                child: _HistorySection(
+                  icon: Icons.favorite,
+                  title: 'Check-ins',
+                  subtitle: 'Historique couple',
+                  onTap: () => context.push('/couple-checkin-history'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child:_HistorySection(
+                  icon: Icons.self_improvement,
+                  title: 'Rituels',
+                  subtitle: 'Bientôt disponible',
+                  onTap: null, // Disabled pour l'instant
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _HistorySection(
+                  icon: Icons.menu_book,
+                  title: 'Journal partagé',
+                  subtitle: 'Bientôt disponible',
+                  onTap: null, // Disabled pour l'instant
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Spacer(), // Pour équilibrer
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
           // Section Moments à venir
           Container(
             padding: const EdgeInsets.all(20),
@@ -368,6 +408,72 @@ class UsDashboardView extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HistorySection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  const _HistorySection({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDisabled = onTap == null;
+
+    return Card(
+      elevation: 0,
+      color: isDisabled ? Colors.grey.shade100 : colorScheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 32,
+                color: isDisabled ? Colors.grey : colorScheme.primary,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled
+                      ? Colors.grey.shade600
+                      : colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  fontSize: 12,
+                  color: isDisabled
+                      ? Colors.grey.shade500
+                      : colorScheme.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

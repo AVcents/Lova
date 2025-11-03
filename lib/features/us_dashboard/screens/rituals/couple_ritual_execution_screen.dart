@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/models/couple_ritual.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/providers/couple_rituals_provider.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/data/couple_rituals_data.dart';
@@ -137,7 +138,42 @@ class _CoupleRitualExecutionScreenState
     }
   }
 
+  Future<void> _saveSession(int durationActual) async {
+    try {
+      final sb = Supabase.instance.client;
+      final userId = sb.auth.currentUser?.id;
+
+      if (userId == null) return;
+
+      // Récupérer relation_id
+      final memberResp = await sb
+          .from('relation_members')
+          .select('relation_id')
+          .eq('user_id', userId)
+          .limit(1)
+          .single();
+
+      final relationId = memberResp['relation_id'] as String;
+
+      // Insérer session
+      await sb.from('couple_ritual_sessions').insert({
+        'relation_id': relationId,
+        'ritual_id': widget.ritual.id,
+        'completed_by': userId,
+        'duration_actual_minutes': durationActual,
+        'completed_at': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      // Log l'erreur mais ne bloque pas l'UX
+      debugPrint('Erreur lors de la sauvegarde de la session: $e');
+    }
+  }
+
   Future<void> _completeRitual(int minutes) async {
+    // Sauvegarder la session dans Supabase
+    await _saveSession(minutes);
+
+    // Incrémenter le compteur local
     ref.read(coupleRitualsProvider.notifier).incrementCompletion(widget.ritual.id);
 
     final currentMinutes = ref.read(todayCoupleRitualsMinutesProvider);
@@ -472,7 +508,7 @@ class _CoupleRitualExecutionScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          widget.ritual.instructions,
+                          widget.ritual.instructions.map((step) => step['text'] as String? ?? '').join('\n'),
                           style: textTheme.bodyMedium?.copyWith(
                             height: 1.5,
                             color: colorScheme.onSurface.withOpacity(0.8),

@@ -25,17 +25,22 @@ mixin _$CoupleRitual {
   String get title => throw _privateConstructorUsedError;
   String get emoji => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
+  @JsonKey(name: 'default_duration')
   int get defaultDuration => throw _privateConstructorUsedError;
+  @JsonKey(name: 'duration_options')
   List<int> get durationOptions => throw _privateConstructorUsedError;
   String get category => throw _privateConstructorUsedError;
   String get benefits => throw _privateConstructorUsedError;
-  String get instructions => throw _privateConstructorUsedError;
+  @JsonKey(name: 'instructions')
+  List<Map<String, dynamic>> get instructions =>
+      throw _privateConstructorUsedError;
   String get tips => throw _privateConstructorUsedError;
   int get points => throw _privateConstructorUsedError;
   int get timesCompleted => throw _privateConstructorUsedError;
   int get currentStreak => throw _privateConstructorUsedError;
   bool get isFavorite => throw _privateConstructorUsedError;
   bool get isCustom => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_premium')
   bool get isPremium => throw _privateConstructorUsedError;
 
   /// Serializes this CoupleRitual to a JSON map.
@@ -60,18 +65,18 @@ abstract class $CoupleRitualCopyWith<$Res> {
     String title,
     String emoji,
     String description,
-    int defaultDuration,
-    List<int> durationOptions,
+    @JsonKey(name: 'default_duration') int defaultDuration,
+    @JsonKey(name: 'duration_options') List<int> durationOptions,
     String category,
     String benefits,
-    String instructions,
+    @JsonKey(name: 'instructions') List<Map<String, dynamic>> instructions,
     String tips,
     int points,
     int timesCompleted,
     int currentStreak,
     bool isFavorite,
     bool isCustom,
-    bool isPremium,
+    @JsonKey(name: 'is_premium') bool isPremium,
   });
 }
 
@@ -144,7 +149,7 @@ class _$CoupleRitualCopyWithImpl<$Res, $Val extends CoupleRitual>
             instructions: null == instructions
                 ? _value.instructions
                 : instructions // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as List<Map<String, dynamic>>,
             tips: null == tips
                 ? _value.tips
                 : tips // ignore: cast_nullable_to_non_nullable
@@ -193,18 +198,18 @@ abstract class _$$CoupleRitualImplCopyWith<$Res>
     String title,
     String emoji,
     String description,
-    int defaultDuration,
-    List<int> durationOptions,
+    @JsonKey(name: 'default_duration') int defaultDuration,
+    @JsonKey(name: 'duration_options') List<int> durationOptions,
     String category,
     String benefits,
-    String instructions,
+    @JsonKey(name: 'instructions') List<Map<String, dynamic>> instructions,
     String tips,
     int points,
     int timesCompleted,
     int currentStreak,
     bool isFavorite,
     bool isCustom,
-    bool isPremium,
+    @JsonKey(name: 'is_premium') bool isPremium,
   });
 }
 
@@ -274,9 +279,9 @@ class __$$CoupleRitualImplCopyWithImpl<$Res>
             : benefits // ignore: cast_nullable_to_non_nullable
                   as String,
         instructions: null == instructions
-            ? _value.instructions
+            ? _value._instructions
             : instructions // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as List<Map<String, dynamic>>,
         tips: null == tips
             ? _value.tips
             : tips // ignore: cast_nullable_to_non_nullable
@@ -318,19 +323,21 @@ class _$CoupleRitualImpl implements _CoupleRitual {
     required this.title,
     required this.emoji,
     required this.description,
-    required this.defaultDuration,
-    required final List<int> durationOptions,
+    @JsonKey(name: 'default_duration') required this.defaultDuration,
+    @JsonKey(name: 'duration_options') required final List<int> durationOptions,
     required this.category,
     required this.benefits,
-    required this.instructions,
+    @JsonKey(name: 'instructions')
+    required final List<Map<String, dynamic>> instructions,
     required this.tips,
     required this.points,
     this.timesCompleted = 0,
     this.currentStreak = 0,
     this.isFavorite = false,
     this.isCustom = false,
-    this.isPremium = false,
-  }) : _durationOptions = durationOptions;
+    @JsonKey(name: 'is_premium') this.isPremium = false,
+  }) : _durationOptions = durationOptions,
+       _instructions = instructions;
 
   factory _$CoupleRitualImpl.fromJson(Map<String, dynamic> json) =>
       _$$CoupleRitualImplFromJson(json);
@@ -344,9 +351,11 @@ class _$CoupleRitualImpl implements _CoupleRitual {
   @override
   final String description;
   @override
+  @JsonKey(name: 'default_duration')
   final int defaultDuration;
   final List<int> _durationOptions;
   @override
+  @JsonKey(name: 'duration_options')
   List<int> get durationOptions {
     if (_durationOptions is EqualUnmodifiableListView) return _durationOptions;
     // ignore: implicit_dynamic_type
@@ -357,8 +366,15 @@ class _$CoupleRitualImpl implements _CoupleRitual {
   final String category;
   @override
   final String benefits;
+  final List<Map<String, dynamic>> _instructions;
   @override
-  final String instructions;
+  @JsonKey(name: 'instructions')
+  List<Map<String, dynamic>> get instructions {
+    if (_instructions is EqualUnmodifiableListView) return _instructions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_instructions);
+  }
+
   @override
   final String tips;
   @override
@@ -376,7 +392,7 @@ class _$CoupleRitualImpl implements _CoupleRitual {
   @JsonKey()
   final bool isCustom;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_premium')
   final bool isPremium;
 
   @override
@@ -404,8 +420,10 @@ class _$CoupleRitualImpl implements _CoupleRitual {
                 other.category == category) &&
             (identical(other.benefits, benefits) ||
                 other.benefits == benefits) &&
-            (identical(other.instructions, instructions) ||
-                other.instructions == instructions) &&
+            const DeepCollectionEquality().equals(
+              other._instructions,
+              _instructions,
+            ) &&
             (identical(other.tips, tips) || other.tips == tips) &&
             (identical(other.points, points) || other.points == points) &&
             (identical(other.timesCompleted, timesCompleted) ||
@@ -432,7 +450,7 @@ class _$CoupleRitualImpl implements _CoupleRitual {
     const DeepCollectionEquality().hash(_durationOptions),
     category,
     benefits,
-    instructions,
+    const DeepCollectionEquality().hash(_instructions),
     tips,
     points,
     timesCompleted,
@@ -462,18 +480,19 @@ abstract class _CoupleRitual implements CoupleRitual {
     required final String title,
     required final String emoji,
     required final String description,
-    required final int defaultDuration,
-    required final List<int> durationOptions,
+    @JsonKey(name: 'default_duration') required final int defaultDuration,
+    @JsonKey(name: 'duration_options') required final List<int> durationOptions,
     required final String category,
     required final String benefits,
-    required final String instructions,
+    @JsonKey(name: 'instructions')
+    required final List<Map<String, dynamic>> instructions,
     required final String tips,
     required final int points,
     final int timesCompleted,
     final int currentStreak,
     final bool isFavorite,
     final bool isCustom,
-    final bool isPremium,
+    @JsonKey(name: 'is_premium') final bool isPremium,
   }) = _$CoupleRitualImpl;
 
   factory _CoupleRitual.fromJson(Map<String, dynamic> json) =
@@ -488,15 +507,18 @@ abstract class _CoupleRitual implements CoupleRitual {
   @override
   String get description;
   @override
+  @JsonKey(name: 'default_duration')
   int get defaultDuration;
   @override
+  @JsonKey(name: 'duration_options')
   List<int> get durationOptions;
   @override
   String get category;
   @override
   String get benefits;
   @override
-  String get instructions;
+  @JsonKey(name: 'instructions')
+  List<Map<String, dynamic>> get instructions;
   @override
   String get tips;
   @override
@@ -510,6 +532,7 @@ abstract class _CoupleRitual implements CoupleRitual {
   @override
   bool get isCustom;
   @override
+  @JsonKey(name: 'is_premium')
   bool get isPremium;
 
   /// Create a copy of CoupleRitual

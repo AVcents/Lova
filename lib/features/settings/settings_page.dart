@@ -256,6 +256,13 @@ class SettingsPage extends ConsumerWidget {
             );
           },
         ),
+        _buildListTile(
+          context,
+          icon: Icons.notification_important,
+          title: 'Test Notifications',
+          subtitle: 'Tester l\'envoi de notifications push',
+          onTap: () => context.push('/settings/test-notifications'),
+        ),
       ],
     );
   }
