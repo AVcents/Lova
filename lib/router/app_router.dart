@@ -11,8 +11,6 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:lova/features/library_us/library_us_page.dart';
 import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
-import 'package:lova/features/onboarding/providers/onboarding_controller.dart';
-import 'package:lova/features/onboarding/presentation/onboarding_flow.dart';
 
 // Pages d'authentification
 import 'package:lova/features/auth/pages/sign_in_page.dart';
@@ -20,9 +18,7 @@ import 'package:lova/features/auth/pages/sign_up_page.dart';
 import 'package:lova/features/auth/pages/forgot_password_page.dart';
 import 'package:lova/features/auth/pages/verify_email_page.dart';
 import 'package:lova/features/chat/chat_couple_page.dart';
-import 'package:lova/features/chat/chat_lova_page.dart';
-import 'package:lova/features/mediation/mediation_flow.dart';
-import 'package:lova/features/profile/profile_page.dart';
+import 'package:lova/features/chat_lova/ui/chat_lova_page.dart';
 import 'package:lova/features/relation_linking/presentation/link_relation_page.dart';
 import 'package:lova/features/settings/settings_page.dart';
 
@@ -58,7 +54,6 @@ import 'package:lova/features/us_dashboard/screens/games/intimacy_card_game_scre
 import 'package:lova/features/us_dashboard/screens/games/deck_selection_screen.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/couple_ritual_history_page.dart';
-import 'package:lova/features/sos/screens/sos_history_page.dart';
 import 'package:lova/features/splash/splash_screen.dart';
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription _sub;
@@ -112,22 +107,7 @@ class AppRouter {
         },
       ),
 
-      // Gate et onboarding
-      GoRoute(
-        path: '/gate',
-        builder: (context, state) => const OnboardingGatePage(),
-      ),
-      GoRoute(
-        path: '/onboarding',
-        name: OnboardingFlow.name,
-        builder: (context, state) => const OnboardingFlow(),
-      ),
-
       // Autres routes hors navigation
-      GoRoute(
-        path: '/mediation',
-        builder: (context, state) => const MediationFlowPage(),
-      ),
 
       // Routes de paramètres (hors bottom nav)
       GoRoute(
@@ -278,11 +258,6 @@ class AppRouter {
         builder: (context, state) => const CoupleRitualsLibraryScreen(),
       ),
       GoRoute(
-        path: '/sos-history',
-        name: 'sosHistory',
-        builder: (context, state) => const SosHistoryPage(),
-      ),
-      GoRoute(
         path: '/connection-games',
         name: 'connectionGames',
         builder: (context, state) => const GamesLibraryScreen(),
@@ -346,10 +321,8 @@ class AppRouter {
               final messageId = messageIdStr != null
                   ? int.tryParse(messageIdStr)
                   : null;
-              final sosSessionId = state.uri.queryParameters['sos_session'];
               return ChatCouplePage(
                 initialMessageId: messageId,
-                sosSessionId: sosSessionId,
               );
             },
           ),
@@ -386,10 +359,6 @@ class AppRouter {
             path: '/link-relation',
             builder: (context, state) => const LinkRelationPage(),
           ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const ProfilePage(),
-          ),
         ],
       ),
     ],
@@ -414,7 +383,6 @@ class AppRouter {
 
       // CHANGEMENT: Permettre l'accès direct au dashboard si authentifié
       if (isAuth && (state.fullPath == '/dashboard' ||
-          state.fullPath == '/gate' ||
           state.fullPath?.startsWith('/settings') == true ||
           state.fullPath?.startsWith('/chat') == true ||
           state.fullPath?.startsWith('/library') == true ||
@@ -450,42 +418,6 @@ class AppRouter {
       return null;
     },
   );
-}
-
-class OnboardingGatePage extends ConsumerWidget {
-  const OnboardingGatePage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncStatus = ref.watch(hasCompletedOnboardingProvider);
-
-    return asyncStatus.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (_, __) {
-        // En cas d'erreur, aller au dashboard par défaut
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.go('/dashboard');
-        });
-        return const SizedBox.shrink();
-      },
-      data: (done) {
-        // Si onboarding complété OU si erreur de check, aller au dashboard
-        // Sinon aller à l'onboarding
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // CHANGEMENT: par défaut aller au dashboard
-          // L'onboarding ne se déclenche que si explicitement non complété
-          if (done == false) {
-            context.go('/onboarding');
-          } else {
-            context.go('/dashboard');
-          }
-        });
-        return const SizedBox.shrink();
-      },
-    );
-  }
 }
 
 // Page placeholder pour les fonctionnalités à venir

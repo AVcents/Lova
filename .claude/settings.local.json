@@ -8,7 +8,14 @@
       "Bash(npx supabase functions deploy:*)",
       "Bash(supabase functions deploy:*)",
       "Bash(tree:*)",
-      "Bash(dart run build_runner build:*)"
+      "Bash(dart run build_runner build:*)",
+      "Bash(rm:*)",
+      "Bash(for:*)",
+      "Bash(find:*)",
+      "Bash(done)",
+      "Bash(awk:*)",
+      "Bash(while read dir)",
+      "Bash(do echo \"=== $feature ===\")"
     ],
     "deny": [],
     "ask": []

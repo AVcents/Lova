@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
 import 'package:lova/features/us_dashboard/widgets/checkin_status_card.dart';
 import 'package:lova/features/us_dashboard/providers/couple_checkin_provider.dart';
-import 'package:lova/features/sos/screens/sos_launch_dialog.dart';
 
 
 class UsDashboardView extends ConsumerStatefulWidget {
@@ -72,15 +71,6 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
             children: [
               Expanded(
                 child: _HistorySection(
-                  icon: Icons.crisis_alert,
-                  title: 'SOS',
-                  subtitle: 'Historique',
-                  onTap: () => context.push('/sos-history'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _HistorySection(
                   icon: Icons.menu_book,
                   title: 'Journal',
                   subtitle: 'Bientôt',
@@ -132,20 +122,6 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
           // Quick Actions
           Row(
             children: [
-              Expanded(
-                child: _buildQuickAction(
-                  context,
-                  icon: Icons.favorite_border,
-                  label: 'SOS Couple',
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => const SosLaunchDialog(),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: _buildQuickAction(
                   context,

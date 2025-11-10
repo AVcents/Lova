@@ -29,8 +29,6 @@ mixin _$CoupleMessage {
   String get content => throw _privateConstructorUsedError;
   @JsonKey(name: 'message_type')
   String get messageType => throw _privateConstructorUsedError;
-  @JsonKey(name: 'sos_session_id')
-  String? get sosSessionId => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_encrypted')
   bool get isEncrypted => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
@@ -59,7 +57,6 @@ abstract class $CoupleMessageCopyWith<$Res> {
     @JsonKey(name: 'sender_id') String? senderId,
     String content,
     @JsonKey(name: 'message_type') String messageType,
-    @JsonKey(name: 'sos_session_id') String? sosSessionId,
     @JsonKey(name: 'is_encrypted') bool isEncrypted,
     @JsonKey(name: 'created_at') DateTime createdAt,
   });
@@ -85,7 +82,6 @@ class _$CoupleMessageCopyWithImpl<$Res, $Val extends CoupleMessage>
     Object? senderId = freezed,
     Object? content = null,
     Object? messageType = null,
-    Object? sosSessionId = freezed,
     Object? isEncrypted = null,
     Object? createdAt = null,
   }) {
@@ -111,10 +107,6 @@ class _$CoupleMessageCopyWithImpl<$Res, $Val extends CoupleMessage>
                 ? _value.messageType
                 : messageType // ignore: cast_nullable_to_non_nullable
                       as String,
-            sosSessionId: freezed == sosSessionId
-                ? _value.sosSessionId
-                : sosSessionId // ignore: cast_nullable_to_non_nullable
-                      as String?,
             isEncrypted: null == isEncrypted
                 ? _value.isEncrypted
                 : isEncrypted // ignore: cast_nullable_to_non_nullable
@@ -144,7 +136,6 @@ abstract class _$$CoupleMessageImplCopyWith<$Res>
     @JsonKey(name: 'sender_id') String? senderId,
     String content,
     @JsonKey(name: 'message_type') String messageType,
-    @JsonKey(name: 'sos_session_id') String? sosSessionId,
     @JsonKey(name: 'is_encrypted') bool isEncrypted,
     @JsonKey(name: 'created_at') DateTime createdAt,
   });
@@ -169,7 +160,6 @@ class __$$CoupleMessageImplCopyWithImpl<$Res>
     Object? senderId = freezed,
     Object? content = null,
     Object? messageType = null,
-    Object? sosSessionId = freezed,
     Object? isEncrypted = null,
     Object? createdAt = null,
   }) {
@@ -195,10 +185,6 @@ class __$$CoupleMessageImplCopyWithImpl<$Res>
             ? _value.messageType
             : messageType // ignore: cast_nullable_to_non_nullable
                   as String,
-        sosSessionId: freezed == sosSessionId
-            ? _value.sosSessionId
-            : sosSessionId // ignore: cast_nullable_to_non_nullable
-                  as String?,
         isEncrypted: null == isEncrypted
             ? _value.isEncrypted
             : isEncrypted // ignore: cast_nullable_to_non_nullable
@@ -221,7 +207,6 @@ class _$CoupleMessageImpl implements _CoupleMessage {
     @JsonKey(name: 'sender_id') this.senderId,
     required this.content,
     @JsonKey(name: 'message_type') this.messageType = 'normal',
-    @JsonKey(name: 'sos_session_id') this.sosSessionId,
     @JsonKey(name: 'is_encrypted') this.isEncrypted = true,
     @JsonKey(name: 'created_at') required this.createdAt,
   });
@@ -244,9 +229,6 @@ class _$CoupleMessageImpl implements _CoupleMessage {
   @JsonKey(name: 'message_type')
   final String messageType;
   @override
-  @JsonKey(name: 'sos_session_id')
-  final String? sosSessionId;
-  @override
   @JsonKey(name: 'is_encrypted')
   final bool isEncrypted;
   @override
@@ -255,7 +237,7 @@ class _$CoupleMessageImpl implements _CoupleMessage {
 
   @override
   String toString() {
-    return 'CoupleMessage(id: $id, relationId: $relationId, senderId: $senderId, content: $content, messageType: $messageType, sosSessionId: $sosSessionId, isEncrypted: $isEncrypted, createdAt: $createdAt)';
+    return 'CoupleMessage(id: $id, relationId: $relationId, senderId: $senderId, content: $content, messageType: $messageType, isEncrypted: $isEncrypted, createdAt: $createdAt)';
   }
 
   @override
@@ -271,8 +253,6 @@ class _$CoupleMessageImpl implements _CoupleMessage {
             (identical(other.content, content) || other.content == content) &&
             (identical(other.messageType, messageType) ||
                 other.messageType == messageType) &&
-            (identical(other.sosSessionId, sosSessionId) ||
-                other.sosSessionId == sosSessionId) &&
             (identical(other.isEncrypted, isEncrypted) ||
                 other.isEncrypted == isEncrypted) &&
             (identical(other.createdAt, createdAt) ||
@@ -288,7 +268,6 @@ class _$CoupleMessageImpl implements _CoupleMessage {
     senderId,
     content,
     messageType,
-    sosSessionId,
     isEncrypted,
     createdAt,
   );
@@ -314,7 +293,6 @@ abstract class _CoupleMessage implements CoupleMessage {
     @JsonKey(name: 'sender_id') final String? senderId,
     required final String content,
     @JsonKey(name: 'message_type') final String messageType,
-    @JsonKey(name: 'sos_session_id') final String? sosSessionId,
     @JsonKey(name: 'is_encrypted') final bool isEncrypted,
     @JsonKey(name: 'created_at') required final DateTime createdAt,
   }) = _$CoupleMessageImpl;
@@ -335,9 +313,6 @@ abstract class _CoupleMessage implements CoupleMessage {
   @override
   @JsonKey(name: 'message_type')
   String get messageType;
-  @override
-  @JsonKey(name: 'sos_session_id')
-  String? get sosSessionId;
   @override
   @JsonKey(name: 'is_encrypted')
   bool get isEncrypted;

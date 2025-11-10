@@ -35,15 +35,3 @@ final coupleChatProvider = StreamProvider.family.autoDispose<List<CoupleMessage>
         return messages;
       });
 });
-
-// Détecter si SOS actif à partir des messages
-final activeSosSessionIdProvider = Provider.family<String?, String>((ref, relationId) {
-  final messages = ref.watch(coupleChatProvider(relationId)).value ?? [];
-
-  // Trouver le dernier message SOS
-  final sosMessages = messages.where((m) => m.isSos).toList();
-  if (sosMessages.isEmpty) return null;
-
-  // Vérifier que la session est toujours active
-  return sosMessages.last.sosSessionId;
-});

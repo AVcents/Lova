@@ -1,17 +1,24 @@
 import 'dart:developer' as developer;
 
+// TODO: Remplacer par MistralApiClient
 import 'package:lova/core/api/openai_api_client.dart';
 import 'package:lova/features/chat_lova/data/lova_repository.dart';
 import 'package:lova/features/chat_lova/models/lova_message.dart';
 
 class RealLovaRepository implements LovaRepository {
+  // TODO: Remplacer par MistralApiClient une fois implémenté
   final OpenAIApiClient _client = OpenAIApiClient();
+  // final MistralApiClient _client = MistralApiClient();
 
   @override
   Stream<LovaMessage> getResponse(
     String userInput,
     List<LovaMessage> history,
   ) async* {
+    // TODO: Adapter ce code pour utiliser l'API Mistral au lieu d'OpenAI
+    // Le streaming SSE devrait fonctionner de manière similaire
+    // L'API Mistral utilise aussi le format SSE (Server-Sent Events)
+
     // Validation des entrées
     if (userInput.trim().isEmpty) {
       yield LovaMessage(
