@@ -32,19 +32,19 @@ import 'package:lova/features/notifications/pages/notifications_page.dart';
 
 import 'package:lova/shared/widgets/bottom_nav_shell.dart';
 
-import 'package:lova/features/me_dashboard/presentation/checkin_page.dart';
-import 'package:lova/features/me_dashboard/presentation/journal_page.dart';
-import 'package:lova/features/me_dashboard/presentation/rituals_selection_page.dart';
-import 'package:lova/features/me_dashboard/presentation/widgets/rituals_history_section.dart' as rituals;
-import 'package:lova/features/me_dashboard/presentation/widgets/checkins_history_section.dart' as checkins;
-import 'package:lova/features/me_dashboard/presentation/widgets/journal_history_section.dart' as journals;
-import 'package:lova/features/me_dashboard/presentation/emotional_history_page.dart';
+import 'package:lova/features/profile/presentation/checkin_page.dart';
+import 'package:lova/features/profile/presentation/journal_page.dart';
+import 'package:lova/features/profile/presentation/rituals_selection_page.dart';
+import 'package:lova/features/profile/presentation/widgets/rituals_history_section.dart' as rituals;
+import 'package:lova/features/profile/presentation/widgets/checkins_history_section.dart' as checkins;
+import 'package:lova/features/profile/presentation/widgets/journal_history_section.dart' as journals;
+import 'package:lova/features/profile/presentation/emotional_history_page.dart';
 
 // Imports pour les routes Intentions
-import 'package:lova/features/me_dashboard/presentation/intentions_overview_page.dart';
-import 'package:lova/features/me_dashboard/presentation/intention_creation_wizard.dart';
-import 'package:lova/features/me_dashboard/presentation/intention_detail_page.dart';
-import 'package:lova/features/me_dashboard/presentation/intention_reflection_page.dart';
+import 'package:lova/features/profile/presentation/intentions_overview_page.dart';
+import 'package:lova/features/profile/presentation/intention_creation_wizard.dart';
+import 'package:lova/features/profile/presentation/intention_detail_page.dart';
+import 'package:lova/features/profile/presentation/intention_reflection_page.dart';
 
 import 'package:lova/features/relation/dashboard/screens/checkin/couple_checkin_screen.dart';
 import 'package:lova/features/relation/dashboard/screens/checkin/couple_checkin_results_screen.dart';
