@@ -15,7 +15,11 @@
       "Bash(done)",
       "Bash(awk:*)",
       "Bash(while read dir)",
-      "Bash(do echo \"=== $feature ===\")"
+      "Bash(do echo \"=== $feature ===\")",
+      "Bash(git push:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: migrate us_dashboard to relation/dashboard\n\nPHASE 1.1 - Migration structurelle\n\nChanges:\n- Move lib/features/us_dashboard/ → lib/features/relation/dashboard/\n- Update all imports (27 files) from features/us_dashboard to features/relation/dashboard\n- Rename us_dashboard_screen.dart → dashboard_screen.dart\n- Update relation_dashboard_page.dart import\n\nStructure:\nrelation/dashboard/\n├── models/ (9 models)\n├── providers/ (couple_checkin, games)\n├── screens/\n│   ├── checkin/ (3 pages + widgets)\n│   ├── games/ (3 pages + widgets + data)\n│   └── rituals/ (3 pages + widgets + data + providers)\n├── services/ (couple_checkin, games, couple_chat)\n├── widgets/ (checkin_status_card)\n└── dashboard_screen.dart\n\n✅ Compilation successful - no errors\n⚠️ 1088 style warnings (pre-existing)\n\n🤖 Generated with Claude Code\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

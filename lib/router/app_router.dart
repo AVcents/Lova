@@ -46,14 +46,14 @@ import 'package:lova/features/me_dashboard/presentation/intention_creation_wizar
 import 'package:lova/features/me_dashboard/presentation/intention_detail_page.dart';
 import 'package:lova/features/me_dashboard/presentation/intention_reflection_page.dart';
 
-import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_screen.dart';
-import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_results_screen.dart';
-import 'package:lova/features/us_dashboard/screens/checkin/couple_checkin_history_page.dart';
-import 'package:lova/features/us_dashboard/screens/games/games_library_screen.dart';
-import 'package:lova/features/us_dashboard/screens/games/intimacy_card_game_screen.dart';
-import 'package:lova/features/us_dashboard/screens/games/deck_selection_screen.dart';
-import 'package:lova/features/us_dashboard/screens/rituals/couple_rituals_library_screen.dart';
-import 'package:lova/features/us_dashboard/screens/rituals/couple_ritual_history_page.dart';
+import 'package:lova/features/relation/dashboard/screens/checkin/couple_checkin_screen.dart';
+import 'package:lova/features/relation/dashboard/screens/checkin/couple_checkin_results_screen.dart';
+import 'package:lova/features/relation/dashboard/screens/checkin/couple_checkin_history_page.dart';
+import 'package:lova/features/relation/dashboard/screens/games/games_library_screen.dart';
+import 'package:lova/features/relation/dashboard/screens/games/intimacy_card_game_screen.dart';
+import 'package:lova/features/relation/dashboard/screens/games/deck_selection_screen.dart';
+import 'package:lova/features/relation/dashboard/screens/rituals/couple_rituals_library_screen.dart';
+import 'package:lova/features/relation/dashboard/screens/rituals/couple_ritual_history_page.dart';
 import 'package:lova/features/splash/splash_screen.dart';
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription _sub;

@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:lova/shared/providers/dashboard_mode_provider.dart';
 import 'package:lova/features/me_dashboard/me_dashboard_view.dart';
-import 'package:lova/features/us_dashboard/us_dashboard_screen.dart';
+import 'package:lova/features/relation/dashboard/dashboard_screen.dart';
 import 'package:lova/features/relation/widgets/action_bar.dart';
 import 'package:lova/features/notifications/providers/notifications_provider.dart';
 
