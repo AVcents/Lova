@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
-import 'package:lova/features/relation_linking/application/link_relation_controller.dart';
-import 'package:lova/features/relation_linking/domain/relation_linking_state.dart';
-import 'package:lova/features/relation_linking/infrastructure/linking_repository.dart';
+import 'package:lova/features/relation/linking/application/link_relation_controller.dart';
+import 'package:lova/features/relation/linking/domain/relation_linking_state.dart';
+import 'package:lova/features/relation/linking/infrastructure/linking_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Provider pour surveiller la relation active en temps réel

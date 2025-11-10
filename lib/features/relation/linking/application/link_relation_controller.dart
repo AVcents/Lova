@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:lova/features/relation_linking/domain/relation_linking_state.dart';
-import 'package:lova/features/relation_linking/infrastructure/linking_repository.dart';
+import 'package:lova/features/relation/linking/domain/relation_linking_state.dart';
+import 'package:lova/features/relation/linking/infrastructure/linking_repository.dart';
 
 final linkRelationControllerProvider =
     StateNotifierProvider.autoDispose<LinkRelationController, RelationLinkingState>(

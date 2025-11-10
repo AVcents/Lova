@@ -19,7 +19,7 @@ import 'package:lova/features/auth/pages/forgot_password_page.dart';
 import 'package:lova/features/auth/pages/verify_email_page.dart';
 import 'package:lova/features/chat/chat_couple_page.dart';
 import 'package:lova/features/chat_lova/ui/chat_lova_page.dart';
-import 'package:lova/features/relation_linking/presentation/link_relation_page.dart';
+import 'package:lova/features/relation/linking/presentation/link_relation_page.dart';
 import 'package:lova/features/settings/settings_page.dart';
 
 
