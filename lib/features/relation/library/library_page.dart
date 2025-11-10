@@ -1,4 +1,4 @@
-// lib/features/library_us/library_us_page.dart
+// lib/features/relation/library/library_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,12 +10,12 @@ import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/shared/providers/annotations_provider.dart';
 import 'package:lova/shared/ui/semantic_colors.dart';
 
-class LibraryUsPage extends ConsumerStatefulWidget {
+class LibraryPage extends ConsumerStatefulWidget {
   final AnnotationTag? initialFilter;
   final String coupleId;
   final Function(int)? scrollToMessage; // Changé en int
 
-  const LibraryUsPage({
+  const LibraryPage({
     super.key,
     this.initialFilter,
     required this.coupleId,
@@ -23,10 +23,10 @@ class LibraryUsPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<LibraryUsPage> createState() => _LibraryUsPageState();
+  ConsumerState<LibraryPage> createState() => _LibraryPageState();
 }
 
-class _LibraryUsPageState extends ConsumerState<LibraryUsPage> {
+class _LibraryPageState extends ConsumerState<LibraryPage> {
   AnnotationTag? _selectedFilter;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();

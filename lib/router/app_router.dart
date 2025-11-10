@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lova/features/relation/relation_dashboard_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
-import 'package:lova/features/library_us/library_us_page.dart';
+import 'package:lova/features/relation/library/library_page.dart';
 import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/features/auth/controller/auth_state_notifier.dart';
 
@@ -344,7 +344,7 @@ class AppRouter {
               final scrollToMessage =
               extra?['scrollToMessage'] as Function(int)?;
 
-              return LibraryUsPage(
+              return LibraryPage(
                 initialFilter: filter,
                 coupleId: coupleId,
                 scrollToMessage: scrollToMessage,
