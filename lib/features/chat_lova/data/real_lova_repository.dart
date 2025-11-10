@@ -1,23 +1,18 @@
 import 'dart:developer' as developer;
 
-// TODO: Remplacer par MistralApiClient
-import 'package:lova/core/api/openai_api_client.dart';
+import 'package:lova/core/api/mistral_api_client.dart';
 import 'package:lova/features/chat_lova/data/lova_repository.dart';
 import 'package:lova/features/chat_lova/models/lova_message.dart';
 
 class RealLovaRepository implements LovaRepository {
-  // TODO: Remplacer par MistralApiClient une fois implémenté
-  final OpenAIApiClient _client = OpenAIApiClient();
-  // final MistralApiClient _client = MistralApiClient();
+  final MistralApiClient _client = MistralApiClient();
 
   @override
   Stream<LovaMessage> getResponse(
     String userInput,
     List<LovaMessage> history,
   ) async* {
-    // TODO: Adapter ce code pour utiliser l'API Mistral au lieu d'OpenAI
-    // Le streaming SSE devrait fonctionner de manière similaire
-    // L'API Mistral utilise aussi le format SSE (Server-Sent Events)
+    // Utilise l'API Mistral avec streaming SSE (Server-Sent Events)
 
     // Validation des entrées
     if (userInput.trim().isEmpty) {
@@ -31,7 +26,7 @@ class RealLovaRepository implements LovaRepository {
       return;
     }
 
-    // Construction des messages pour OpenAI
+    // Construction des messages pour Mistral
     final messages = _buildMessages(userInput, history);
     final buffer = StringBuffer();
     bool hasReceivedContent = false;
@@ -39,8 +34,7 @@ class RealLovaRepository implements LovaRepository {
     try {
       developer.log('=== DÉBUT ENVOI MESSAGE ===', name: 'RealLovaRepository');
 
-      // Votre OpenAIApiClient fait déjà le parsing SSE correctement !
-      // On récupère directement les morceaux de texte
+      // MistralApiClient fait le parsing SSE et retourne directement les morceaux de texte
       await for (final textChunk in _client.sendMessage(messages)) {
         developer.log('Chunk reçu: "$textChunk"', name: 'RealLovaRepository');
 
@@ -115,7 +109,7 @@ class RealLovaRepository implements LovaRepository {
     }
   }
 
-  /// Construit la liste des messages pour OpenAI
+  /// Construit la liste des messages pour Mistral
   List<Map<String, String>> _buildMessages(
     String userInput,
     List<LovaMessage> history,
