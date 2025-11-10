@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lova/router/app_router.dart';
 import 'package:lova/shared/providers/theme_mode_provider.dart';
 import 'package:lova/theme/app_theme.dart';
-import 'features/onboarding/providers/onboarding_controller.dart';
 import 'features/auth/controller/auth_state_notifier.dart';
 
 class AuthStateListener extends ConsumerStatefulWidget {
@@ -17,30 +16,10 @@ class AuthStateListener extends ConsumerStatefulWidget {
 }
 
 class _AuthStateListenerState extends ConsumerState<AuthStateListener> {
-  bool _isInitializing = false;
-
   @override
   Widget build(BuildContext context) {
     ref.listen(authStateNotifierProvider, (previous, next) {
-      next?.maybeWhen(
-        authenticated: (_) {
-          // Éviter les initialisations multiples
-          if (!_isInitializing) {
-            _isInitializing = true;
-            // Initialisation synchrone améliorée
-            initializeOnboarding(ref).then((_) {
-              _isInitializing = false;
-            });
-          }
-        },
-        unauthenticated: () {
-          // Reset l'état d'onboarding lors de la déconnexion
-          ref.read(onboardingCompletedProvider.notifier).state = false;
-          resetOnboarding(ref);
-          _isInitializing = false;
-        },
-        orElse: () {},
-      );
+      // Listen to auth state changes
     });
     return widget.child;
   }

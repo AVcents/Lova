@@ -9,7 +9,20 @@
       "Bash(supabase functions deploy:*)",
       "Bash(tree:*)",
       "Bash(dart run build_runner build:*)",
-      "Bash(git merge:*)"
+      "Bash(rm:*)",
+      "Bash(for:*)",
+      "Bash(find:*)",
+      "Bash(done)",
+      "Bash(awk:*)",
+      "Bash(while read dir)",
+      "Bash(do echo \"=== $feature ===\")",
+      "Bash(git push:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Read(///**)"
     ],
     "deny": [],
     "ask": []

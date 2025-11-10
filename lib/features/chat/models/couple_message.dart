@@ -11,7 +11,6 @@ class CoupleMessage with _$CoupleMessage {
     @JsonKey(name: 'sender_id') String? senderId,  // NULL si AI
     required String content,
     @JsonKey(name: 'message_type') @Default('normal') String messageType,
-    @JsonKey(name: 'sos_session_id') String? sosSessionId,
     @JsonKey(name: 'is_encrypted') @Default(true) bool isEncrypted,
     @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _CoupleMessage;
@@ -21,19 +20,10 @@ class CoupleMessage with _$CoupleMessage {
 
 enum MessageType {
   normal,
-  sosUser,
-  sosAi,
 }
 
 extension MessageTypeX on CoupleMessage {
   MessageType get type {
-    switch (messageType) {
-      case 'sos_user': return MessageType.sosUser;
-      case 'sos_ai': return MessageType.sosAi;
-      default: return MessageType.normal;
-    }
+    return MessageType.normal;
   }
-
-  bool get isSos => sosSessionId != null;
-  bool get isAi => messageType == 'sos_ai';
 }
