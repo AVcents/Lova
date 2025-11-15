@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lova/features/relation/dashboard/screens/rituals/couple_rituals_library_screen.dart';
-import 'package:lova/features/relation/dashboard/widgets/checkin_status_card.dart';
-import 'package:lova/features/relation/dashboard/providers/couple_checkin_provider.dart';
-
 
 class UsDashboardView extends ConsumerStatefulWidget {
   const UsDashboardView({Key? key}) : super(key: key);
@@ -15,134 +11,54 @@ class UsDashboardView extends ConsumerStatefulWidget {
 }
 
 class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
-
   @override
-  void initState() {
-    super.initState();
-    // Rafraîchir le check-in à chaque ouverture
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(todayCoupleCheckinProvider);
-    });
-  }
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-
-          const CheckinStatusCard(),
-          // ════════════════════════════════════════════════
-          // GAUGE + QUICK ACTIONS
-          // ════════════════════════════════════════════════
-
-          _buildLoveGaugeSection(context),
+          // 💑 1. INSIGHT COUPLE (PLACEHOLDER)
+          _buildCoupleInsightPlaceholder(context),
 
           const SizedBox(height: 20),
 
-          // ════════════════════════════════════════════════
-          // SECTIONS HISTORIQUES
-          // ════════════════════════════════════════════════
-          Row(
-            children: [
-              Expanded(
-                child: _HistorySection(
-                  icon: Icons.favorite,
-                  title: 'Check-ins',
-                  subtitle: 'Historique',
-                  onTap: () => context.push('/couple-checkin-history'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _HistorySection(
-                  icon: Icons.self_improvement,
-                  title: 'Rituels',
-                  subtitle: 'Historique',
-                  onTap: () => context.push('/couple-ritual-history'),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          Row(
-            children: [
-              Expanded(
-                child: _HistorySection(
-                  icon: Icons.menu_book,
-                  title: 'Journal',
-                  subtitle: 'Bientôt',
-                  onTap: null,
-                ),
-              ),
-            ],
-          ),
+          // 🔥 2. STREAK RELATION
+          _buildRelationshipStreak(context),
 
           const SizedBox(height: 20),
 
-          // ════════════════════════════════════════════════
-          // RITUELS ACTIFS
-          // ════════════════════════════════════════════════
-          _buildActiveRitualsCard(context),
-
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════
-  // GAUGE + QUICK ACTIONS
-  // ════════════════════════════════════════════════════════════
-
-  Widget _buildLoveGaugeSection(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primaryContainer.withOpacity(0.2),
-            colorScheme.secondaryContainer.withOpacity(0.15),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
-          width: 0.50,
-        ),
-      ),
-      child: Column(
-        children: [
-          // Quick Actions
+          // ⚡ 3. QUICK ACTIONS (Check-in, Rituels, Games) - 3 côte à côte
           Row(
             children: [
               Expanded(
                 child: _buildQuickAction(
                   context,
-                  icon: Icons.photo_library_outlined,
-                  label: 'Souvenirs',
-                  onTap: () {
-                    // TODO: Navigation Souvenirs
-                  },
+                  icon: Icons.favorite_outline,
+                  label: 'Check-in',
+                  onTap: () => context.push('/couple-checkin-history'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildQuickAction(
                   context,
-                  icon: Icons.spa_outlined,
+                  icon: Icons.self_improvement,
                   label: 'Rituels',
+                  onTap: () => context.push('/couple-ritual-history'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildQuickAction(
+                  context,
+                  icon: Icons.games_outlined,
+                  label: 'Games',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CoupleRitualsLibraryScreen(),
+                    // TODO: Navigation vers games history
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Games - Bientôt disponible'),
                       ),
                     );
                   },
@@ -150,180 +66,70 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
               ),
             ],
           ),
+
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildQuickAction(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required VoidCallback onTap,
-      }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: colorScheme.primary,
-                size: 28,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════
-  // RITUELS ACTIFS
-  // ════════════════════════════════════════════════════════════
-
-  Widget _buildActiveRitualsCard(BuildContext context) {
+  // 💑 PLACEHOLDER : Insight Couple (à développer)
+  Widget _buildCoupleInsightPlaceholder(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primaryContainer.withOpacity(0.3),
+            colorScheme.secondaryContainer.withOpacity(0.2),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.outline.withOpacity(0.2),
           width: 1,
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.local_fire_department,
-                  color: colorScheme.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Nos rituels',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CoupleRitualsLibraryScreen(),
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: colorScheme.primary,
-                ),
-                child: const Text('Voir tout'),
-              ),
-            ],
+          Icon(
+            Icons.favorite,
+            color: colorScheme.primary,
+            size: 48,
           ),
-
-          const SizedBox(height: 20),
-
-          // Liste des rituels
-          _buildRitualRow(
-            context,
-            emoji: '💆',
-            name: 'Massages',
-            completion: '8/10',
-            hasStreak: false,
-          ),
-
           const SizedBox(height: 16),
-
-          _buildRitualRow(
-            context,
-            emoji: '🙏',
-            name: 'Gratitude partagée',
-            completion: '12/12',
-            hasStreak: true,
-            streak: 12,
+          Text(
+            'Insight Couple',
+            style: textTheme.titleLarge?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-
+          const SizedBox(height: 8),
+          Text(
+            'Votre analyse relationnelle apparaîtra ici',
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 16),
-
-          _buildRitualRow(
-            context,
-            emoji: '🍷',
-            name: 'Apéro déconnecté',
-            completion: '3/7',
-            hasStreak: false,
-          ),
-
-          const SizedBox(height: 20),
-
-          // CTA Explorer
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CoupleRitualsLibraryScreen(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.explore_outlined),
-              label: const Text('Explorer tous les rituels'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.2),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'En développement',
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -332,95 +138,77 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
     );
   }
 
-  Widget _buildRitualRow(
-      BuildContext context, {
-        required String emoji,
-        required String name,
-        required String completion,
-        bool hasStreak = false,
-        int streak = 0,
-      }) {
+  // 🔥 STREAK : Jours ensemble sur LOOVA
+  Widget _buildRelationshipStreak(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    // TODO: Récupérer la vraie date de début de relation depuis la BDD
+    // Pour l'instant, on simule avec 14 jours
+    const daysTogether = 14;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primaryContainer.withOpacity(0.3),
+            colorScheme.secondaryContainer.withOpacity(0.2),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.2),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
-          // Emoji
+          // Icône de cœur
           Container(
-            width: 48,
-            height: 48,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.primary.withOpacity(0.15),
+              shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 24)),
+            child: Icon(
+              Icons.favorite,
+              color: colorScheme.primary,
+              size: 32,
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
 
-          // Info
+          // Contenu
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        style: textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      '$daysTogether',
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (hasStreak) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFFFF6B35).withOpacity(0.2),
-                              const Color(0xFFFF9068).withOpacity(0.2),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('🔥', style: TextStyle(fontSize: 10)),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$streak',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFFF6B35),
-                              ),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'jour${daysTogether > 1 ? 's' : ''}',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.7),
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Prochain : dans 2 jours',
+                  'Ensemble sur LOOVA',
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface.withOpacity(0.6),
                   ),
@@ -428,87 +216,57 @@ class _UsDashboardViewState extends ConsumerState<UsDashboardView> {
               ],
             ),
           ),
-
-          const SizedBox(width: 12),
-
-          // Completion
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              completion,
-              style: textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF4CAF50),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
-}
 
-class _HistorySection extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback? onTap;
-
-  const _HistorySection({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  // ⚡ Quick Action (identique à profile_view.dart)
+  Widget _buildQuickAction(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDisabled = onTap == null;
 
-    return Card(
-      elevation: 0,
-      color: isDisabled ? Colors.grey.shade100 : colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 icon,
-                size: 32,
-                color: isDisabled ? Colors.grey : colorScheme.primary,
+                color: colorScheme.primary.withOpacity(0.7),
+                size: 28,
               ),
               const SizedBox(height: 8),
               Text(
-                title,
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDisabled
-                      ? Colors.grey.shade600
-                      : colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
+                label,
                 style: textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
-                  color: isDisabled
-                      ? Colors.grey.shade500
-                      : colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

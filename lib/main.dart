@@ -1,6 +1,7 @@
 // lib/main.dart
 
 import 'package:flutter/material.dart';
+import 'package:lova/core/theme/theme_extensions.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,6 +14,8 @@ import 'package:lova/shared/providers/tanks_provider.dart';
 import 'package:lova/shared/repositories/annotations_repository_memory.dart';
 import 'package:lova/shared/services/tanks_persistence.dart';
 import 'package:lova/core/services/firebase_service.dart';  // ⬅️ AJOUT
+
+import 'package:lova/core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

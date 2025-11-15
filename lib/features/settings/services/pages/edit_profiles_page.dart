@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lova/core/theme/theme_extensions.dart';
 import 'package:lova/features/settings/services/profile_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -213,7 +214,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: context.spacing.screenPadding,
           children: [
             // Avatar
             Center(
@@ -234,29 +235,29 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     bottom: 0,
                     right: 0,
                     child: PopupMenuButton<ImageSource>(
-                      icon: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.edit, size: 20),
+                      icon: CircleAvatar(
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        child: const Icon(Icons.edit, size: 20),
                       ),
                       onSelected: _pickImage,
                       itemBuilder: (context) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: ImageSource.camera,
                           child: Row(
                             children: [
-                              Icon(Icons.camera_alt),
-                              SizedBox(width: 8),
-                              Text('Prendre une photo'),
+                              const Icon(Icons.camera_alt),
+                              SizedBox(width: context.spacing.xs),
+                              const Text('Prendre une photo'),
                             ],
                           ),
                         ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: ImageSource.gallery,
                           child: Row(
                             children: [
-                              Icon(Icons.photo_library),
-                              SizedBox(width: 8),
-                              Text('Choisir une photo'),
+                              const Icon(Icons.photo_library),
+                              SizedBox(width: context.spacing.xs),
+                              const Text('Choisir une photo'),
                             ],
                           ),
                         ),
@@ -267,10 +268,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: context.spacing.xxl),
 
             _buildSectionTitle('Informations personnelles'),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _firstNameController,
@@ -281,7 +282,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ),
               validator: (val) => val?.isEmpty ?? true ? 'Requis' : null,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _lastNameController,
@@ -291,7 +292,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _nicknameController,
@@ -301,7 +302,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _phoneController,
@@ -312,7 +313,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ),
               keyboardType: TextInputType.phone,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             // Date de naissance
             InkWell(
@@ -340,7 +341,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             // Genre
             DropdownButtonFormField<String>(
@@ -357,10 +358,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               onChanged: (value) => setState(() => _gender = value),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: context.spacing.xxl),
 
             _buildSectionTitle('Localisation'),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _cityController,
@@ -370,7 +371,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _countryController,
@@ -380,7 +381,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             DropdownButtonFormField<String>(
               value: _selectedTimezone,
@@ -396,10 +397,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               onChanged: (value) => setState(() => _selectedTimezone = value),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: context.spacing.xxl),
 
             _buildSectionTitle('Préférences'),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             DropdownButtonFormField<String>(
               value: _selectedLanguage,
@@ -414,7 +415,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               )).toList(),
               onChanged: (value) => setState(() => _selectedLanguage = value),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             SwitchListTile(
               title: const Text('Notifications par email'),
@@ -427,10 +428,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               onChanged: (val) => setState(() => _notificationPush = val),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: context.spacing.xxl),
 
             _buildSectionTitle('Consentements (RGPD)'),
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             SwitchListTile(
               title: const Text('Marketing'),
@@ -445,7 +446,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               onChanged: (val) => setState(() => _analyticsConsent = val),
             ),
 
-            const SizedBox(height: 80),
+            SizedBox(height: context.spacing.xxl * 2.5),
           ],
         ),
       ),

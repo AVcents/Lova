@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lova/core/theme/theme_extensions.dart';
 import 'package:lova/features/auth/utils/email_validator.dart';
 import 'package:lova/features/settings/services/profile_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -88,7 +89,7 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -110,23 +111,23 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: context.spacing.screenPadding,
           children: [
             // Email actuel
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(context.spacing.md),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.radii.sm),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Email actuel',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.spacing.xs),
                   Text(
                     _currentEmail ?? 'Non défini',
                     style: theme.textTheme.bodyLarge,
@@ -135,7 +136,7 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: context.spacing.xl),
 
             // Nouvel email
             TextFormField(
@@ -162,7 +163,7 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
               },
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             // Confirmer email
             TextFormField(
@@ -185,11 +186,11 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
               },
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: context.spacing.xl),
 
             const Divider(),
 
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             // Mot de passe pour confirmation
             Text(
@@ -197,7 +198,7 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
               style: theme.textTheme.titleMedium,
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             TextFormField(
               controller: _passwordController,
@@ -223,7 +224,7 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
               },
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: context.spacing.xxl),
 
             // Bouton de confirmation
             SizedBox(
@@ -237,25 +238,27 @@ class _ChangeEmailPageState extends ConsumerState<ChangeEmailPage> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: context.spacing.md),
 
             // Avertissement
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(context.spacing.sm),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                color: const Color(0xFFFF9800).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(context.radii.xs),
+                border: Border.all(
+                  color: const Color(0xFFFF9800).withOpacity(0.3),
+                ),
               ),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange),
-                  SizedBox(width: 12),
+                  const Icon(Icons.info_outline, color: Color(0xFFFF9800)),
+                  SizedBox(width: context.spacing.sm),
                   Expanded(
                     child: Text(
                       'Vous devrez confirmer votre nouvelle adresse email en cliquant sur le lien qui vous sera envoyé.',
-                      style: TextStyle(fontSize: 13),
+                      style: theme.textTheme.bodySmall,
                     ),
                   ),
                 ],

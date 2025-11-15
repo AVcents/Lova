@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lova/core/theme/theme_extensions.dart';
 import 'package:lova/features/settings/services/profile_service.dart';
 
 class ObjectivesPage extends ConsumerStatefulWidget {
@@ -141,7 +142,7 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-        padding: const EdgeInsets.all(16),
+        padding: context.spacing.screenPadding,
         children: [
           // Section Objectifs
           _buildSectionHeader(
@@ -150,13 +151,13 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
             subtitle: 'Sélectionnez ce que vous souhaitez améliorer dans votre relation',
             color: theme.colorScheme.primary,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.spacing.md),
 
           _buildInfoCard(
             'Ces objectifs nous aideront à personnaliser votre expérience et à vous proposer du contenu adapté.',
             Icons.lightbulb_outline,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.spacing.md),
 
           Wrap(
             spacing: 8,
@@ -183,9 +184,9 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
             }).toList(),
           ),
 
-          const SizedBox(height: 32),
+          SizedBox(height: context.spacing.xxl),
           const Divider(),
-          const SizedBox(height: 32),
+          SizedBox(height: context.spacing.xxl),
 
           // Section Centres d'intérêt
           _buildSectionHeader(
@@ -194,13 +195,13 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
             subtitle: 'Sélectionnez vos passions et hobbies',
             color: theme.colorScheme.secondary,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.spacing.md),
 
           _buildInfoCard(
             'Trouvez des activités et contenus en lien avec vos passions communes.',
             Icons.explore_outlined,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.spacing.md),
 
           Wrap(
             spacing: 8,
@@ -227,14 +228,14 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
             }).toList(),
           ),
 
-          const SizedBox(height: 32),
+          SizedBox(height: context.spacing.xxl),
 
           // Résumé
           if (_selectedObjectives.isNotEmpty || _selectedInterests.isNotEmpty)
             Card(
               color: theme.colorScheme.surfaceContainerHighest,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(context.spacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -244,7 +245,7 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
                           Icons.analytics_outlined,
                           color: theme.colorScheme.primary,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: context.spacing.xs),
                         Text(
                           'Votre sélection',
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -253,7 +254,7 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.spacing.md),
 
                     if (_selectedObjectives.isNotEmpty) ...[
                       Text(
@@ -262,7 +263,7 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: context.spacing.xs),
                     ],
 
                     if (_selectedInterests.isNotEmpty) ...[
@@ -278,7 +279,7 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
               ),
             ),
 
-          const SizedBox(height: 80),
+          SizedBox(height: context.spacing.xxl * 2.5),
         ],
       ),
     );
@@ -296,14 +297,14 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.spacing.xs),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(context.radii.xs),
               ),
               child: Icon(icon, color: color, size: 24),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: context.spacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,10 +334,10 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
   Widget _buildInfoCard(String text, IconData icon) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(context.spacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.radii.sm),
         border: Border.all(
           color: theme.colorScheme.outline.withOpacity(0.2),
         ),
@@ -348,7 +349,7 @@ class _ObjectivesPageState extends ConsumerState<ObjectivesPage> {
             size: 20,
             color: theme.colorScheme.primary,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: context.spacing.sm),
           Expanded(
             child: Text(
               text,
