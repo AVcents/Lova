@@ -39,7 +39,7 @@ enum AnnotationTag {
 /// Modèle d'annotation pour un message
 class MessageAnnotation {
   final String id;
-  final int messageId; // Changé en int pour correspondre à Drift
+  final String messageId; // UUID du message
   final String coupleId;
   final String authorUserId;
   final AnnotationTag tag;
@@ -74,7 +74,7 @@ class MessageAnnotation {
   factory MessageAnnotation.fromMap(Map<String, dynamic> map) {
     return MessageAnnotation(
       id: map['id'] as String,
-      messageId: map['messageId'] as int,
+      messageId: map['messageId'] as String,
       coupleId: map['coupleId'] as String,
       authorUserId: map['authorUserId'] as String,
       tag: AnnotationTag.fromString(map['tag'] as String),
@@ -85,7 +85,7 @@ class MessageAnnotation {
 
   MessageAnnotation copyWith({
     String? id,
-    int? messageId,
+    String? messageId,
     String? coupleId,
     String? authorUserId,
     AnnotationTag? tag,

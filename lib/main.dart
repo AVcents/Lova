@@ -16,6 +16,7 @@ import 'package:lova/shared/services/tanks_persistence.dart';
 import 'package:lova/core/services/firebase_service.dart';  // ⬅️ AJOUT
 
 import 'package:lova/core/theme/app_theme.dart';
+import 'package:lova/shared/repositories/annotations_repository_supabase.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,13 +67,16 @@ void main() async {
 
   // Initialiser les services de persistance
   final tanksPersistence = await TanksPersistence.create();
-  final annotationsRepository = await AnnotationsRepositoryMemory.create();
+
+  // Override du provider
+  final supabase = Supabase.instance.client;
+  final annotationsRepo = AnnotationsRepositorySupabase(supabase);
 
   runApp(
     ProviderScope(
       overrides: [
         tanksPersistenceProvider.overrideWithValue(tanksPersistence),
-        annotationsRepositoryProvider.overrideWithValue(annotationsRepository),
+        annotationsRepositoryProvider.overrideWithValue(annotationsRepo),
       ],
       child: const App(),
     ),

@@ -88,8 +88,9 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - assets/images/lova_logo.png
-    - assets/images/loova_avatar.png
+    - assets/images/
+    - assets/images/Loova_avatar.png/
+    - assets/images/Loova_logo.png/
     - assets/animations/
 
   fonts:

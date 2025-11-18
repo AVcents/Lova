@@ -9,11 +9,13 @@ import 'package:intl/intl.dart';
 import 'package:lova/shared/models/message_annotation.dart';
 import 'package:lova/shared/providers/annotations_provider.dart';
 import 'package:lova/shared/ui/semantic_colors.dart';
+import 'package:lova/features/auth/controller/auth_state_notifier.dart';
+import 'package:lova/features/auth/domain/auth_state.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
   final AnnotationTag? initialFilter;
   final String coupleId;
-  final Function(int)? scrollToMessage; // Changé en int
+  final Function(String)? scrollToMessage; // UUID String
 
   const LibraryPage({
     super.key,
@@ -57,9 +59,22 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // Préparer les paramètres de filtrage
+    // Récupérer l'utilisateur connecté
+    final authState = ref.watch(authStateNotifierProvider);
+    final currentUser = authState.userOrNull;
+
+    // Si pas connecté, afficher erreur
+    if (currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Mes tags')),
+        body: const Center(child: Text('Vous devez être connecté')),
+      );
+    }
+
+    // Préparer les paramètres de filtrage (avec userId pour voir SEULEMENT ses tags)
     final filter = AnnotationFilter(
       coupleId: widget.coupleId,
+      userId: currentUser.id, // ✅ Filtre par utilisateur connecté
       filter: _selectedFilter,
       query: _searchQuery.isEmpty ? null : _searchQuery,
     );
@@ -71,7 +86,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
-          'Bibliothèque du couple',
+          'Mes tags',
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: colorScheme.onSurface,
@@ -147,7 +162,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -231,12 +246,12 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           _selectedFilter = selected ? tag : null;
         });
       },
-      selectedColor: colorScheme.primary.withOpacity(0.2),
+      selectedColor: colorScheme.primary.withValues(alpha: 0.2),
       backgroundColor: colorScheme.surfaceContainerHighest,
       side: BorderSide(
         color: isSelected
             ? colorScheme.primary
-            : colorScheme.outline.withOpacity(0.15),
+            : colorScheme.outline.withValues(alpha: 0.15),
         width: isSelected ? 1.5 : 1,
       ),
       labelStyle: textTheme.bodyMedium?.copyWith(
@@ -291,9 +306,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    // Récupérer l'utilisateur connecté pour déterminer "Toi" vs "Partenaire"
+    final authState = ref.watch(authStateNotifierProvider);
+    final currentUser = authState.userOrNull;
+
     // TODO: Récupérer le vrai contenu du message depuis le repository
     // Pour le moment on utilise un placeholder
-    final messagePreview = 'Message #${annotation.messageId}...';
+    const messagePreview = 'Message tagué';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -306,7 +325,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Naviguer vers le message dans le chat
+          // Fermer la page library
+          context.pop();
+
+          // Puis naviguer vers le message dans le chat
           if (widget.scrollToMessage != null) {
             widget.scrollToMessage!(annotation.messageId);
           } else {
@@ -325,7 +347,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -395,7 +417,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -440,6 +462,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 children: [
                   TextButton.icon(
                     onPressed: () {
+                      // Fermer la page library
+                      context.pop();
+
+                      // Puis naviguer vers le message
                       if (widget.scrollToMessage != null) {
                         widget.scrollToMessage!(annotation.messageId);
                       } else {
@@ -455,12 +481,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     ),
                   ),
                   const Spacer(),
-                  Text(
-                    'Par ${annotation.authorUserId == 'userA' ? 'Toi' : 'Partenaire'}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: SemanticColors.neutralOnSurface(context),
+                  if (currentUser != null)
+                    Text(
+                      annotation.authorUserId == currentUser.id ? 'Tagué par moi' : 'Tagué par mon partenaire',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: SemanticColors.neutralOnSurface(context),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],

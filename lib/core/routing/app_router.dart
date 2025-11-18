@@ -317,10 +317,7 @@ class AppRouter {
           GoRoute(
             path: '/chat-couple',
             builder: (context, state) {
-              final messageIdStr = state.uri.queryParameters['messageId'];
-              final messageId = messageIdStr != null
-                  ? int.tryParse(messageIdStr)
-                  : null;
+              final messageId = state.uri.queryParameters['messageId'];
               return ChatCouplePage(
                 initialMessageId: messageId,
               );
@@ -342,7 +339,7 @@ class AppRouter {
               final extra = state.extra as Map<String, dynamic>?;
               final coupleId = extra?['coupleId'] ?? 'couple_001';
               final scrollToMessage =
-              extra?['scrollToMessage'] as Function(int)?;
+              extra?['scrollToMessage'] as Function(String)?;
 
               return LibraryPage(
                 initialFilter: filter,

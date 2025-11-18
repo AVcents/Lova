@@ -7,12 +7,16 @@ abstract class AnnotationsRepository {
   /// Liste toutes les annotations d'un couple, avec filtres optionnels
   Future<List<MessageAnnotation>> listByCouple(
     String coupleId, {
+    String? userId,
     AnnotationTag? filter,
     String? query,
   });
 
   /// Liste toutes les annotations d'un message spécifique
-  Future<List<MessageAnnotation>> listByMessage(int messageId);
+  Future<List<MessageAnnotation>> listByMessage(String messageId);
+
+  /// Stream des annotations d'un message spécifique (temps réel)
+  Stream<List<MessageAnnotation>> listByMessageStream(String messageId); // ligne ~14
 
   /// Ajoute une nouvelle annotation
   Future<void> add(MessageAnnotation annotation);
@@ -27,8 +31,8 @@ abstract class AnnotationsRepository {
   Future<MessageAnnotation?> getById(String annotationId);
 
   /// Vérifie si un message a déjà un tag spécifique par un utilisateur
-  Future<bool> hasUserTag(int messageId, String userId, AnnotationTag tag);
+  Future<bool> hasUserTag(String messageId, String userId, AnnotationTag tag); // ligne ~20
 
   /// Compte le nombre d'annotations pour un couple
-  Future<int> countByCouple(String coupleId, {AnnotationTag? filter});
+  Future<int> countByCouple(String coupleId, {String? userId, AnnotationTag? filter});
 }

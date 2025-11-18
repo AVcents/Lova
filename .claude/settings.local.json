@@ -22,7 +22,12 @@
       "Bash(git commit:*)",
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
-      "Read(///**)"
+      "Read(///**)",
+      "Bash(cat:*)",
+      "Bash(pod cache clean:*)",
+      "Bash(pod install)",
+      "Bash(./gradlew:*)",
+      "Bash(dart analyze:*)"
     ],
     "deny": [],
     "ask": []

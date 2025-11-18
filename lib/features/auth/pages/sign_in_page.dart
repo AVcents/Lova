@@ -255,8 +255,8 @@ class _SignInPageState extends ConsumerState<SignInPage>
                             children: [
                               // Logo avec taille standardisée
                               Image.asset(
-                                'assets/images/lova_logo.png',
-                                height: 160,
+                                'assets/images/loova_logo.png',
+                                height: 70,
                                 fit: BoxFit.contain,
                               ),
                               const SizedBox(height: 16),

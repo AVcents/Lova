@@ -10,7 +10,7 @@ _$CoupleMessageImpl _$$CoupleMessageImplFromJson(Map<String, dynamic> json) =>
     _$CoupleMessageImpl(
       id: json['id'] as String,
       relationId: json['relation_id'] as String,
-      senderId: json['sender_id'] as String?,
+      senderId: json['sender_id'] as String,
       content: json['content'] as String,
       messageType: json['message_type'] as String? ?? 'normal',
       isEncrypted: json['is_encrypted'] as bool? ?? true,

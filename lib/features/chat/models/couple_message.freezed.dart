@@ -25,7 +25,7 @@ mixin _$CoupleMessage {
   @JsonKey(name: 'relation_id')
   String get relationId => throw _privateConstructorUsedError;
   @JsonKey(name: 'sender_id')
-  String? get senderId => throw _privateConstructorUsedError; // NULL si AI
+  String get senderId => throw _privateConstructorUsedError;
   String get content => throw _privateConstructorUsedError;
   @JsonKey(name: 'message_type')
   String get messageType => throw _privateConstructorUsedError;
@@ -54,7 +54,7 @@ abstract class $CoupleMessageCopyWith<$Res> {
   $Res call({
     String id,
     @JsonKey(name: 'relation_id') String relationId,
-    @JsonKey(name: 'sender_id') String? senderId,
+    @JsonKey(name: 'sender_id') String senderId,
     String content,
     @JsonKey(name: 'message_type') String messageType,
     @JsonKey(name: 'is_encrypted') bool isEncrypted,
@@ -79,7 +79,7 @@ class _$CoupleMessageCopyWithImpl<$Res, $Val extends CoupleMessage>
   $Res call({
     Object? id = null,
     Object? relationId = null,
-    Object? senderId = freezed,
+    Object? senderId = null,
     Object? content = null,
     Object? messageType = null,
     Object? isEncrypted = null,
@@ -95,10 +95,10 @@ class _$CoupleMessageCopyWithImpl<$Res, $Val extends CoupleMessage>
                 ? _value.relationId
                 : relationId // ignore: cast_nullable_to_non_nullable
                       as String,
-            senderId: freezed == senderId
+            senderId: null == senderId
                 ? _value.senderId
                 : senderId // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as String,
             content: null == content
                 ? _value.content
                 : content // ignore: cast_nullable_to_non_nullable
@@ -133,7 +133,7 @@ abstract class _$$CoupleMessageImplCopyWith<$Res>
   $Res call({
     String id,
     @JsonKey(name: 'relation_id') String relationId,
-    @JsonKey(name: 'sender_id') String? senderId,
+    @JsonKey(name: 'sender_id') String senderId,
     String content,
     @JsonKey(name: 'message_type') String messageType,
     @JsonKey(name: 'is_encrypted') bool isEncrypted,
@@ -157,7 +157,7 @@ class __$$CoupleMessageImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? relationId = null,
-    Object? senderId = freezed,
+    Object? senderId = null,
     Object? content = null,
     Object? messageType = null,
     Object? isEncrypted = null,
@@ -173,10 +173,10 @@ class __$$CoupleMessageImplCopyWithImpl<$Res>
             ? _value.relationId
             : relationId // ignore: cast_nullable_to_non_nullable
                   as String,
-        senderId: freezed == senderId
+        senderId: null == senderId
             ? _value.senderId
             : senderId // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
         content: null == content
             ? _value.content
             : content // ignore: cast_nullable_to_non_nullable
@@ -204,7 +204,7 @@ class _$CoupleMessageImpl implements _CoupleMessage {
   const _$CoupleMessageImpl({
     required this.id,
     @JsonKey(name: 'relation_id') required this.relationId,
-    @JsonKey(name: 'sender_id') this.senderId,
+    @JsonKey(name: 'sender_id') required this.senderId,
     required this.content,
     @JsonKey(name: 'message_type') this.messageType = 'normal',
     @JsonKey(name: 'is_encrypted') this.isEncrypted = true,
@@ -221,8 +221,7 @@ class _$CoupleMessageImpl implements _CoupleMessage {
   final String relationId;
   @override
   @JsonKey(name: 'sender_id')
-  final String? senderId;
-  // NULL si AI
+  final String senderId;
   @override
   final String content;
   @override
@@ -290,7 +289,7 @@ abstract class _CoupleMessage implements CoupleMessage {
   const factory _CoupleMessage({
     required final String id,
     @JsonKey(name: 'relation_id') required final String relationId,
-    @JsonKey(name: 'sender_id') final String? senderId,
+    @JsonKey(name: 'sender_id') required final String senderId,
     required final String content,
     @JsonKey(name: 'message_type') final String messageType,
     @JsonKey(name: 'is_encrypted') final bool isEncrypted,
@@ -307,7 +306,7 @@ abstract class _CoupleMessage implements CoupleMessage {
   String get relationId;
   @override
   @JsonKey(name: 'sender_id')
-  String? get senderId; // NULL si AI
+  String get senderId;
   @override
   String get content;
   @override

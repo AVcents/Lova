@@ -13,7 +13,7 @@ import 'package:lova/shared/ui/semantic_colors.dart';
 Future<void> showTagActionSheet(
   BuildContext context, {
   required String coupleId,
-  required int messageId,
+  required String messageId,
   required String currentUserId,
 }) async {
   await showModalBottomSheet(
@@ -33,7 +33,7 @@ Future<void> showTagActionSheet(
 
 class _TagActionSheetContent extends ConsumerStatefulWidget {
   final String coupleId;
-  final int messageId;
+  final String messageId;
   final String currentUserId;
 
   const _TagActionSheetContent({
@@ -73,7 +73,6 @@ class _TagActionSheetContentState
       await ref
           .read(annotationsNotifierProvider.notifier)
           .addAnnotation(annotation);
-
       // Si c'est un tag utile, incrémenter le Love Tank
       if (tag.isUseful) {
         try {

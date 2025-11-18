@@ -14,32 +14,39 @@ final annotationsRepositoryProvider = Provider<AnnotationsRepository>((ref) {
   );
 });
 
-/// Provider pour récupérer les annotations d'un message
+/// Provider pour récupérer les annotations d'un message (TEMPS RÉEL)
 final annotationsByMessageProvider =
-    FutureProvider.family<List<MessageAnnotation>, int>((ref, messageId) async {
+    StreamProvider.family<List<MessageAnnotation>, String>((ref, messageId) {
       final repository = ref.watch(annotationsRepositoryProvider);
-      return repository.listByMessage(messageId);
+      return repository.listByMessageStream(messageId);
     });
 
 /// Paramètres pour filtrer les annotations d'un couple
 class AnnotationFilter {
   final String coupleId;
+  final String? userId; // Filtre par utilisateur (pour voir SEULEMENT ses tags)
   final AnnotationTag? filter;
   final String? query;
 
-  const AnnotationFilter({required this.coupleId, this.filter, this.query});
+  const AnnotationFilter({
+    required this.coupleId,
+    this.userId,
+    this.filter,
+    this.query,
+  });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is AnnotationFilter &&
         other.coupleId == coupleId &&
+        other.userId == userId &&
         other.filter == filter &&
         other.query == query;
   }
 
   @override
-  int get hashCode => Object.hash(coupleId, filter, query);
+  int get hashCode => Object.hash(coupleId, userId, filter, query);
 }
 
 /// Provider pour récupérer les annotations filtrées d'un couple
@@ -51,6 +58,7 @@ final annotationsByCoupleProvider =
       final repository = ref.watch(annotationsRepositoryProvider);
       return repository.listByCouple(
         params.coupleId,
+        userId: params.userId,
         filter: params.filter,
         query: params.query,
       );
@@ -59,9 +67,8 @@ final annotationsByCoupleProvider =
 /// StateNotifier pour gérer les opérations sur les annotations
 class AnnotationsNotifier extends StateNotifier<AsyncValue<void>> {
   final AnnotationsRepository _repository;
-  final Ref _ref;
 
-  AnnotationsNotifier(this._repository, this._ref)
+  AnnotationsNotifier(this._repository)
     : super(const AsyncValue.data(null));
 
   /// Ajoute une nouvelle annotation
@@ -85,9 +92,7 @@ class AnnotationsNotifier extends StateNotifier<AsyncValue<void>> {
 
       await _repository.add(annotation);
 
-      // Invalider les caches pour forcer le refresh
-      _ref.invalidate(annotationsByMessageProvider(annotation.messageId));
-      _ref.invalidate(annotationsByCoupleProvider);
+      // Avec StreamProvider, pas besoin d'invalider : le stream se met à jour automatiquement
 
       state = const AsyncValue.data(null);
     } catch (e, stack) {
@@ -99,16 +104,9 @@ class AnnotationsNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> removeAnnotation(String annotationId) async {
     state = const AsyncValue.loading();
     try {
-      // Récupérer l'annotation pour avoir ses infos avant suppression
-      final annotation = await _repository.getById(annotationId);
-
       await _repository.remove(annotationId);
 
-      // Invalider les caches concernés
-      if (annotation != null) {
-        _ref.invalidate(annotationsByMessageProvider(annotation.messageId));
-        _ref.invalidate(annotationsByCoupleProvider);
-      }
+      // Avec StreamProvider, pas besoin d'invalider : le stream se met à jour automatiquement
 
       state = const AsyncValue.data(null);
     } catch (e, stack) {
@@ -122,9 +120,7 @@ class AnnotationsNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await _repository.update(annotation);
 
-      // Invalider les caches
-      _ref.invalidate(annotationsByMessageProvider(annotation.messageId));
-      _ref.invalidate(annotationsByCoupleProvider);
+      // Avec StreamProvider, pas besoin d'invalider : le stream se met à jour automatiquement
 
       state = const AsyncValue.data(null);
     } catch (e, stack) {
@@ -137,7 +133,7 @@ class AnnotationsNotifier extends StateNotifier<AsyncValue<void>> {
 final annotationsNotifierProvider =
     StateNotifierProvider<AnnotationsNotifier, AsyncValue<void>>((ref) {
       final repository = ref.watch(annotationsRepositoryProvider);
-      return AnnotationsNotifier(repository, ref);
+      return AnnotationsNotifier(repository);
     });
 
 /// Provider pour compter les annotations d'un couple
@@ -146,5 +142,9 @@ final annotationsCountProvider = FutureProvider.family<int, AnnotationFilter>((
   params,
 ) async {
   final repository = ref.watch(annotationsRepositoryProvider);
-  return repository.countByCouple(params.coupleId, filter: params.filter);
+  return repository.countByCouple(
+    params.coupleId,
+    userId: params.userId,
+    filter: params.filter,
+  );
 });

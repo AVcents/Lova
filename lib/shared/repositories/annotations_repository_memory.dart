@@ -52,10 +52,16 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
   @override
   Future<List<MessageAnnotation>> listByCouple(
     String coupleId, {
+    String? userId,
     AnnotationTag? filter,
     String? query,
   }) async {
     var results = _annotations.where((ann) => ann.coupleId == coupleId);
+
+    // Filtre par utilisateur si spécifié
+    if (userId != null) {
+      results = results.where((ann) => ann.authorUserId == userId);
+    }
 
     // Filtre par tag si spécifié
     if (filter != null) {
@@ -79,12 +85,18 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
   }
 
   @override
-  Future<List<MessageAnnotation>> listByMessage(int messageId) async {
+  Future<List<MessageAnnotation>> listByMessage(String messageId) async {
     final results =
         _annotations.where((ann) => ann.messageId == messageId).toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return results;
+  }
+
+  @override
+  Stream<List<MessageAnnotation>> listByMessageStream(String messageId) async* {
+    // Pour l'implémentation mémoire, on émet une seule fois
+    yield await listByMessage(messageId);
   }
 
   @override
@@ -119,21 +131,25 @@ class AnnotationsRepositoryMemory implements AnnotationsRepository {
 
   @override
   Future<bool> hasUserTag(
-    int messageId,
-    String userId,
-    AnnotationTag tag,
-  ) async {
+      String messageId,  // ← Change int en String
+      String userId,
+      AnnotationTag tag,
+      ) async {
     return _annotations.any(
-      (ann) =>
-          ann.messageId == messageId &&
+          (ann) =>
+      ann.messageId == messageId &&
           ann.authorUserId == userId &&
           ann.tag == tag,
     );
   }
 
   @override
-  Future<int> countByCouple(String coupleId, {AnnotationTag? filter}) async {
+  Future<int> countByCouple(String coupleId, {String? userId, AnnotationTag? filter}) async {
     var results = _annotations.where((ann) => ann.coupleId == coupleId);
+
+    if (userId != null) {
+      results = results.where((ann) => ann.authorUserId == userId);
+    }
 
     if (filter != null) {
       results = results.where((ann) => ann.tag == filter);

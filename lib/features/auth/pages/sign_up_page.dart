@@ -234,7 +234,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                             children: [
                               // Logo avec taille standardisée
                               Image.asset(
-                                'assets/images/lova_logo.png',
+                                'assets/images/loova_logo.png',
                                 height: 160,
                                 fit: BoxFit.contain,
                               ),

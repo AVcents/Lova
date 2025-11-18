@@ -41,6 +41,7 @@ class TypingIndicator extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Avatar LOOVA avec gradient
+                // Avatar LOOVA avec gradient
                 Container(
                   width: 32,
                   height: 32,
@@ -55,19 +56,21 @@ class TypingIndicator extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Center(
-                    child: Text(
-                      '💜',
-                      style: TextStyle(fontSize: 16),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/loova_avatar.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
 
                 SizedBox(width: context.spacing.xs),
 
-                // Label "LOAVA"
+                // Label "LOVA"
                 Text(
-                  'LOVA',
+                  'Loova',
                   style: textTheme.labelMedium?.copyWith(
                     color: LoovaColors.gradientEnd,
                     fontWeight: FontWeight.w700,
